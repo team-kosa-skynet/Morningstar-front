@@ -9,6 +9,9 @@
     margin: 0 auto;
 
     .mainSection {
+      width: 1440px;
+      margin: 0 auto;
+      padding: 40px 40px 40px 40px;
       min-height: calc(100vh - $header-height - $nav-height - $footer-height);
     }
   }
