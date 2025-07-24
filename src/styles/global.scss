@@ -1,0 +1,232 @@
+// styles/global.scss
+
+// 변수 import
+@use 'variables' as *;
+
+// ===========================
+// Reset & Base Styles
+// ===========================
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: $font-family-base;
+  font-weight: $font-weight-regular;
+  font-size: $font-size-base;
+  line-height: $line-height-normal;
+  color: $text-black;
+  background-color: $bg-white;
+}
+
+// ===========================
+// Typography
+// ===========================
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+  margin: 0;
+}
+
+h1 {
+  font-size: $font-size-5xl;
+  font-weight: $font-weight-bold;
+}
+
+h2 {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+}
+
+h3 {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+}
+
+h4 {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semi-bold;
+}
+
+h5 {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semi-bold;
+}
+
+h6 {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+}
+
+p {
+  margin: 0;
+  line-height: $line-height-normal;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: $transition-base;
+
+  &:hover {
+    color: $primary-color;
+  }
+}
+
+// ===========================
+// Lists
+// ===========================
+
+ul, ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+// ===========================
+// Images
+// ===========================
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+// ===========================
+// Buttons
+// ===========================
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  transition: $transition-base;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $primary-color;
+    outline-offset: 2px;
+  }
+}
+
+// ===========================
+// Forms
+// ===========================
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
+  border: 1px solid $border-gray;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-sm;
+  transition: $transition-base;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+  }
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+// ===========================
+// Container
+// ===========================
+
+.container {
+  max-width: $container-width;
+  margin: 0 auto;
+  padding: 0 $container-padding;
+}
+
+// ===========================
+// Utility Classes
+// ===========================
+
+// Text Alignment
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+// Font Weights
+.font-thin { font-weight: $font-weight-thin; }
+.font-light { font-weight: $font-weight-light; }
+.font-regular { font-weight: $font-weight-regular; }
+.font-medium { font-weight: $font-weight-medium; }
+.font-semi-bold { font-weight: $font-weight-semi-bold; }
+.font-bold { font-weight: $font-weight-bold; }
+.font-black { font-weight: $font-weight-black; }
+
+// Spacing
+.mt-sm { margin-top: $spacing-sm; }
+.mt-md { margin-top: $spacing-md; }
+.mt-lg { margin-top: $spacing-lg; }
+.mt-xl { margin-top: $spacing-xl; }
+
+.mb-sm { margin-bottom: $spacing-sm; }
+.mb-md { margin-bottom: $spacing-md; }
+.mb-lg { margin-bottom: $spacing-lg; }
+.mb-xl { margin-bottom: $spacing-xl; }
+
+// Display
+.d-none { display: none; }
+.d-block { display: block; }
+.d-flex { display: flex; }
+.d-inline-flex { display: inline-flex; }
+
+// Flexbox
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// ===========================
+// Scrollbar Styling
+// ===========================
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: $bg-light-gray;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $border-dark;
+  border-radius: 4px;
+
+  &:hover {
+    background: $text-gray;
+  }
+}

@@ -1,0 +1,16 @@
+// src/App.module.scss
+@use './styles/variables' as *;
+.layoutWrapper {
+  width: 100%;
+  min-width: 1440px;
+
+  .frameContainer {
+    width: 100%;
+    margin: 0 auto;
+
+    .mainSection {
+      min-height: calc(100vh - $header-height - $nav-height);
+      padding-top: $header-height; // 헤더가 fixed일 경우
+    }
+  }
+}

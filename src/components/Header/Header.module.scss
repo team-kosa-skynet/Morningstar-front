@@ -1,0 +1,130 @@
+@use '../../styles/variables' as *;
+
+.header {
+  width: 100%;
+  background-color: #ffffff;
+  
+  .headerTop {
+    width: 100%;
+    height: 80px;
+    
+    .headerContainer {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 20px 48px 14px 30px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      
+      .logoSection {
+        display: flex;
+        align-items: center;
+        width: 198px;
+        height: 75px;
+        position: relative;
+        
+        .logoImage {
+          width: 75px;
+          height: 75px;
+          margin-bottom: 1px;
+          
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+        }
+        
+        .title {
+          position: absolute;
+          left: 82px;
+          top: 50%;
+          transform: translateY(-50%);
+          
+          span {
+            font-family: $font-family-base;
+            font-weight: $font-weight-bold;
+            font-size: 24px;
+            line-height: 1.193359375em;
+            color: #000000;
+          }
+        }
+      }
+      
+      .authSection {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        
+        .loginText,
+        .signupText {
+          font-family: $font-family-base;
+          font-weight: $font-weight-bold;
+          font-size: 20px;
+          line-height: 1.193359375em;
+          color: #000000;
+          cursor: pointer;
+          
+          &:hover {
+            opacity: 0.7;
+          }
+        }
+      }
+    }
+  }
+}
+
+// 반응형 디자인
+@media (max-width: 1440px) {
+  .header {
+    .headerTop .headerContainer {
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    .headerTop {
+      height: auto;
+      min-height: 60px;
+      
+      .headerContainer {
+        padding: 16px 16px;
+        flex-direction: column;
+        gap: 16px;
+        
+        .logoSection {
+          width: auto;
+          height: auto;
+          
+          .logoImage {
+            width: 50px;
+            height: 50px;
+          }
+          
+          .title {
+            position: static;
+            transform: none;
+            margin-left: 12px;
+            
+            span {
+              font-size: 20px;
+            }
+          }
+        }
+        
+        .authSection {
+          gap: 24px;
+          
+          .loginText,
+          .signupText {
+            font-size: 18px;
+          }
+        }
+      }
+    }
+  }
+}

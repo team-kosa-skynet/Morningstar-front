@@ -1,0 +1,206 @@
+// styles/_variables.scss
+
+// ===========================
+// Fonts
+// ===========================
+
+// 폰트 페이스 정의
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 100;
+  font-style: normal;
+  src: url('../assets/fonts/Pretendard-Thin.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 200;
+  font-style: normal;
+  src: url('../assets/fonts/Pretendard-ExtraLight.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 300;
+  font-style: normal;
+  src: url('../assets/fonts/Pretendard-Light.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 400;
+  font-style: normal;
+  src: url('../assets/fonts/Pretendard-Regular.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 500;
+  font-style: normal;
+  src: url('../assets/fonts/Pretendard-Medium.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 600;
+  font-style: normal;
+  src: url('../assets/fonts/Pretendard-SemiBold.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 700;
+  font-style: normal;
+  src: url('../assets/fonts/Pretendard-Bold.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 800;
+  font-style: normal;
+  src: url('../assets/fonts/Pretendard-ExtraBold.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 900;
+  font-style: normal;
+  src: url('../assets/fonts/Pretendard-Black.woff') format('woff');
+}
+
+// 폰트 변수
+$font-family-base: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+// 폰트 굵기 변수
+$font-weight-thin: 100;
+$font-weight-extra-light: 200;
+$font-weight-light: 300;
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semi-bold: 600;
+$font-weight-bold: 700;
+$font-weight-extra-bold: 800;
+$font-weight-black: 900;
+
+// ===========================
+// Colors (피그마에서 추출)
+// ===========================
+
+// Primary Colors
+$primary-color: #4E4EFF;           // 메인 파란색 (네비게이션 활성화, 버튼 등)
+$primary-hover: #3838E6;           // 호버시 진한 파란색
+
+// Background Colors
+$bg-dark: #000D1C;                 // 어두운 배경 (어바웃 섹션, 푸터)
+$bg-white: #FFFFFF;                // 흰색 배경
+$bg-light-gray: #F5F5F5;           // 연한 회색 배경
+
+// Text Colors
+$text-black: #000000;              // 기본 검정 텍스트
+$text-white: #FFFFFF;              // 흰색 텍스트
+$text-primary: rgba(255, 255, 255, 0.9);   // 주요 텍스트 (90% 흰색)
+$text-secondary: rgba(255, 255, 255, 0.8); // 보조 텍스트 (80% 흰색)
+$text-light: rgba(255, 255, 255, 0.6);     // 연한 텍스트 (60% 흰색)
+$text-gray: #777777;               // 회색 텍스트 (시간, 메타정보)
+
+// Border Colors
+$border-light: #DDDDDD;            // 연한 보더 (헤더 하단)
+$border-gray: #E0E0E0;             // 일반 보더
+$border-dark: #CCCCCC;             // 진한 보더
+
+// Status Colors
+$success-color: #4CAF50;           // 성공
+$warning-color: #FF9800;           // 경고
+$error-color: #F44336;             // 에러
+$info-color: #2196F3;              // 정보
+
+// ===========================
+// Font Sizes
+// ===========================
+
+$font-size-xs: 12px;
+$font-size-sm: 14px;
+$font-size-base: 16px;
+$font-size-md: 18px;
+$font-size-lg: 20px;
+$font-size-xl: 24px;
+$font-size-2xl: 30px;
+$font-size-3xl: 36px;
+$font-size-4xl: 48px;
+$font-size-5xl: 54px;
+
+// Line Heights
+$line-height-tight: 1.2;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.75;
+
+// ===========================
+// Spacing
+// ===========================
+
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-2xl: 40px;
+$spacing-3xl: 48px;
+$spacing-4xl: 64px;
+
+// ===========================
+// Layout
+// ===========================
+
+$header-height: 134px;
+$nav-height: 54px;
+$container-width: 1360px;
+$container-padding: 40px;
+
+// ===========================
+// Breakpoints
+// ===========================
+
+$breakpoint-mobile: 768px;
+$breakpoint-tablet: 1024px;
+$breakpoint-desktop: 1440px;
+$breakpoint-wide: 1920px;
+
+// ===========================
+// Border Radius
+// ===========================
+
+$radius-sm: 4px;
+$radius-md: 8px;
+$radius-lg: 16px;
+$radius-xl: 24px;
+$radius-2xl: 32px;
+$radius-full: 50px;
+
+// ===========================
+// Shadows
+// ===========================
+
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+$shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+
+// ===========================
+// Z-index
+// ===========================
+
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+
+// ===========================
+// Transitions
+// ===========================
+
+$transition-base: all 0.3s ease;
+$transition-fast: all 0.15s ease;
+$transition-slow: all 0.5s ease;
