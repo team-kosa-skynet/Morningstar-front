@@ -1,0 +1,346 @@
+@import '../../../styles/variables';
+
+.signup-page {
+  min-height: 100vh;
+  background-color: $bg-white;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: $font-family-base;
+}
+
+.signup-container {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 50px;
+}
+
+// 헤더 섹션
+.header-section {
+  text-align: center;
+  margin-bottom: 28px;
+
+  .logo {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 24px;
+    object-fit: contain;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .title {
+    font-size: 26px;
+    font-weight: $font-weight-bold;
+    color: #333333;
+    margin: 0 0 16px 0;
+    line-height: 1.2;
+  }
+
+  .subtitle {
+    font-size: $font-size-base;
+    font-weight: $font-weight-regular;
+    color: #333333;
+    margin: 0;
+    line-height: 1.2;
+  }
+}
+
+// 폼 스타일
+.signup-form {
+  width: 100%;
+  max-width: 328px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+
+  &:last-of-type {
+    margin-bottom: 24px;
+  }
+}
+
+.form-label {
+  display: block;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  color: $text-black;
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.input-container {
+  position: relative;
+
+  &.error {
+    .form-input {
+      border-color: #ED2040;
+    }
+  }
+}
+
+.form-input {
+  width: 100%;
+  height: 50px;
+  padding: 0 20px;
+  border: 1px solid #BDBDBD;
+  border-radius: 10px;
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  font-family: $font-family-base;
+  background-color: $bg-white;
+  transition: border-color 0.2s ease;
+
+  &::placeholder {
+    color: #999999;
+    font-size: $font-size-md;
+  }
+
+  &:focus {
+    outline: none;
+    border: 2px solid $primary-color;
+  }
+
+  &.password-input {
+    caret-color: transparent;
+  }
+}
+
+// 비밀번호 도트
+.password-dots {
+  position: absolute;
+  left: 21px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.password-dot {
+  width: 6px;
+  height: 6px;
+  background-color: $text-black;
+  border-radius: 50%;
+
+  &.error {
+    background-color: #ED2040;
+  }
+}
+
+// 에러 메시지
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 7px;
+
+  i {
+    color: #ED2040;
+    font-size: 12px;
+    width: 12px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  span {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-regular;
+    color: #ED2040;
+    line-height: 1.2;
+  }
+}
+
+// 비밀번호 규칙
+.password-rules {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rule-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  i {
+    color: #2ECC71;
+    font-size: 12px;
+    width: 12px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  span {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-regular;
+    color: #2ECC71;
+    line-height: 1.2;
+  }
+
+  &:not(.valid) {
+    i {
+      color: #BDBDBD;
+    }
+
+    span {
+      color: #BDBDBD;
+    }
+  }
+}
+
+// 가입하기 버튼
+.signup-button {
+  width: 100%;
+  height: 50px;
+  background-color: #000D1C;
+  color: $bg-white;
+  border: none;
+  border-radius: 15px;
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  font-family: $font-family-base;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-bottom: 25px;
+
+  &:hover {
+    background-color: #001428;
+  }
+
+  &:active {
+    background-color: #000A14;
+  }
+}
+
+// 소셜 로그인 섹션
+.social-section {
+  width: 100%;
+}
+
+.divider {
+  position: relative;
+  text-align: center;
+  margin-bottom: 25px;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 112px;
+    height: 1px;
+    background-color: #999999;
+  }
+
+  &::before {
+    left: 0;
+  }
+
+  &::after {
+    right: 0;
+  }
+
+  span {
+    display: inline-block;
+    padding: 0 11px;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-regular;
+    color: #999999;
+    background-color: $bg-white;
+    line-height: 1.2;
+  }
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.social-button {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &.kakao {
+    background-color: #FFD43B;
+  }
+
+  &.google {
+    background-color: #EEEEEE;
+  }
+
+  img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+  }
+}
+
+// 반응형 디자인
+@media (max-width: $breakpoint-mobile) {
+  .signup-page {
+    padding: 20px 16px;
+  }
+
+  .signup-container {
+    max-width: 100%;
+  }
+
+  .signup-form {
+    max-width: 100%;
+  }
+
+  .header-section {
+    margin-bottom: 32px;
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 16px;
+    }
+
+    .title {
+      font-size: 22px;
+    }
+
+    .subtitle {
+      font-size: $font-size-sm;
+    }
+  }
+
+  .form-group {
+    margin-bottom: 24px;
+  }
+
+  .divider {
+    &::before,
+    &::after {
+      width: calc(50% - 50px);
+    }
+  }
+}
