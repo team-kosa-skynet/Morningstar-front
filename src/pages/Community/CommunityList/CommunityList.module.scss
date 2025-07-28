@@ -1,23 +1,287 @@
+@import '../../../styles/variables';
+
 .communityList {
-  padding: 2rem 0;
+  background-color: $bg-white;
+  min-height: calc(100vh - $header-height - $nav-height - $footer-height);
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 40px;
+  background-color: $bg-white;
+}
+
+.inner {
+  max-width: 930px;
+  margin: 0 auto;
+}
+
+// 리스트 헤더
+.listHeader {
+  margin-bottom: 32px;
+}
+
+.titleSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
 .title {
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 2rem;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $text-black;
+  margin: 0;
 }
 
+.writeButton {
+  background-color: $bg-dark;
+  color: $bg-white;
+  border: none;
+  border-radius: 13px;
+  padding: 10px 20px;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  transition: $transition-base;
+
+  &:hover {
+    background-color: lighten($bg-dark, 10%);
+  }
+}
+
+.searchBox {
+  position: relative;
+  width: 100%;
+}
+
+.searchInput {
+  width: 100%;
+  height: 44px;
+  padding: 12px 45px 12px 15px;
+  border: 1px solid $bg-dark;
+  border-radius: 10px;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  color: $text-black;
+  background-color: $bg-white;
+  outline: none;
+
+  &::placeholder {
+    color: $text-gray;
+  }
+
+  &:focus {
+    border-color: $primary-color;
+  }
+}
+
+.searchButton {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: $text-black;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    color: $primary-color;
+  }
+}
+
+// 게시글 리스트
 .postList {
-  background: #f8f9fa;
-  padding: 2rem;
-  border-radius: 8px;
-  text-align: center;
-  color: #666;
+  border-top: 2px solid $bg-dark;
+}
+
+.postItem {
+  display: flex;
+  align-items: center;
+  padding: 20px 20px 20px 0;
+  border-bottom: 1px solid $border-light;
+  cursor: pointer;
+  transition: $transition-base;
+
+  &:hover {
+    background-color: rgba($primary-color, 0.02);
+  }
+}
+
+.thumbnail {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  margin-right: 10px;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.postContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.postTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  h3 {
+    margin: 0;
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
+    color: $text-black;
+
+    &.notice {
+      font-weight: $font-weight-bold;
+    }
+  }
+
+  .commentCount {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    color: $primary-color;
+  }
+}
+
+.postMeta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.likes,
+.time {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  img {
+    width: 14px;
+    height: 14px;
+  }
+
+  span {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+  }
+}
+
+.likes span {
+  color: $primary-color;
+}
+
+.time span {
+  color: $text-gray;
+}
+
+.authorInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.authorIcon {
+  width: 16px;
+  height: 16px;
+  object-fit: cover;
+}
+
+.authorName {
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $text-black;
+}
+
+// 페이지네이션
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 33px;
+}
+
+.navButton {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: $text-black;
+  width: 16px;
+  height: 27px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 16px;
+    height: 27px;
+  }
+
+  &:hover:not(:disabled) {
+    filter: brightness(0) saturate(100%) invert(31%) sepia(98%) saturate(6879%) hue-rotate(238deg) brightness(99%) contrast(101%);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+  }
+}
+
+.pageNumbers {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.pageButton {
+  background: none;
+  border: none;
+  padding: 5px 8px;
+  cursor: pointer;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $text-black;
+  min-width: 18px;
+  height: 27px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50px;
+  transition: $transition-base;
+
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+    color: $primary-color;
+  }
+
+  &.active {
+    background-color: $bg-dark;
+    color: $bg-white;
+  }
+}
+
+.dots {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $text-black;
 }

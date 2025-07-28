@@ -14,6 +14,9 @@ const Header: React.FC = () => {
     navigate('/signup');
   };
 
+  const handleLoginClick = () => {
+    navigate('/login');
+  }
   return (
     <>
       <header className={styles.header}>
@@ -30,7 +33,7 @@ const Header: React.FC = () => {
             </div>
             
             <div className={styles.authSection}>
-              <span className={styles.loginText}>로그인</span>
+              <span className={styles.loginText} onClick={handleLoginClick}>로그인</span>
               <span className={styles.signupText} onClick={handleSignUpClick}>회원가입</span>
             </div>
           </div>
