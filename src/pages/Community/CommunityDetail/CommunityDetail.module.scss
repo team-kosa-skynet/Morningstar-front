@@ -172,6 +172,27 @@
     margin-bottom: 10px;
     padding: 20px 5px 20px 5px;
     .postContent {
+      .imageSection {
+        margin-bottom: 15px;
+        
+        .contentImage {
+          max-width: 100%;
+          height: auto;
+          display: block;
+          margin-bottom: 10px;
+          
+          // alt 텍스트 스타일링 (이미지 로드 실패 시)
+          font-family: 'Pretendard', sans-serif;
+          font-size: 14px;
+          text-indent: 5px; // 아이콘과 텍스트 사이 간격
+
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+      
       p {
         font-family: 'Pretendard', sans-serif;
         font-weight: 400;
