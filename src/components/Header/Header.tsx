@@ -7,7 +7,7 @@ import { getLevelIcon } from '../../utils/levelUtils';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
-  const { isLoggedIn, user, point, logout } = useAuthStore();
+  const { isLoggedIn, user, point} = useAuthStore();
 
   const handleLogoClick = () => {
     navigate('/');
@@ -21,9 +21,8 @@ const Header: React.FC = () => {
     navigate('/login');
   };
 
-  const handleLogoutClick = () => {
-    logout();
-    navigate('/');
+  const handleUserNameClick = () => {
+    navigate('/mypage');
   };
   return (
     <>
@@ -44,17 +43,13 @@ const Header: React.FC = () => {
               {isLoggedIn ? (
                 <>
                   <div className={styles.userInfo}>
-                    <div className={styles.userProfile}>
+                    <div className={styles.userProfile} onClick={handleUserNameClick}>
                       <div className={styles.levelIcon}>
                         <img src={getLevelIcon(point ?? 0)} alt="레벨" />
                       </div>
                       <span className={styles.userName}>{user?.name}</span>
                     </div>
                     <span className={styles.pointText}>포인트: {point ?? 0}P</span>
-                  </div>
-                  <div className={styles.actionButtons}>
-                    <span className={styles.myInfoText}>내 정보</span>
-                    <span className={styles.logoutText} onClick={handleLogoutClick}>로그아웃</span>
                   </div>
                 </>
               ) : (
