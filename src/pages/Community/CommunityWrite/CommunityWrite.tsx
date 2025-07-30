@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CommunityWrite.module.scss';
-import { createBoard } from '../../../services/authApi';
+import { createBoard, uploadImage } from '../../../services/authApi';
 import { useAuthStore } from '../../../stores/authStore';
 
 const CommunityWrite: React.FC = () => {
@@ -10,8 +10,10 @@ const CommunityWrite: React.FC = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [showImagePreview, setShowImagePreview] = useState(false);
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCancel = () => {
@@ -39,12 +41,32 @@ const CommunityWrite: React.FC = () => {
 
     setIsSubmitting(true);
     try {
+      // 1단계: 이미지 파일들을 S3에 업로드
+      const imageUrls: string[] = [];
+      
+      if (selectedFiles.length > 0) {
+        for (let i = 0; i < selectedFiles.length; i++) {
+          try {
+            setUploadProgress(`이미지 ${i + 1}/${selectedFiles.length} 업로드 중...`);
+            const imageUrl = await uploadImage(selectedFiles[i], token);
+            imageUrls.push(imageUrl);
+          } catch (error) {
+            console.error(`이미지 ${i + 1} 업로드 실패:`, error);
+            alert(`이미지 ${i + 1} 업로드에 실패했습니다. 다시 시도해주세요.`);
+            setUploadProgress('');
+            return;
+          }
+        }
+        setUploadProgress('게시글 작성 중...');
+      }
+
+      // 2단계: 게시글 작성 (업로드된 이미지 URL들 포함)
       await createBoard(
         {
           title: title.trim(),
           content: content.trim(),
           category: '일반', // 기본 카테고리로 설정
-          imageUrl: uploadedImages // 현재는 base64 이미지, 실제로는 서버 업로드 후 URL을 받아야 함
+          imageUrl: imageUrls
         },
         token
       );
@@ -60,6 +82,7 @@ const CommunityWrite: React.FC = () => {
       }
     } finally {
       setIsSubmitting(false);
+      setUploadProgress('');
     }
   };
 
@@ -70,15 +93,17 @@ const CommunityWrite: React.FC = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      const newImages: string[] = [];
+      const newFiles = Array.from(files);
+      const newPreviewUrls: string[] = [];
       
-      Array.from(files).forEach((file) => {
+      newFiles.forEach((file) => {
         const reader = new FileReader();
         reader.onload = (event) => {
           if (event.target?.result) {
-            newImages.push(event.target.result as string);
-            if (newImages.length === files.length) {
-              setUploadedImages([...uploadedImages, ...newImages]);
+            newPreviewUrls.push(event.target.result as string);
+            if (newPreviewUrls.length === newFiles.length) {
+              setSelectedFiles([...selectedFiles, ...newFiles]);
+              setPreviewUrls([...previewUrls, ...newPreviewUrls]);
               if (!showImagePreview) {
                 setShowImagePreview(true);
               }
@@ -95,9 +120,11 @@ const CommunityWrite: React.FC = () => {
   };
 
   const handleRemoveImage = (index: number) => {
-    const newImages = uploadedImages.filter((_, i) => i !== index);
-    setUploadedImages(newImages);
-    if (newImages.length === 0) {
+    const newFiles = selectedFiles.filter((_, i) => i !== index);
+    const newPreviewUrls = previewUrls.filter((_, i) => i !== index);
+    setSelectedFiles(newFiles);
+    setPreviewUrls(newPreviewUrls);
+    if (newFiles.length === 0) {
       setShowImagePreview(false);
     }
   };
@@ -136,7 +163,7 @@ const CommunityWrite: React.FC = () => {
             {showImagePreview && (
               <div className={styles.imagePreviewSection}>
                 <div className={styles.imageList}>
-                  {uploadedImages.map((image, index) => (
+                  {previewUrls.map((image, index) => (
                     <div key={index} className={styles.imageItem}>
                       <img src={image} alt={`업로드 이미지 ${index + 1}`} />
                       <button
@@ -162,7 +189,7 @@ const CommunityWrite: React.FC = () => {
             )}
 
             <div className={styles.writeFooter}>
-              <button className={styles.imageBtn} onClick={handleImageClick}>
+              <button className={styles.imageBtn} onClick={handleImageClick} disabled={isSubmitting}>
                 <i className="bi bi-image"></i>
               </button>
               <button 
@@ -171,7 +198,7 @@ const CommunityWrite: React.FC = () => {
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
-                  <span>...</span>
+                  uploadProgress ? <span style={{fontSize: '10px'}}>{uploadProgress}</span> : <span>...</span>
                 ) : (
                   <i className="bi bi-vector-pen"></i>
                 )}

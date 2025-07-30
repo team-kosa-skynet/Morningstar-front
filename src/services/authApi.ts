@@ -293,3 +293,27 @@ export const createBoard = async (boardData: CreateBoardRequest, token: string):
     throw error;
   }
 };
+
+export const uploadImage = async (imageFile: File, token: string): Promise<string> => {
+  try {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+
+    const response = await axios.post<string>(
+      '/s3/upload',
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
