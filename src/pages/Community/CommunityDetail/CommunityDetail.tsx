@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import styles from './CommunityDetail.module.scss';
 import Pagination from '../../../components/Pagination/Pagination';
-import { getBoardDetail } from '../../../services/authApi';
+import { getBoardDetail, createComment } from '../../../services/authApi';
 import { useAuthStore } from '../../../stores/authStore';
 
 interface BoardDetail {
@@ -38,6 +38,7 @@ const CommunityDetail = () => {
   const [boardDetail, setBoardDetail] = useState<BoardDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
   // API에서 게시글 상세 데이터 가져오기
   const fetchBoardDetail = async () => {
@@ -72,10 +73,46 @@ const CommunityDetail = () => {
     setCurrentPage(page);
   };
 
-  const handleCommentSubmit = () => {
-    // 댓글 작성 로직
-    console.log('댓글 작성:', commentText);
-    setCommentText('');
+  const handleCommentSubmit = async () => {
+    if (!commentText.trim()) {
+      alert('댓글 내용을 입력해주세요.');
+      return;
+    }
+
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    if (!boardId) return;
+
+    setIsSubmittingComment(true);
+    try {
+      await createComment(
+        {
+          boardId: boardId,
+          content: commentText.trim()
+        },
+        token
+      );
+      
+      // 댓글 작성 성공 후 입력창 초기화
+      setCommentText('');
+      
+      // 게시글 상세 정보 다시 불러오기 (댓글 목록 새로고침)
+      await fetchBoardDetail();
+      
+      alert('댓글이 작성되었습니다.');
+    } catch (error: any) {
+      console.error('댓글 작성 실패:', error);
+      if (error.code === 401) {
+        alert('로그인이 필요합니다.');
+      } else {
+        alert('댓글 작성에 실패했습니다.');
+      }
+    } finally {
+      setIsSubmittingComment(false);
+    }
   };
 
   if (loading) {
@@ -199,13 +236,24 @@ const CommunityDetail = () => {
                     placeholder="댓글을 입력해주세요!"
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !isSubmittingComment) {
+                        handleCommentSubmit();
+                      }
+                    }}
                     className={styles.commentTextField}
+                    disabled={isSubmittingComment}
                   />
                   <button 
                     className={styles.submitButton}
                     onClick={handleCommentSubmit}
+                    disabled={isSubmittingComment}
                   >
-                    <i className="bi bi-vector-pen"></i>
+                    {isSubmittingComment ? (
+                      <span>...</span>
+                    ) : (
+                      <i className="bi bi-vector-pen"></i>
+                    )}
                   </button>
                 </div>
               </div>

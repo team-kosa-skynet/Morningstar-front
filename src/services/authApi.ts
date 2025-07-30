@@ -131,6 +131,17 @@ interface BoardDetailResponse {
   };
 }
 
+interface CreateCommentRequest {
+  boardId: string;
+  content: string;
+}
+
+interface CreateCommentResponse {
+  code: number;
+  message: string;
+  data: CommentItem | null;
+}
+
 export const signUp = async (signUpData: SignUpRequest): Promise<SignUpResponse> => {
   try {
     const response = await axios.post<SignUpResponse>(
@@ -210,6 +221,27 @@ export const getBoardDetail = async (boardId: number, token?: string): Promise<B
     const response = await axios.get<BoardDetailResponse>(
       `${API_BASE_URL}/boards/${boardId}`,
       token ? { headers } : undefined
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const createComment = async (commentData: CreateCommentRequest, token: string): Promise<CreateCommentResponse> => {
+  try {
+    const response = await axios.post<CreateCommentResponse>(
+      `${API_BASE_URL}/comment`,
+      commentData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
     );
     return response.data;
   } catch (error) {
