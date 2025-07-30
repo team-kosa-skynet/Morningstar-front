@@ -78,6 +78,7 @@
           display: flex;
           align-items: center;
           gap: 32px;
+          margin-right: 26px;
           
           .userProfile {
             display: flex;
@@ -100,18 +101,18 @@
             .userName {
               font-family: $font-family-base;
               font-weight: 600;
-              font-size: 20px;
+              font-size: 18px;
               line-height: 1.193359375em;
-              color: #000000;
+              color: #000D1C;
             }
           }
           
           .pointText {
             font-family: $font-family-base;
             font-weight: 600;
-            font-size: 20px;
+            font-size: 18px;
             line-height: 1.193359375em;
-            color: #000000;
+            color: #000D1C;
           }
         }
         
@@ -124,9 +125,9 @@
           .logoutText {
             font-family: $font-family-base;
             font-weight: $font-weight-bold;
-            font-size: 22px;
+            font-size: 20px;
             line-height: 1.193359375em;
-            color: #000000;
+            color: #000D1C;
             cursor: pointer;
             
             &:hover {

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './Header.module.scss';
 import logoImage from '../../assets/images/logo.png';
 import { useAuthStore } from '../../stores/authStore';
+import { getLevelIcon } from '../../utils/levelUtils';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ const Header: React.FC = () => {
                   <div className={styles.userInfo}>
                     <div className={styles.userProfile}>
                       <div className={styles.levelIcon}>
-                        <img src={logoImage} alt="레벨" />
+                        <img src={getLevelIcon(point ?? 0)} alt="레벨" />
                       </div>
                       <span className={styles.userName}>{user?.name}</span>
                     </div>
