@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import styles from './CommunityDetail.module.scss';
 import Pagination from '../../../components/Pagination/Pagination';
-import { getBoardDetail, createComment } from '../../../services/authApi';
+import { getBoardDetail, createComment, deleteBoard, updateComment, deleteComment } from '../../../services/authApi';
 import { useAuthStore } from '../../../stores/authStore';
 import DropdownModal from '../../../components/DropdownModal/DropdownModal';
 
@@ -72,30 +72,73 @@ const CommunityDetail = () => {
   };
 
   // 게시글/댓글 수정
-  const handleEdit = () => {
-    if (activeModal === 'post') {
-      // 게시글 수정 로직
-      console.log('게시글 수정');
-    } else if (activeModal === 'comment' && modalTargetId) {
-      // 댓글 수정 로직
-      console.log('댓글 수정:', modalTargetId);
+  const handleEdit = async () => {
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      return;
     }
+
+    try {
+      if (activeModal === 'post' && boardDetail) {
+        // 게시글 수정 - 수정 페이지로 이동
+        navigate(`/community/edit/${boardDetail.boardId}`);
+        
+      } else if (activeModal === 'comment' && modalTargetId && boardDetail) {
+        // 댓글 수정
+        const comment = boardDetail.comments.content.find(c => c.commentId === modalTargetId);
+        if (!comment) return;
+
+        const newContent = prompt('새 댓글 내용을 입력하세요:', comment.comment);
+        if (newContent === null) return; // 취소 시
+
+        await updateComment(
+          modalTargetId,
+          {
+            boardId: boardDetail.boardId.toString(),
+            content: newContent.trim()
+          },
+          token
+        );
+
+        alert('댓글이 수정되었습니다.');
+        await fetchBoardDetail(); // 새로고침
+      }
+    } catch (error: any) {
+      console.error('수정 실패:', error);
+      alert('수정에 실패했습니다.');
+    }
+    
     handleCloseModal();
   };
 
   // 게시글/댓글 삭제
-  const handleDelete = () => {
-    if (activeModal === 'post') {
-      // 게시글 삭제 로직
-      if (window.confirm('정말로 게시글을 삭제하시겠습니까?')) {
-        console.log('게시글 삭제');
-      }
-    } else if (activeModal === 'comment' && modalTargetId) {
-      // 댓글 삭제 로직
-      if (window.confirm('정말로 댓글을 삭제하시겠습니까?')) {
-        console.log('댓글 삭제:', modalTargetId);
-      }
+  const handleDelete = async () => {
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      return;
     }
+
+    try {
+      if (activeModal === 'post' && boardDetail) {
+        // 게시글 삭제
+        if (window.confirm('정말로 게시글을 삭제하시겠습니까?')) {
+          await deleteBoard(boardDetail.boardId, token);
+          alert('게시글이 삭제되었습니다.');
+          navigate('/community'); // 목록으로 이동
+        }
+      } else if (activeModal === 'comment' && modalTargetId && boardDetail) {
+        // 댓글 삭제
+        if (window.confirm('정말로 댓글을 삭제하시겠습니까?')) {
+          await deleteComment(modalTargetId, token);
+          alert('댓글이 삭제되었습니다.');
+          await fetchBoardDetail(); // 새로고침
+        }
+      }
+    } catch (error: any) {
+      console.error('삭제 실패:', error);
+      alert('삭제에 실패했습니다.');
+    }
+    
     handleCloseModal();
   };
 
@@ -137,7 +180,7 @@ const CommunityDetail = () => {
   }, [boardId]);
 
   const handleBackClick = () => {
-    navigate(-1);
+    navigate('/community');
   };
 
   const handlePageChange = (page: number) => {

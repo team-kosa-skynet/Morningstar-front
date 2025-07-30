@@ -142,6 +142,23 @@ interface CreateCommentResponse {
   data: CommentItem | null;
 }
 
+interface UpdateCommentRequest {
+  boardId: string;
+  content: string;
+}
+
+interface UpdateCommentResponse {
+  code: number;
+  message: string;
+  data: any;
+}
+
+interface DeleteCommentResponse {
+  code: number;
+  message: string;
+  data: any;
+}
+
 interface CreateBoardRequest {
   title: string;
   content: string;
@@ -161,6 +178,25 @@ interface CreateBoardResponse {
     createdDate: string;
     imageUrl: string[];
   } | null;
+}
+
+interface UpdateBoardRequest {
+  title: string;
+  content: string;
+  category: string;
+  imageUrl: string[];
+}
+
+interface UpdateBoardResponse {
+  code: number;
+  message: string;
+  data: any;
+}
+
+interface DeleteBoardResponse {
+  code: number;
+  message: string;
+  data: any;
 }
 
 export const signUp = async (signUpData: SignUpRequest): Promise<SignUpResponse> => {
@@ -306,6 +342,86 @@ export const uploadImage = async (imageFile: File, token: string): Promise<strin
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const updateBoard = async (boardId: number, boardData: UpdateBoardRequest, token: string): Promise<UpdateBoardResponse> => {
+  try {
+    const response = await axios.patch<UpdateBoardResponse>(
+      `${API_BASE_URL}/boards/${boardId}`,
+      boardData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const deleteBoard = async (boardId: number, token: string): Promise<DeleteBoardResponse> => {
+  try {
+    const response = await axios.delete<DeleteBoardResponse>(
+      `${API_BASE_URL}/boards/${boardId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const updateComment = async (commentId: number, commentData: UpdateCommentRequest, token: string): Promise<UpdateCommentResponse> => {
+  try {
+    const response = await axios.patch<UpdateCommentResponse>(
+      `${API_BASE_URL}/comment/${commentId}`,
+      commentData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const deleteComment = async (commentId: number, token: string): Promise<DeleteCommentResponse> => {
+  try {
+    const response = await axios.delete<DeleteCommentResponse>(
+      `${API_BASE_URL}/comments/${commentId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
       }
     );
