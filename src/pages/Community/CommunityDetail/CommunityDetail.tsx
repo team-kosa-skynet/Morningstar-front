@@ -4,6 +4,7 @@ import styles from './CommunityDetail.module.scss';
 import Pagination from '../../../components/Pagination/Pagination';
 import { getBoardDetail, createComment } from '../../../services/authApi';
 import { useAuthStore } from '../../../stores/authStore';
+import DropdownModal from '../../../components/DropdownModal/DropdownModal';
 
 interface BoardDetail {
   boardId: number;
@@ -32,19 +33,82 @@ interface CommentItem {
 const CommunityDetail = () => {
   const navigate = useNavigate();
   const { boardId } = useParams<{ boardId: string }>();
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   const [currentPage, setCurrentPage] = useState(1);
   const [commentText, setCommentText] = useState('');
   const [boardDetail, setBoardDetail] = useState<BoardDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  
+  // 모달 관련 상태
+  const [activeModal, setActiveModal] = useState<'post' | 'comment' | null>(null);
+  const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
+  const [modalTargetId, setModalTargetId] = useState<number | null>(null);
 
   // 날짜 배열을 문자열로 변환하는 함수
   const formatDateArray = (dateArray: number[]): string => {
     if (!dateArray || dateArray.length < 6) return '';
-    const [year, month, day, hour, minute, second] = dateArray;
+    const [year, month, day, hour, minute] = dateArray;
     return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')} ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+  };
+
+  // 3dots 버튼 클릭 핸들러
+  const handleDotsClick = (e: React.MouseEvent, type: 'post' | 'comment', targetId?: number) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setModalPosition({
+      x: rect.left + rect.width / 2,
+      y: rect.bottom + 5
+    });
+    setActiveModal(type);
+    setModalTargetId(targetId || null);
+  };
+
+  // 모달 닫기
+  const handleCloseModal = () => {
+    setActiveModal(null);
+    setModalTargetId(null);
+  };
+
+  // 게시글/댓글 수정
+  const handleEdit = () => {
+    if (activeModal === 'post') {
+      // 게시글 수정 로직
+      console.log('게시글 수정');
+    } else if (activeModal === 'comment' && modalTargetId) {
+      // 댓글 수정 로직
+      console.log('댓글 수정:', modalTargetId);
+    }
+    handleCloseModal();
+  };
+
+  // 게시글/댓글 삭제
+  const handleDelete = () => {
+    if (activeModal === 'post') {
+      // 게시글 삭제 로직
+      if (window.confirm('정말로 게시글을 삭제하시겠습니까?')) {
+        console.log('게시글 삭제');
+      }
+    } else if (activeModal === 'comment' && modalTargetId) {
+      // 댓글 삭제 로직
+      if (window.confirm('정말로 댓글을 삭제하시겠습니까?')) {
+        console.log('댓글 삭제:', modalTargetId);
+      }
+    }
+    handleCloseModal();
+  };
+
+  // 신고하기
+  const handleReport = () => {
+    if (activeModal === 'post') {
+      // 게시글 신고 로직
+      console.log('게시글 신고');
+    } else if (activeModal === 'comment' && modalTargetId) {
+      // 댓글 신고 로직
+      console.log('댓글 신고:', modalTargetId);
+    }
+    handleCloseModal();
   };
 
   // API에서 게시글 상세 데이터 가져오기
@@ -171,7 +235,10 @@ const CommunityDetail = () => {
             {/* 제목 영역 */}
             <div className={styles.titleSection}>
               <h1 className={styles.postTitle}>{boardDetail.title}</h1>
-              <button className={styles.menuButton}>
+              <button 
+                className={styles.menuButton}
+                onClick={(e) => handleDotsClick(e, 'post')}
+              >
                 <svg width="6" height="24" viewBox="0 0 6 24" fill="none">
                   <circle cx="3" cy="3" r="2" fill="#000"/>
                   <circle cx="3" cy="12" r="2" fill="#000"/>  
@@ -274,7 +341,10 @@ const CommunityDetail = () => {
                         <img src="/src/assets/images/level/lv1.png" alt="프로필" className={styles.profileImage} />
                         <span className={styles.nickname}>{comment.writer}</span>
                       </div>
-                      <button className={styles.menuButton}>
+                      <button 
+                        className={styles.menuButton}
+                        onClick={(e) => handleDotsClick(e, 'comment', comment.commentId)}
+                      >
                         <i className="bi bi-three-dots-vertical"></i>
                       </button>
                     </div>
@@ -303,6 +373,23 @@ const CommunityDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* 드롭다운 모달 */}
+      <DropdownModal
+        isOpen={activeModal !== null}
+        onClose={handleCloseModal}
+        position={modalPosition}
+        isOwner={
+          activeModal === 'post' 
+            ? boardDetail?.writer === user?.name
+            : activeModal === 'comment' && modalTargetId
+              ? boardDetail?.comments.content.find(c => c.commentId === modalTargetId)?.writer === user?.name
+              : false
+        }
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onReport={handleReport}
+      />
     </div>
   );
 };
