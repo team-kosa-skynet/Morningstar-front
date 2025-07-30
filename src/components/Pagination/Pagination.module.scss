@@ -50,11 +50,11 @@
   font-weight: $font-weight-bold;
   color: $text-black;
   width: 32px;
-  height: 27px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50px;
+  border-radius: 50%;
   transition: $transition-base;
 
   &:hover {

@@ -51,8 +51,6 @@
 
 .contentBox {
   background: #FFFFFF;
-  border: 1px solid #F5F5F5;
-  margin-top: 40px; // 헤더와의 간격
   
   // 제목 영역
   .titleSection {
@@ -60,7 +58,6 @@
     align-items: flex-start;
     justify-content: space-between;
     padding: 12px 0;
-    border-bottom: 1px solid #F5F5F5;
     position: relative;
     
     .postTitle {
@@ -98,20 +95,19 @@
   
   // 메타 정보 영역
   .metaSection {
-    padding: 33px 4px 0;
+    padding: 13px 4px 0;
     
     .userInfo {
       display: flex;  
       align-items: center;
       gap: 7px;
-      margin-bottom: 16px;
+      margin-bottom: 5px;
       
       .profileImage {
         width: 14px;
         height: 14px;
-        background: url('data:image/svg+xml;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAACXBIWXMAAAsTAAALEwEAmpwYAAABB0lEQVR4nGNgGAWjYBSMglEwCkbBKBgFo2AUjIJRMAqGD2BgYGD8//8/AzYwadIkRgYGBgZOTk4GbGBgNGJgYGDABjY0NDAwMDAwMzPj1MjExMTAwsLCwMbGhlOjQEFBAQMLCwsDJycnTrt4eHgYGBgYGDg4OHBq7OzsbGBgYGCwsLBgePr0KQMPDw8DDw8PQ29vL4O7uzvOSDUyMjIwMTFhYGJiYuDl5WXg5eVlEBERwWnXKBgFo4CGgIGBgYHhf38/A7awrKwsGNksrWxgaGtiYxsYGrGys7OzsrKyMbOys7NzcnKys7Ozs7KysrOzs7NzcnKysbGxs7Ozs3NycnJycrKzs7OzsrKys7Ozs7Kzs7NzcHCws7Mw...') no-repeat center;
-        background-size: contain;
         border-radius: 50%;
+        object-fit: cover;
       }
       
       .nickname {
@@ -143,9 +139,19 @@
           color: #999999;
         }
         
-        svg {
-          width: 14px;
-          height: 14px;
+        i {
+          font-size: 14px;
+          color: #999999;
+        }
+      }
+      
+      .dateInfo {
+        span {
+          font-family: 'Pretendard', sans-serif;
+          font-weight: 500;
+          font-size: 12px;
+          line-height: 14px;
+          color: #999999;
         }
       }
       
@@ -155,6 +161,253 @@
         background: #999999;
         margin: 0 5px;
       }
+    }
+  }
+  
+  // 본문 박스 영역
+  .contentSection {
+    border-top: 1px solid #F5F5F5;
+    border-bottom: 1px solid #F5F5F5;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 20px 5px 20px 5px;
+    .postContent {
+
+      p {
+        font-family: 'Pretendard', sans-serif;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 17px;
+        color: #000D1C;
+        margin: 0;
+      }
+    }
+    
+    // 반응 박스
+    .reactionSection {
+      margin-top: 30px;
+      .likeButton {
+        width: 56px;
+        height: 24px;
+        margin-top: 0;
+        padding: 5px 8px;
+        background: none;
+        border: 1px solid #DDDDDD;
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 1px;
+        transition: all 0.2s ease;
+        
+        i {
+          font-size: 16px;
+          color: #555555;
+          margin-right: 5px;
+        }
+        
+        span {
+          font-family: 'Noto Sans KR', sans-serif;
+          font-weight: 400;
+          font-size: 12px;
+          line-height: 14px;
+          color: #555555;
+        }
+        
+        &:hover {
+          background-color: rgba(78, 78, 255, 0.05);
+          border-color: #4E4EFF;
+          
+          i, span {
+            color: #4E4EFF;
+          }
+        }
+      }
+    }
+  }
+  
+  // 댓글 박스 영역
+  .commentBox {
+    background: #FFFFFF;
+    margin-top: 0;
+    
+    // 댓글 타이틀
+    .commentTitle {
+      height: 50px;
+      background: #FFFFFF;
+      
+      .titleSection {
+        padding: 16px 6px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 5px;
+        
+        .commentLabel {
+          font-family: 'Pretendard', sans-serif;
+          font-weight: 600;
+          font-size: 14px;
+          line-height: 17px;
+          color: #000000;
+        }
+        
+        .commentCount {
+          font-family: 'Pretendard', sans-serif;
+          font-weight: 400;
+          font-size: 14px;
+          line-height: 14px;
+          color: #4E4EFF;
+        }
+      }
+    }
+    
+    // 댓글 입력창
+    .commentInput {
+      height: 40px;
+      background: #FFFFFF;
+      
+      .inputWrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border: 1px solid #DDDDDD;
+        
+        .commentTextField {
+          width: 100%;
+          height: 100%;
+          border: none;
+          outline: none;
+          padding: 10px 55px 10px 15px;
+          font-family: 'Pretendard', sans-serif;
+          font-weight: 500;
+          font-size: 16px;
+          line-height: 19px;
+          color: #000000;
+          
+          &::placeholder {
+            color: #999999;
+            font-size: 14px;
+          }
+        }
+        
+        .submitButton {
+          position: absolute;
+          right: 0;
+          top: 0;
+          width: 40px;
+          height: 40px;
+          background: #000D1C;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          
+          i {
+            font-size: 20px;
+            color: #FFFFFF;
+          }
+          
+          &:hover {
+            background: #001a33;
+          }
+        }
+      }
+    }
+    
+    // 댓글 목록
+    .commentList {
+      margin-top: 10px;
+      .commentItem {
+        padding: 0 4px;
+        border-bottom: 1px solid #F5F5F5;
+        
+        &:last-child {
+          border-bottom: none;
+        }
+        
+        .commentHeader {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 0;
+          
+          .userInfo {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            
+            .profileImage {
+              width: 14px;
+              height: 14px;
+              border-radius: 50%;
+            }
+            
+            .nickname {
+              font-family: 'Pretendard', sans-serif;
+              font-weight: 600;
+              font-size: 14px;
+              line-height: 17px;
+              color: #000D1C;
+            }
+          }
+          
+          .menuButton {
+            width: 18px;
+            height: 18px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            
+            i {
+              font-size: 13px;
+              color: #000000;
+            }
+            
+            &:hover {
+              opacity: 0.7;
+            }
+          }
+        }
+        
+        .commentMeta {
+          padding: 4px 0 18px 0;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          
+          .commentDate {
+            font-family: 'Pretendard', sans-serif;
+            font-weight: 500;
+            font-size: 12px;
+            line-height: 14px;
+            color: #999999;
+          }
+        }
+        
+        .commentContent {
+          p {
+            font-family: 'Pretendard', sans-serif;
+            font-weight: 500;
+            font-size: 12px;
+            line-height: 14px;
+            color: #000D1C;
+            margin: 0;
+            display: inline;
+          }
+        }
+      }
+    }
+    
+    // 페이지네이션 영역
+    .paginationWrapper {
+      display: flex;
+      justify-content: center;
+      padding: 33px 0;
     }
   }
 }
