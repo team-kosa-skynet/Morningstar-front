@@ -1,44 +1,160 @@
+@import '../../../styles/variables';
+
 .communityDetail {
-  padding: 2rem 0;
+  background-color: $bg-white;
+  min-height: calc(100vh - $header-height - $nav-height - $footer-height);
+}
+
+// 헤더 (목록으로 돌아가기)
+.header {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 281px; // Figma에서 컨테이너 시작점
+  
+  .backToList {
+    width: 930px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    
+    svg {
+      width: 10px;
+      height: 17px;
+    }
+    
+    span {
+      font-family: 'Pretendard', sans-serif;
+      font-weight: 500;  
+      font-size: 16px;
+      line-height: 19px;
+      color: #000000;
+    }
+    
+    &:hover {
+      opacity: 0.7;
+    }
+  }
 }
 
 .container {
-  max-width: 800px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 281px; // Figma에서 컨테이너 패딩
 }
 
-.post {
-  background: #fff;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.inner {
+  width: 930px;
+  margin: 0 auto;
 }
 
-.title {
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 1rem;
-}
-
-.meta {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #eee;
-}
-
-.author {
-  font-weight: 500;
-  color: #007bff;
-}
-
-.date {
-  color: #666;
-}
-
-.content {
-  line-height: 1.6;
-  color: #333;
+.contentBox {
+  background: #FFFFFF;
+  border: 1px solid #F5F5F5;
+  margin-top: 40px; // 헤더와의 간격
+  
+  // 제목 영역
+  .titleSection {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #F5F5F5;
+    position: relative;
+    
+    .postTitle {
+      font-family: 'Pretendard', sans-serif;
+      font-weight: 700;
+      font-size: 24px;
+      line-height: 29px;
+      color: #000D1C;
+      margin: 0;
+      padding: 0 2px;
+      flex: 1;
+    }
+    
+    .menuButton {
+      width: 29px;
+      height: 29px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1px;
+      
+      svg {
+        width: 6px;
+        height: 24px;
+      }
+      
+      &:hover {
+        opacity: 0.7;
+      }
+    }
+  }
+  
+  // 메타 정보 영역
+  .metaSection {
+    padding: 33px 4px 0;
+    
+    .userInfo {
+      display: flex;  
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 16px;
+      
+      .profileImage {
+        width: 14px;
+        height: 14px;
+        background: url('data:image/svg+xml;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAACXBIWXMAAAsTAAALEwEAmpwYAAABB0lEQVR4nGNgGAWjYBSMglEwCkbBKBgFo2AUjIJRMAqGD2BgYGD8//8/AzYwadIkRgYGBgZOTk4GbGBgNGJgYGDABjY0NDAwMDAwMzPj1MjExMTAwsLCwMbGhlOjQEFBAQMLCwsDJycnTrt4eHgYGBgYGDg4OHBq7OzsbGBgYGCwsLBgePr0KQMPDw8DDw8PQ29vL4O7uzvOSDUyMjIwMTFhYGJiYuDl5WXg5eVlEBERwWnXKBgFo4CGgIGBgYHhf38/A7awrKwsGNksrWxgaGtiYxsYGrGys7OzsrKyMbOys7NzcnKys7Ozs7KysrOzs7NzcnKysbGxs7Ozs3NycnJycrKzs7OzsrKys7Ozs7Kzs7NzcHCws7Mw...') no-repeat center;
+        background-size: contain;
+        border-radius: 50%;
+      }
+      
+      .nickname {
+        font-family: 'Pretendard', sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 17px;
+        color: #000D1C;
+      }
+    }
+    
+    .postMeta {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      
+      .likeInfo,
+      .dateInfo,
+      .commentInfo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        
+        span {
+          font-family: 'Pretendard', sans-serif;
+          font-weight: 500;
+          font-size: 12px;
+          line-height: 14px;
+          color: #999999;
+        }
+        
+        svg {
+          width: 14px;
+          height: 14px;
+        }
+      }
+      
+      .divider {
+        width: 1px;
+        height: 10px;
+        background: #999999;
+        margin: 0 5px;
+      }
+    }
+  }
 }

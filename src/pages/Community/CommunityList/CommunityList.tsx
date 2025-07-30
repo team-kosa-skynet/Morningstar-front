@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CommunityList.module.scss';
+import Pagination from '../../../components/Pagination/Pagination';
 
 // 아이콘 import
 import ThumbsUpIcon from '../../../assets/icons/hand-thumbs-up.svg';
 import ClockIcon from '../../../assets/icons/clock.svg';
-import ChevronLeftIcon from '../../../assets/icons/chevron-left-icon.svg';
-import ChevronRightIcon from '../../../assets/icons/chevron-right-icon.svg';
 
 // 이미지 import
 import tempImage from '../../../assets/images/level/temp.png';
@@ -29,6 +28,7 @@ const CommunityList = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = 25; // 전체 페이지 수
 
   // 임시 데이터
   const posts: PostItem[] = [
@@ -192,42 +192,11 @@ const CommunityList = () => {
           </div>
 
           {/* 페이지네이션 */}
-          <div className={styles.pagination}>
-            <button 
-              className={styles.navButton}
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              <img src={ChevronLeftIcon} alt="이전" />
-            </button>
-            
-            <div className={styles.pageNumbers}>
-              {[1, 2, 3, 4, 5].map((page) => (
-                <button
-                  key={page}
-                  className={`${styles.pageButton} ${currentPage === page ? styles.active : ''}`}
-                  onClick={() => handlePageChange(page)}
-                >
-                  {page}
-                </button>
-              ))}
-              <span className={styles.dots}>...</span>
-              <button
-                className={styles.pageButton}
-                onClick={() => handlePageChange(25)}
-              >
-                25
-              </button>
-            </div>
-
-            <button 
-              className={styles.navButton}
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === 25}
-            >
-              <img src={ChevronRightIcon} alt="다음" />
-            </button>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </div>
       </div>
     </div>
