@@ -111,10 +111,6 @@
   border-bottom: 1px solid $border-light;
   cursor: pointer;
   transition: $transition-base;
-
-  &:hover {
-    background-color: rgba($primary-color, 0.02);
-  }
 }
 
 .thumbnail {

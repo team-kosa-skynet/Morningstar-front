@@ -9,6 +9,7 @@ import './styles/global.scss';
 import styles from './App.module.scss';
 import Login from "./pages/Auth/Login/Login.tsx";
 import CommunityList from "./pages/Community/CommunityList/CommunityList.tsx";
+import CommunityWrite from "./pages/Community/CommunityWrite/CommunityWrite.tsx";
 
 function AppContent() {
     const location = useLocation();
@@ -25,6 +26,7 @@ function AppContent() {
                         <Route path="/signup" element={<SignUp />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/community" element={<CommunityList />} />
+                        <Route path="/community/write" element={<CommunityWrite />} />
                     </Routes>
                 </main>
                 {!hideLayout && <Footer />}

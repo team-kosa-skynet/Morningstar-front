@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './CommunityList.module.scss';
 
 // 아이콘 import
@@ -25,6 +26,7 @@ interface PostItem {
 }
 
 const CommunityList = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -113,6 +115,10 @@ const CommunityList = () => {
     setCurrentPage(page);
   };
 
+  const handleWriteClick = () => {
+    navigate('/community/write');
+  };
+
   return (
     <div className={styles.communityList}>
       <div className={styles.container}>
@@ -121,7 +127,7 @@ const CommunityList = () => {
           <div className={styles.listHeader}>
             <div className={styles.titleSection}>
               <h1 className={styles.title}>전체 글</h1>
-              <button className={styles.writeButton}>글쓰기</button>
+              <button className={styles.writeButton} onClick={handleWriteClick}>글쓰기</button>
             </div>
             <div className={styles.searchBox}>
               <input
