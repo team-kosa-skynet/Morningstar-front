@@ -7,11 +7,12 @@ interface NicknameSectionProps {
 }
 
 const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
-  const { user } = useAuthStore();
+  const { user, updateUserName } = useAuthStore();
   const [newNickname, setNewNickname] = useState('');
   const [isChecking, setIsChecking] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [checkResult, setCheckResult] = useState<'available' | 'unavailable' | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleDuplicateCheck = async () => {
     if (!newNickname.trim()) return;
@@ -28,11 +29,41 @@ const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
   };
 
   const handleSave = async () => {
-    if (!isChecked || checkResult !== 'available') return;
+    if (!newNickname.trim() || isSaving) return;
     
-    // TODO: 실제 닉네임 변경 API 호출
-    console.log('닉네임 변경:', newNickname);
-    onBack();
+    setIsSaving(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+
+      const response = await fetch('/api/member/nickname', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          nickname: newNickname.trim()
+        })
+      });
+
+      if (response.ok) {
+        alert('닉네임이 성공적으로 변경되었습니다.');
+        updateUserName(newNickname.trim());
+        onBack();
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || '닉네임 변경에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('닉네임 변경 오류:', error);
+      alert('네트워크 오류가 발생했습니다.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,9 +109,9 @@ const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
           <button 
             className={styles.saveButton}
             onClick={handleSave}
-            disabled={!isChecked || checkResult !== 'available'}
+            disabled={!newNickname.trim() || isSaving}
           >
-            저장
+            {isSaving ? '저장 중...' : '저장'}
           </button>
         </div>
       </div>

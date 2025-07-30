@@ -18,6 +18,7 @@ interface AuthState {
   initializeAuth: () => Promise<void>;
   fetchUserPoint: () => Promise<void>;
   setPoint: (point: number) => void;
+  updateUserName: (newName: string) => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -101,5 +102,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setPoint: (point: number) => {
     set({ point });
+  },
+
+  updateUserName: (newName: string) => {
+    const { user } = get();
+    if (user) {
+      const updatedUser = { ...user, name: newName };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      set({ user: updatedUser });
+    }
   },
 }));
