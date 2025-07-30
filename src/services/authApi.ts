@@ -82,9 +82,9 @@ interface BoardsResponse {
 
 interface CommentItem {
   commentId: number;
-  content: string;
+  comment: string;
   writer: string;
-  createdDate: string;
+  createdDate: number[];
 }
 
 interface BoardDetailResponse {

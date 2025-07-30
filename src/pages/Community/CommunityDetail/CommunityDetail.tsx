@@ -24,9 +24,9 @@ interface BoardDetail {
 
 interface CommentItem {
   commentId: number;
-  content: string;
+  comment: string;
   writer: string;
-  createdDate: string;
+  createdDate: number[];
 }
 
 const CommunityDetail = () => {
@@ -39,6 +39,13 @@ const CommunityDetail = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
+  // 날짜 배열을 문자열로 변환하는 함수
+  const formatDateArray = (dateArray: number[]): string => {
+    if (!dateArray || dateArray.length < 6) return '';
+    const [year, month, day, hour, minute, second] = dateArray;
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')} ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+  };
 
   // API에서 게시글 상세 데이터 가져오기
   const fetchBoardDetail = async () => {
@@ -273,9 +280,9 @@ const CommunityDetail = () => {
                     </div>
                     <div className={styles.commentMeta}>
                       <div className={styles.commentContent}>
-                        <p>{comment.content}</p>
+                        <p>{comment.comment}</p>
                       </div>
-                      <span className={styles.commentDate}>{comment.createdDate}</span>
+                      <span className={styles.commentDate}>{formatDateArray(comment.createdDate)}</span>
                     </div>
                   </div>
                 ))}
