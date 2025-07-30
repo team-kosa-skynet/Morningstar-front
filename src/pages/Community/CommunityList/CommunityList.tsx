@@ -32,7 +32,6 @@ const CommunityList = () => {
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [authInitialized, setAuthInitialized] = useState(false);
 
   // API에서 게시글 데이터 가져오기
   const fetchPosts = async (page: number = 0) => {
@@ -54,22 +53,9 @@ const CommunityList = () => {
     }
   };
 
-  // 인증 상태 초기화 감지
   useEffect(() => {
-    // 약간의 지연을 두어 initializeAuth가 완료되도록 대기
-    const timer = setTimeout(() => {
-      setAuthInitialized(true);
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  // 인증 초기화가 완료된 후 게시글 로드
-  useEffect(() => {
-    if (authInitialized) {
-      fetchPosts(currentPage);
-    }
-  }, [currentPage, authInitialized]);
+    fetchPosts(currentPage);
+  }, [currentPage]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page - 1); // Pagination 컴포넌트는 1부터 시작하지만 API는 0부터 시작
@@ -128,7 +114,12 @@ const CommunityList = () => {
               <div className={styles.empty}>게시글이 없습니다.</div>
             ) : (
               posts.map((post) => (
-                <div key={post.boardId} className={styles.postItem}>
+                <div 
+                  key={post.boardId} 
+                  className={styles.postItem}
+                  onClick={() => navigate(`/community/detail/${post.boardId}`)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <div className={styles.thumbnail}>
                     {post.imageUrl && post.imageUrl !== 'https://example.com/image1.jpg' ? (
                       <img src={post.imageUrl} alt="" />

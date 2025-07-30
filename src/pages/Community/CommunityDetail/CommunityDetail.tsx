@@ -1,12 +1,68 @@
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import styles from './CommunityDetail.module.scss';
 import Pagination from '../../../components/Pagination/Pagination';
+import { getBoardDetail } from '../../../services/authApi';
+import { useAuthStore } from '../../../stores/authStore';
+
+interface BoardDetail {
+  boardId: number;
+  title: string;
+  commentCount: number;
+  imageUrl: string[];
+  content: string;
+  writer: string;
+  createdDate: string;
+  viewCount: number;
+  likeCount: number;
+  comments: {
+    content: CommentItem[];
+    totalPages: number;
+    totalElements: number;
+  };
+}
+
+interface CommentItem {
+  commentId: number;
+  content: string;
+  writer: string;
+  createdDate: string;
+}
 
 const CommunityDetail = () => {
   const navigate = useNavigate();
+  const { boardId } = useParams<{ boardId: string }>();
+  const { token } = useAuthStore();
   const [currentPage, setCurrentPage] = useState(1);
   const [commentText, setCommentText] = useState('');
+  const [boardDetail, setBoardDetail] = useState<BoardDetail | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // API에서 게시글 상세 데이터 가져오기
+  const fetchBoardDetail = async () => {
+    if (!boardId) return;
+    
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await getBoardDetail(Number(boardId), token || undefined);
+      setBoardDetail(response.data);
+    } catch (error: any) {
+      console.error('게시글 상세 조회 실패:', error);
+      if (error.code === 401) {
+        setError('로그인이 필요합니다.');
+      } else {
+        setError('게시글을 불러오는데 실패했습니다.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBoardDetail();
+  }, [boardId]);
 
   const handleBackClick = () => {
     navigate(-1);
@@ -21,6 +77,36 @@ const CommunityDetail = () => {
     console.log('댓글 작성:', commentText);
     setCommentText('');
   };
+
+  if (loading) {
+    return (
+      <div className={styles.communityDetail}>
+        <div className={styles.container}>
+          <div className={styles.loading}>게시글을 불러오는 중...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.communityDetail}>
+        <div className={styles.container}>
+          <div className={styles.error}>{error}</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!boardDetail) {
+    return (
+      <div className={styles.communityDetail}>
+        <div className={styles.container}>
+          <div className={styles.error}>게시글을 찾을 수 없습니다.</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.communityDetail}>
@@ -40,7 +126,7 @@ const CommunityDetail = () => {
           <div className={styles.contentBox}>
             {/* 제목 영역 */}
             <div className={styles.titleSection}>
-              <h1 className={styles.postTitle}>안녕하세요! 잘부탁드립니다</h1>
+              <h1 className={styles.postTitle}>{boardDetail.title}</h1>
               <button className={styles.menuButton}>
                 <svg width="6" height="24" viewBox="0 0 6 24" fill="none">
                   <circle cx="3" cy="3" r="2" fill="#000"/>
@@ -54,21 +140,21 @@ const CommunityDetail = () => {
             <div className={styles.metaSection}>
               <div className={styles.userInfo}>
                 <img src="/src/assets/images/level/lv1.png" alt="프로필" className={styles.profileImage} />
-                <span className={styles.nickname}>고라니</span>
+                <span className={styles.nickname}>{boardDetail.writer}</span>
               </div>
               <div className={styles.postMeta}>
                 <div className={styles.dateInfo}>
-                  <span>25/07/23</span>
+                  <span>{boardDetail.createdDate}</span>
                 </div>
                 <div className={styles.divider}></div>
                 <div className={styles.likeInfo}>
                   <i className="bi bi-hand-thumbs-up"></i>
-                  <span>10</span>
+                  <span>{boardDetail.likeCount}</span>
                 </div>
                 <div className={styles.divider}></div>
                 <div className={styles.commentInfo}>
                   <i className="bi bi-chat-left-dots"></i>
-                  <span>10</span>
+                  <span>{boardDetail.commentCount}</span>
                 </div>
               </div>
             </div>
@@ -76,14 +162,21 @@ const CommunityDetail = () => {
             {/* 본문 박스 */}
             <div className={styles.contentSection}>
               <div className={styles.postContent}>
-                <p>오늘 가입했어요 잘부탁드려요.</p>
+                {boardDetail.imageUrl && boardDetail.imageUrl.length > 0 && (
+                  <div className={styles.imageSection}>
+                    {boardDetail.imageUrl.map((url, index) => (
+                      <img key={index} src={url} alt={`이미지`} className={styles.contentImage} />
+                    ))}
+                  </div>
+                )}
+                <p>{boardDetail.content}</p>
               </div>
               
               {/* 반응 박스 */}
               <div className={styles.reactionSection}>
                 <button className={styles.likeButton}>
                   <i className="bi bi-hand-thumbs-up"></i>
-                  <span>14</span>
+                  <span>{boardDetail.likeCount}</span>
                 </button>
               </div>
             </div>
@@ -94,7 +187,7 @@ const CommunityDetail = () => {
               <div className={styles.commentTitle}>
                 <div className={styles.titleSection}>
                   <span className={styles.commentLabel}>댓글</span>
-                  <span className={styles.commentCount}>1</span>
+                  <span className={styles.commentCount}>{boardDetail.comments.totalElements}</span>
                 </div>
               </div>
               
@@ -119,52 +212,38 @@ const CommunityDetail = () => {
               
               {/* 댓글 목록 */}
               <div className={styles.commentList}>
-                <div className={styles.commentItem}>
-                  <div className={styles.commentHeader}>
-                    <div className={styles.userInfo}>
-                      <img src="/src/assets/images/level/lv1.png" alt="프로필" className={styles.profileImage} />
-                      <span className={styles.nickname}>고라니</span>
+                {boardDetail.comments.content.map((comment) => (
+                  <div key={comment.commentId} className={styles.commentItem}>
+                    <div className={styles.commentHeader}>
+                      <div className={styles.userInfo}>
+                        <img src="/src/assets/images/level/lv1.png" alt="프로필" className={styles.profileImage} />
+                        <span className={styles.nickname}>{comment.writer}</span>
+                      </div>
+                      <button className={styles.menuButton}>
+                        <i className="bi bi-three-dots-vertical"></i>
+                      </button>
                     </div>
-                    <button className={styles.menuButton}>
-                      <i className="bi bi-three-dots-vertical"></i>
-                    </button>
-                  </div>
-                  <div className={styles.commentMeta}>
-                    <div className={styles.commentContent}>
-                      <p>반갑습니다 어서오세요!</p>
+                    <div className={styles.commentMeta}>
+                      <div className={styles.commentContent}>
+                        <p>{comment.content}</p>
+                      </div>
+                      <span className={styles.commentDate}>{comment.createdDate}</span>
                     </div>
-                    <span className={styles.commentDate}>25/07/23</span>
                   </div>
-                </div>
-                
-                <div className={styles.commentItem}>
-                  <div className={styles.commentHeader}>
-                    <div className={styles.userInfo}>
-                      <img src="/src/assets/images/level/lv1.png" alt="프로필" className={styles.profileImage} />
-                      <span className={styles.nickname}>고라니</span>
-                    </div>
-                    <button className={styles.menuButton}>
-                      <i className="bi bi-three-dots-vertical"></i>
-                    </button>
-                  </div>
-                  <div className={styles.commentMeta}>
-                    <div className={styles.commentContent}>
-                      <p>반갑습니다 어서오세요!</p>
-                    </div>
-                    <span className={styles.commentDate}>25/07/23</span>
-                  </div>
-                </div>
+                ))}
               </div>
               
               {/* 페이지네이션 */}
-              <div className={styles.paginationWrapper}>
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={25}
-                  onPageChange={handlePageChange}
-                  maxVisiblePages={5}
-                />
-              </div>
+              {boardDetail.comments.totalPages > 1 && (
+                <div className={styles.paginationWrapper}>
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={boardDetail.comments.totalPages}
+                    onPageChange={handlePageChange}
+                    maxVisiblePages={5}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

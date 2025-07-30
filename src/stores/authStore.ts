@@ -12,9 +12,10 @@ interface AuthState {
   user: User | null;
   token: string | null;
   point: number | null;
+  isAuthInitialized: boolean;
   login: (user: User, token: string) => void;
   logout: () => void;
-  initializeAuth: () => void;
+  initializeAuth: () => Promise<void>;
   fetchUserPoint: () => Promise<void>;
   setPoint: (point: number) => void;
 }
@@ -24,6 +25,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   token: null,
   point: null,
+  isAuthInitialized: false,
 
   login: async (user: User, token: string) => {
     localStorage.setItem('token', token);
@@ -80,6 +82,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         localStorage.removeItem('user');
       }
     }
+    
+    // 초기화 완료 표시
+    set({ isAuthInitialized: true });
   },
 
   fetchUserPoint: async () => {

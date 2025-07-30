@@ -30,7 +30,7 @@ function AppContent() {
                         <Route path="/login" element={<Login />} />
                         <Route path="/community" element={<CommunityList />} />
                         <Route path="/community/write" element={<CommunityWrite />} />
-                        <Route path="/community/detail" element={<CommunityDetail />} />
+                        <Route path="/community/detail/:boardId" element={<CommunityDetail />} />
                     </Routes>
                 </main>
                 {!hideLayout && <Footer />}
@@ -41,10 +41,27 @@ function AppContent() {
 
 function App() {
     const initializeAuth = useAuthStore((state) => state.initializeAuth);
+    const isAuthInitialized = useAuthStore((state) => state.isAuthInitialized);
 
     useEffect(() => {
         initializeAuth();
     }, [initializeAuth]);
+
+    // 인증 초기화가 완료되지 않았으면 로딩 화면 표시
+    if (!isAuthInitialized) {
+        return (
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100vh',
+                fontSize: '18px',
+                color: '#666'
+            }}>
+                로딩 중...
+            </div>
+        );
+    }
 
     return (
         <BrowserRouter>

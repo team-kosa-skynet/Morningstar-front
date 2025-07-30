@@ -80,6 +80,57 @@ interface BoardsResponse {
   };
 }
 
+interface CommentItem {
+  commentId: number;
+  content: string;
+  writer: string;
+  createdDate: string;
+}
+
+interface BoardDetailResponse {
+  code: number;
+  message: string;
+  data: {
+    boardId: number;
+    title: string;
+    commentCount: number;
+    imageUrl: string[];
+    content: string;
+    writer: string;
+    createdDate: string;
+    viewCount: number;
+    likeCount: number;
+    comments: {
+      content: CommentItem[];
+      pageable: {
+        pageNumber: number;
+        pageSize: number;
+        sort: {
+          empty: boolean;
+          sorted: boolean;
+          unsorted: boolean;
+        };
+        offset: number;
+        paged: boolean;
+        unpaged: boolean;
+      };
+      totalPages: number;
+      totalElements: number;
+      last: boolean;
+      size: number;
+      number: number;
+      sort: {
+        empty: boolean;
+        sorted: boolean;
+        unsorted: boolean;
+      };
+      numberOfElements: number;
+      first: boolean;
+      empty: boolean;
+    };
+  };
+}
+
 export const signUp = async (signUpData: SignUpRequest): Promise<SignUpResponse> => {
   try {
     const response = await axios.post<SignUpResponse>(
@@ -138,6 +189,26 @@ export const getBoards = async (page: number = 0, size: number = 10, sort: strin
     
     const response = await axios.get<BoardsResponse>(
       `${API_BASE_URL}/boards?page=${page}&size=${size}&sort=${sort}`,
+      token ? { headers } : undefined
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const getBoardDetail = async (boardId: number, token?: string): Promise<BoardDetailResponse> => {
+  try {
+    const headers: any = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    
+    const response = await axios.get<BoardDetailResponse>(
+      `${API_BASE_URL}/boards/${boardId}`,
       token ? { headers } : undefined
     );
     return response.data;
