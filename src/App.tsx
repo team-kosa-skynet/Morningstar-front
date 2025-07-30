@@ -1,5 +1,6 @@
 // src/App.tsx
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 import Home from './pages/Home/Home';
@@ -11,6 +12,7 @@ import Login from "./pages/Auth/Login/Login.tsx";
 import CommunityList from "./pages/Community/CommunityList/CommunityList.tsx";
 import CommunityWrite from "./pages/Community/CommunityWrite/CommunityWrite.tsx";
 import CommunityDetail from "./pages/Community/CommunityDetail/CommunityDetail.tsx";
+import { useAuthStore } from './stores/authStore';
 
 function AppContent() {
     const location = useLocation();
@@ -38,6 +40,12 @@ function AppContent() {
 }
 
 function App() {
+    const initializeAuth = useAuthStore((state) => state.initializeAuth);
+
+    useEffect(() => {
+        initializeAuth();
+    }, [initializeAuth]);
+
     return (
         <BrowserRouter>
             <AppContent />

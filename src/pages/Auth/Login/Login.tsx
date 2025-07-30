@@ -5,9 +5,11 @@ import logo from '../../../assets/images/logo.png';
 import googleIcon from '../../../assets/icons/google.svg';
 import kakaoIcon from '../../../assets/icons/kakao.svg';
 import { login } from '../../../services/authApi';
+import { useAuthStore } from '../../../stores/authStore';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const { login: loginStore } = useAuthStore();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -38,13 +40,12 @@ const Login: React.FC = () => {
 
       console.log('로그인 성공:', response);
       
-      // 토큰을 localStorage에 저장
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify({
+      // Zustand 스토어에 로그인 정보 저장
+      loginStore({
         email: response.data.email,
         name: response.data.name,
         userId: response.data.userId
-      }));
+      }, response.data.token);
 
       // 루트로 리다이렉트
       navigate('/');

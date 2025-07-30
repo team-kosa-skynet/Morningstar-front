@@ -2,9 +2,11 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Header.module.scss';
 import logoImage from '../../assets/images/logo.png';
+import { useAuthStore } from '../../stores/authStore';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
+  const { isLoggedIn, user, logout } = useAuthStore();
 
   const handleLogoClick = () => {
     navigate('/');
@@ -16,7 +18,12 @@ const Header: React.FC = () => {
 
   const handleLoginClick = () => {
     navigate('/login');
-  }
+  };
+
+  const handleLogoutClick = () => {
+    logout();
+    navigate('/');
+  };
   return (
     <>
       <header className={styles.header}>
@@ -33,8 +40,17 @@ const Header: React.FC = () => {
             </div>
             
             <div className={styles.authSection}>
-              <span className={styles.loginText} onClick={handleLoginClick}>로그인</span>
-              <span className={styles.signupText} onClick={handleSignUpClick}>회원가입</span>
+              {isLoggedIn ? (
+                <>
+                  <span className={styles.userName}>안녕하세요, {user?.name}님!</span>
+                  <span className={styles.logoutText} onClick={handleLogoutClick}>로그아웃</span>
+                </>
+              ) : (
+                <>
+                  <span className={styles.loginText} onClick={handleLoginClick}>로그인</span>
+                  <span className={styles.signupText} onClick={handleSignUpClick}>회원가입</span>
+                </>
+              )}
             </div>
           </div>
         </div>
