@@ -49,7 +49,7 @@ const Header: React.FC = () => {
                       </div>
                       <span className={styles.userName}>{user?.name}</span>
                     </div>
-                    <span className={styles.pointText}>포인트: {point ?? 0}P</span>
+                    <span className={styles.pointText}>포인트: <span className={styles.pointValue}>{point ?? 0}P</span></span>
                   </div>
                 </>
               ) : (

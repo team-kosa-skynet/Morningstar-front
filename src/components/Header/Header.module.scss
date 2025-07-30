@@ -87,7 +87,7 @@
             cursor: pointer;
             
             &:hover {
-              opacity: 0.7;
+              opacity: 0.9;
             }
             
             .levelIcon {
@@ -118,6 +118,10 @@
             font-size: 18px;
             line-height: 1.193359375em;
             color: #000D1C;
+          }
+          
+          .pointValue {
+            color: #4E4EFF;
           }
         }
         
