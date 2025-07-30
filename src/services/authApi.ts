@@ -41,6 +41,45 @@ interface PointResponse {
   };
 }
 
+interface BoardItem {
+  boardId: number;
+  title: string;
+  commentCount: number;
+  writer: string;
+  imageUrl: string;
+  createdDate: string;
+  viewCount: number;
+  likeCount: number;
+}
+
+interface BoardsResponse {
+  code: number;
+  message: string;
+  data: {
+    content: BoardItem[];
+    pageable: {
+      pageNumber: number;
+      pageSize: number;
+      sort: {
+        sorted: boolean;
+        unsorted: boolean;
+        empty: boolean;
+      };
+      offset: number;
+      paged: boolean;
+      unpaged: boolean;
+    };
+    last: boolean;
+    totalElements: number;
+    totalPages: number;
+    first: boolean;
+    size: number;
+    number: number;
+    numberOfElements: number;
+    empty: boolean;
+  };
+}
+
 export const signUp = async (signUpData: SignUpRequest): Promise<SignUpResponse> => {
   try {
     const response = await axios.post<SignUpResponse>(
@@ -80,6 +119,26 @@ export const getCurrentPoint = async (token: string): Promise<PointResponse> => 
           Authorization: `Bearer ${token}`
         }
       }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const getBoards = async (page: number = 0, size: number = 10, sort: string = 'createdAt,asc', token?: string): Promise<BoardsResponse> => {
+  try {
+    const headers: any = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    
+    const response = await axios.get<BoardsResponse>(
+      `${API_BASE_URL}/boards?page=${page}&size=${size}&sort=${sort}`,
+      token ? { headers } : undefined
     );
     return response.data;
   } catch (error) {

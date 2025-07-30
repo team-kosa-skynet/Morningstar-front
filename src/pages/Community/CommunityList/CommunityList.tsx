@@ -1,118 +1,60 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CommunityList.module.scss';
 import Pagination from '../../../components/Pagination/Pagination';
+import { getBoards } from '../../../services/authApi';
+import { useAuthStore } from '../../../stores/authStore';
 
 // 아이콘 import
 import ThumbsUpIcon from '../../../assets/icons/hand-thumbs-up.svg';
 import ClockIcon from '../../../assets/icons/clock.svg';
 
-// 이미지 import
-import tempImage from '../../../assets/images/level/temp.png';
-import adminIcon from '../../../assets/images/level/admin.png';
+// 레벨 1 아이콘 import (일시적으로 모든 유저에게 적용)
 import userIcon from '../../../assets/images/level/lv1.png';
 
 interface PostItem {
-  id: number;
+  boardId: number;
   title: string;
-  author: string;
-  thumbnail: string;
-  likes: number;
-  comments: number;
-  time: string;
-  isNotice: boolean;
-  authorIcon: string;
+  writer: string;
+  imageUrl: string;
+  likeCount: number;
+  commentCount: number;
+  createdDate: string;
+  viewCount: number;
 }
 
 const CommunityList = () => {
   const navigate = useNavigate();
+  const { token } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 25; // 전체 페이지 수
+  const [currentPage, setCurrentPage] = useState(0); // API는 0부터 시작
+  const [posts, setPosts] = useState<PostItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [totalPages, setTotalPages] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
-  // 임시 데이터
-  const posts: PostItem[] = [
-    {
-      id: 1,
-      title: '[공지] 개방 커뮤니티 이용 안내',
-      author: '관리자',
-      thumbnail: tempImage,
-      likes: 60,
-      comments: 23,
-      time: '45 분 전',
-      isNotice: true,
-      authorIcon: adminIcon,
-    },
-    {
-      id: 2,
-      title: '안녕하세요?',
-      author: '고라니',
-      thumbnail: tempImage,
-      likes: 10,
-      comments: 5,
-      time: '10 분 전',
-      isNotice: false,
-      authorIcon: userIcon,
-    },
-    {
-      id: 3,
-      title: '안녕하세요?',
-      author: '고라니',
-      thumbnail: tempImage,
-      likes: 10,
-      comments: 5,
-      time: '10 분 전',
-      isNotice: false,
-      authorIcon: userIcon,
-    },
-    {
-      id: 4,
-      title: '안녕하세요?',
-      author: '고라니',
-      thumbnail: tempImage,
-      likes: 10,
-      comments: 5,
-      time: '10 분 전',
-      isNotice: false,
-      authorIcon: userIcon,
-    },
-    {
-      id: 5,
-      title: '안녕하세요?',
-      author: '고라니',
-      thumbnail: tempImage,
-      likes: 10,
-      comments: 5,
-      time: '10 분 전',
-      isNotice: false,
-      authorIcon: userIcon,
-    },
-    {
-      id: 6,
-      title: '안녕하세요?',
-      author: '고라니',
-      thumbnail: tempImage,
-      likes: 10,
-      comments: 5,
-      time: '10 분 전',
-      isNotice: false,
-      authorIcon: userIcon,
-    },
-    {
-      id: 7,
-      title: '안녕하세요?',
-      author: '고라니',
-      thumbnail: tempImage,
-      likes: 10,
-      comments: 5,
-      time: '10 분 전',
-      isNotice: false,
-      authorIcon: userIcon,
-    },
-  ];
+  // API에서 게시글 데이터 가져오기
+  const fetchPosts = async (page: number = 0) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await getBoards(page, 10, 'createdAt,desc', token || undefined);
+      setPosts(response.data.content);
+      setTotalPages(response.data.totalPages);
+    } catch (error: any) {
+      console.error('게시글 조회 실패:', error);
+      setError('게시글을 불러오는데 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts(currentPage);
+  }, [currentPage]);
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    setCurrentPage(page - 1); // Pagination 컴포넌트는 1부터 시작하지만 API는 0부터 시작
   };
 
   const handleWriteClick = () => {
@@ -160,43 +102,55 @@ const CommunityList = () => {
 
           {/* 게시글 리스트 */}
           <div className={styles.postList}>
-            {posts.map((post) => (
-              <div key={post.id} className={styles.postItem}>
-                <div className={styles.thumbnail}>
-                  <img src={post.thumbnail} alt="" />
-                </div>
-                <div className={styles.postContent}>
-                  <div className={styles.postTitle}>
-                    <h3 className={post.isNotice ? styles.notice : ''}>
-                      {post.title}
-                    </h3>
-                    <span className={styles.commentCount}>{post.comments}</span>
+            {loading ? (
+              <div className={styles.loading}>게시글을 불러오는 중...</div>
+            ) : error ? (
+              <div className={styles.error}>{error}</div>
+            ) : posts.length === 0 ? (
+              <div className={styles.empty}>게시글이 없습니다.</div>
+            ) : (
+              posts.map((post) => (
+                <div key={post.boardId} className={styles.postItem}>
+                  <div className={styles.thumbnail}>
+                    {post.imageUrl && post.imageUrl !== 'https://example.com/image1.jpg' ? (
+                      <img src={post.imageUrl} alt="" />
+                    ) : (
+                      <div className={styles.noImage}></div>
+                    )}
                   </div>
-                  <div className={styles.postMeta}>
-                    <div className={styles.likes}>
-                      <img src={ThumbsUpIcon} alt="좋아요" />
-                      <span>{post.likes}</span>
+                  <div className={styles.postContent}>
+                    <div className={styles.postTitle}>
+                      <h3>{post.title}</h3>
+                      <span className={styles.commentCount}>{post.commentCount}</span>
                     </div>
-                    <div className={styles.time}>
-                      <img src={ClockIcon} alt="시간" />
-                      <span>{post.time}</span>
+                    <div className={styles.postMeta}>
+                      <div className={styles.likes}>
+                        <img src={ThumbsUpIcon} alt="좋아요" />
+                        <span>{post.likeCount}</span>
+                      </div>
+                      <div className={styles.time}>
+                        <img src={ClockIcon} alt="시간" />
+                        <span>{post.createdDate}</span>
+                      </div>
                     </div>
                   </div>
+                  <div className={styles.authorInfo}>
+                    <img src={userIcon} alt="" className={styles.authorIcon} />
+                    <span className={styles.authorName}>{post.writer}</span>
+                  </div>
                 </div>
-                <div className={styles.authorInfo}>
-                  <img src={post.authorIcon} alt="" className={styles.authorIcon} />
-                  <span className={styles.authorName}>{post.author}</span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           {/* 페이지네이션 */}
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
+          {!loading && totalPages > 0 && (
+            <Pagination
+              currentPage={currentPage + 1} // 화면에는 1부터 표시
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          )}
         </div>
       </div>
     </div>
