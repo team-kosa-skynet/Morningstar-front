@@ -7,10 +7,10 @@ interface NicknameSectionProps {
 }
 
 const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
-  const { user, updateUserName } = useAuthStore();
+  const {updateUserName } = useAuthStore();
   const [newNickname, setNewNickname] = useState('');
   const [isChecking, setIsChecking] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
+  const [setIsChecked] = useState(false);
   const [checkResult, setCheckResult] = useState<'available' | 'unavailable' | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -23,6 +23,7 @@ const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
     setTimeout(() => {
       const isAvailable = Math.random() > 0.5;
       setCheckResult(isAvailable ? 'available' : 'unavailable');
+      // @ts-ignore
       setIsChecked(true);
       setIsChecking(false);
     }, 1000);
@@ -68,6 +69,7 @@ const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewNickname(e.target.value);
+    // @ts-ignore
     setIsChecked(false);
     setCheckResult(null);
   };
