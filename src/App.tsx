@@ -13,6 +13,7 @@ import CommunityList from "./pages/Community/CommunityList/CommunityList.tsx";
 import CommunityWrite from "./pages/Community/CommunityWrite/CommunityWrite.tsx";
 import CommunityEdit from "./pages/Community/CommunityEdit/CommunityEdit.tsx";
 import CommunityDetail from "./pages/Community/CommunityDetail/CommunityDetail.tsx";
+import MyPage from "./pages/MyPage/MyPage.tsx";
 import { useAuthStore } from './stores/authStore';
 
 function AppContent() {
@@ -33,6 +34,7 @@ function AppContent() {
                         <Route path="/community/write" element={<CommunityWrite />} />
                         <Route path="/community/edit/:boardId" element={<CommunityEdit />} />
                         <Route path="/community/detail/:boardId" element={<CommunityDetail />} />
+                        <Route path="/mypage" element={<MyPage />} />
                     </Routes>
                 </main>
                 {!hideLayout && <Footer />}
