@@ -30,6 +30,11 @@ const levelIcons = {
 
 // 포인트별 레벨 계산 함수
 export const getLevelFromPoints = (points: number): number => {
+  // 유효하지 않은 입력값 처리
+  if (typeof points !== 'number' || isNaN(points) || points < 0) {
+    return 1; // 기본값으로 레벨 1 반환
+  }
+  
   if (points <= 1000) return 1;
   if (points <= 3000) return 2;
   if (points <= 6000) return 3;
@@ -45,7 +50,9 @@ export const getLevelFromPoints = (points: number): number => {
 // 레벨별 아이콘 가져오기 함수
 export const getLevelIcon = (points: number): string => {
   const level = getLevelFromPoints(points);
-  return levelIcons[level as keyof typeof levelIcons];
+  const icon = levelIcons[level as keyof typeof levelIcons];
+  // undefined 방지를 위한 fallback
+  return icon || lv1; // 아이콘이 없으면 레벨 1 아이콘을 기본값으로 사용
 };
 
 // 레벨별 이름 가져오기 함수 (선택사항)

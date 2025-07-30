@@ -9,7 +9,8 @@
       "Bash(find:*)",
       "Bash(ls:*)",
       "mcp__figma-mcp__get_figma_data",
-      "WebFetch(domain:documenter.getpostman.com)"
+      "WebFetch(domain:documenter.getpostman.com)",
+      "WebFetch(domain:mesonia.tistory.com)"
     ],
     "deny": []
   }
