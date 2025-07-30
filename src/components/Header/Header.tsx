@@ -6,7 +6,7 @@ import { useAuthStore } from '../../stores/authStore';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
-  const { isLoggedIn, user, logout } = useAuthStore();
+  const { isLoggedIn, user, point, logout } = useAuthStore();
 
   const handleLogoClick = () => {
     navigate('/');
@@ -39,11 +39,22 @@ const Header: React.FC = () => {
               </div>
             </div>
             
-            <div className={styles.authSection}>
+            <div className={styles.rightSection}>
               {isLoggedIn ? (
                 <>
-                  <span className={styles.userName}>안녕하세요, {user?.name}님!</span>
-                  <span className={styles.logoutText} onClick={handleLogoutClick}>로그아웃</span>
+                  <div className={styles.userInfo}>
+                    <div className={styles.userProfile}>
+                      <div className={styles.levelIcon}>
+                        <img src={logoImage} alt="레벨" />
+                      </div>
+                      <span className={styles.userName}>{user?.name}</span>
+                    </div>
+                    <span className={styles.pointText}>포인트: {point ?? 0}P</span>
+                  </div>
+                  <div className={styles.actionButtons}>
+                    <span className={styles.myInfoText}>내 정보</span>
+                    <span className={styles.logoutText} onClick={handleLogoutClick}>로그아웃</span>
+                  </div>
                 </>
               ) : (
                 <>

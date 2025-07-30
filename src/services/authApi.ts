@@ -33,6 +33,14 @@ interface LoginResponse {
   };
 }
 
+interface PointResponse {
+  code: number;
+  message: string;
+  data: {
+    point: number;
+  };
+}
+
 export const signUp = async (signUpData: SignUpRequest): Promise<SignUpResponse> => {
   try {
     const response = await axios.post<SignUpResponse>(
@@ -53,6 +61,25 @@ export const login = async (loginData: LoginRequest): Promise<LoginResponse> => 
     const response = await axios.post<LoginResponse>(
       '/login',
       loginData
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const getCurrentPoint = async (token: string): Promise<PointResponse> => {
+  try {
+    const response = await axios.get<PointResponse>(
+      `${API_BASE_URL}/point/current`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
     );
     return response.data;
   } catch (error) {
