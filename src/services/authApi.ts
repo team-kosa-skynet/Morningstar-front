@@ -234,7 +234,7 @@ export const getBoardDetail = async (boardId: number, token?: string): Promise<B
 export const createComment = async (commentData: CreateCommentRequest, token: string): Promise<CreateCommentResponse> => {
   try {
     const response = await axios.post<CreateCommentResponse>(
-      `${API_BASE_URL}/comment`,
+      `${API_BASE_URL}/comments`,
       commentData,
       {
         headers: {
