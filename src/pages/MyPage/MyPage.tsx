@@ -3,6 +3,7 @@ import { useAuthStore } from '../../stores/authStore';
 import ProfileSection from '../../components/MyPage/ProfileSection';
 import MainSection from '../../components/MyPage/MainSection';
 import NicknameSection from '../../components/MyPage/NicknameSection';
+import PasswordSection from '../../components/MyPage/PasswordSection';
 import styles from './MyPage.module.scss';
 
 type CurrentSection = 'main' | 'nickname' | 'password' | 'points';
@@ -27,6 +28,8 @@ const MyPage: React.FC = () => {
     switch (currentSection) {
       case 'nickname':
         return <NicknameSection onBack={handleBackToMain} />;
+      case 'password':
+        return <PasswordSection onBack={handleBackToMain} />;
       case 'main':
       default:
         return <MainSection onSectionChange={handleSectionChange} />;
