@@ -32,6 +32,7 @@ const CommunityList = () => {
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   // API에서 게시글 데이터 가져오기
   const fetchPosts = async (page: number = 0) => {
@@ -43,15 +44,32 @@ const CommunityList = () => {
       setTotalPages(response.data.totalPages);
     } catch (error: any) {
       console.error('게시글 조회 실패:', error);
-      setError('게시글을 불러오는데 실패했습니다.');
+      if (error.code === 401) {
+        setError('로그인이 필요합니다.');
+      } else {
+        setError('게시글을 불러오는데 실패했습니다.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  // 인증 상태 초기화 감지
   useEffect(() => {
-    fetchPosts(currentPage);
-  }, [currentPage]);
+    // 약간의 지연을 두어 initializeAuth가 완료되도록 대기
+    const timer = setTimeout(() => {
+      setAuthInitialized(true);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  // 인증 초기화가 완료된 후 게시글 로드
+  useEffect(() => {
+    if (authInitialized) {
+      fetchPosts(currentPage);
+    }
+  }, [currentPage, authInitialized]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page - 1); // Pagination 컴포넌트는 1부터 시작하지만 API는 0부터 시작

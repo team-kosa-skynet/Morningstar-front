@@ -10,7 +10,9 @@
       "Bash(ls:*)",
       "mcp__figma-mcp__get_figma_data",
       "WebFetch(domain:documenter.getpostman.com)",
-      "WebFetch(domain:mesonia.tistory.com)"
+      "WebFetch(domain:mesonia.tistory.com)",
+      "Bash(tskill:*)",
+      "Bash(powershell:*)"
     ],
     "deny": []
   }
