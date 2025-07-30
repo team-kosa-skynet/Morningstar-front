@@ -41,6 +41,11 @@ const CommunityDetail = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   
+  // 댓글 수정 상태
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editingCommentText, setEditingCommentText] = useState('');
+  const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
+  
   // 모달 관련 상태
   const [activeModal, setActiveModal] = useState<'post' | 'comment' | null>(null);
   const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
@@ -71,6 +76,58 @@ const CommunityDetail = () => {
     setModalTargetId(null);
   };
 
+  // 댓글 수정 시작
+  const handleStartCommentEdit = (commentId: number, currentText: string) => {
+    setEditingCommentId(commentId);
+    setEditingCommentText(currentText);
+    handleCloseModal();
+  };
+
+  // 댓글 수정 취소
+  const handleCancelEdit = () => {
+    setEditingCommentId(null);
+    setEditingCommentText('');
+  };
+
+  // 댓글 수정 제출
+  const handleCommentEditSubmit = async () => {
+    if (!editingCommentText.trim()) {
+      alert('댓글 내용을 입력해주세요.');
+      return;
+    }
+
+    if (!token || !editingCommentId || !boardDetail) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    setIsSubmittingEdit(true);
+    try {
+      await updateComment(
+        editingCommentId,
+        {
+          boardId: boardDetail.boardId.toString(),
+          content: editingCommentText.trim()
+        },
+        token
+      );
+
+      alert('댓글이 수정되었습니다.');
+      setEditingCommentId(null);
+      setEditingCommentText('');
+      await fetchBoardDetail(); // 새로고침
+    } catch (error: any) {
+      console.error('댓글 수정 실패:', error);
+      if (error.code === 401) {
+        alert('로그인이 필요합니다.');
+      } else {
+        alert('댓글 수정에 실패했습니다.');
+      }
+    } finally {
+      setIsSubmittingEdit(false);
+    }
+  };
+
   // 게시글/댓글 수정
   const handleEdit = async () => {
     if (!token) {
@@ -84,24 +141,11 @@ const CommunityDetail = () => {
         navigate(`/community/edit/${boardDetail.boardId}`);
         
       } else if (activeModal === 'comment' && modalTargetId && boardDetail) {
-        // 댓글 수정
+        // 댓글 수정 - 인라인 수정 모드로 전환
         const comment = boardDetail.comments.content.find(c => c.commentId === modalTargetId);
         if (!comment) return;
 
-        const newContent = prompt('새 댓글 내용을 입력하세요:', comment.comment);
-        if (newContent === null) return; // 취소 시
-
-        await updateComment(
-          modalTargetId,
-          {
-            boardId: boardDetail.boardId.toString(),
-            content: newContent.trim()
-          },
-          token
-        );
-
-        alert('댓글이 수정되었습니다.');
-        await fetchBoardDetail(); // 새로고침
+        handleStartCommentEdit(modalTargetId, comment.comment);
       }
     } catch (error: any) {
       console.error('수정 실패:', error);
@@ -397,6 +441,50 @@ const CommunityDetail = () => {
                       </div>
                       <span className={styles.commentDate}>{formatDateArray(comment.createdDate)}</span>
                     </div>
+                    
+                    {/* 댓글 수정 입력창 */}
+                    {editingCommentId === comment.commentId && (
+                      <div className={styles.commentEditInput}>
+                        <div className={styles.inputWrapper}>
+                          <input
+                            type="text"
+                            placeholder="수정할 댓글을 입력해주세요!"
+                            value={editingCommentText}
+                            onChange={(e) => setEditingCommentText(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !isSubmittingEdit) {
+                                handleCommentEditSubmit();
+                              } else if (e.key === 'Escape') {
+                                handleCancelEdit();
+                              }
+                            }}
+                            className={styles.commentTextField}
+                            disabled={isSubmittingEdit}
+                            autoFocus
+                          />
+                          <div className={styles.editButtons}>
+                            <button 
+                              className={styles.cancelEditButton}
+                              onClick={handleCancelEdit}
+                              disabled={isSubmittingEdit}
+                            >
+                              취소
+                            </button>
+                            <button 
+                              className={styles.submitEditButton}
+                              onClick={handleCommentEditSubmit}
+                              disabled={isSubmittingEdit}
+                            >
+                              {isSubmittingEdit ? (
+                                <span>...</span>
+                              ) : (
+                                <i className="bi bi-vector-pen"></i>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
