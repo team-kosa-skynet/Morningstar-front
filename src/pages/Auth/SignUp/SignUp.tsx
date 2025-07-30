@@ -3,6 +3,7 @@ import styles from './SignUp.module.scss';
 import logo from '../../../assets/images/logo2.png';
 import kakaoIcon from '../../../assets/icons/kakao.svg';
 import googleIcon from '../../../assets/icons/google.svg';
+import { signUp } from '../../../services/authApi';
 
 interface FormData {
   email: string;
@@ -54,6 +55,9 @@ const SignUp: React.FC = () => {
       message: ''
     }
   });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // 이메일 유효성 검사
   const validateEmail = (email: string) => {
@@ -113,7 +117,7 @@ const SignUp: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // 최종 유효성 검사
@@ -122,8 +126,30 @@ const SignUp: React.FC = () => {
     const confirmPasswordValid = formData.password === formData.confirmPassword;
 
     if (emailValid && Object.values(passwordRules).every(Boolean) && confirmPasswordValid) {
-      console.log('회원가입 처리:', formData);
-      // 회원가입 API 호출
+      setIsLoading(true);
+      setErrorMessage('');
+
+      try {
+        const response = await signUp({
+          email: formData.email,
+          password: formData.password
+        });
+
+        console.log('회원가입 성공:', response);
+        alert(`회원가입이 완료되었습니다! 환영합니다, ${response.data.name}님!`);
+        
+        // 폼 초기화
+        setFormData({
+          email: '',
+          password: '',
+          confirmPassword: ''
+        });
+      } catch (error: any) {
+        console.error('회원가입 실패:', error);
+        setErrorMessage(error?.message || '회원가입 중 오류가 발생했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -212,9 +238,17 @@ const SignUp: React.FC = () => {
             )}
           </div>
 
+          {/* 에러 메시지 */}
+          {errorMessage && (
+            <div className={styles.errorMessage}>
+              <i className="bi bi-x-lg"></i>
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           {/* 가입하기 버튼 */}
-          <button type="submit" className={styles.signupButton}>
-            가입하기
+          <button type="submit" className={styles.signupButton} disabled={isLoading}>
+            {isLoading ? '가입 중...' : '가입하기'}
           </button>
 
           {/* 간편 회원가입 */}

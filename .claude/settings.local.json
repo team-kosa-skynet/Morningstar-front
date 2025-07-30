@@ -8,7 +8,8 @@
       "Bash(echo $HOME)",
       "Bash(find:*)",
       "Bash(ls:*)",
-      "mcp__figma-mcp__get_figma_data"
+      "mcp__figma-mcp__get_figma_data",
+      "WebFetch(domain:documenter.getpostman.com)"
     ],
     "deny": []
   }

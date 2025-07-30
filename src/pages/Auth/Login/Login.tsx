@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './Login.module.scss';
 import logo from '../../../assets/images/logo.png';
 import googleIcon from '../../../assets/icons/google.svg';
 import kakaoIcon from '../../../assets/icons/kakao.svg';
+import { login } from '../../../services/authApi';
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -18,10 +24,36 @@ const Login: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // 로그인 로직 구현
-    console.log('로그인 데이터:', formData);
+    
+    setIsLoading(true);
+    setErrorMessage('');
+
+    try {
+      const response = await login({
+        email: formData.email,
+        password: formData.password
+      });
+
+      console.log('로그인 성공:', response);
+      
+      // 토큰을 localStorage에 저장
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify({
+        email: response.data.email,
+        name: response.data.name,
+        userId: response.data.userId
+      }));
+
+      // 루트로 리다이렉트
+      navigate('/');
+    } catch (error: any) {
+      console.error('로그인 실패:', error);
+      setErrorMessage(error?.message || '로그인 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSocialLogin = (provider: 'kakao' | 'google') => {
@@ -44,10 +76,10 @@ const Login: React.FC = () => {
         <form onSubmit={handleSubmit} className={styles.loginForm}>
           <div className={styles.inputGroup}>
             <input
-              type="text"
-              name="username"
-              placeholder="아이디"
-              value={formData.username}
+              type="email"
+              name="email"
+              placeholder="이메일"
+              value={formData.email}
               onChange={handleInputChange}
               className={styles.input}
               required
@@ -66,8 +98,15 @@ const Login: React.FC = () => {
             />
           </div>
 
-          <button type="submit" className={styles.loginButton}>
-            GAEBANG 로그인
+          {/* 에러 메시지 */}
+          {errorMessage && (
+            <div className={styles.errorMessage}>
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
+          <button type="submit" className={styles.loginButton} disabled={isLoading}>
+            {isLoading ? '로그인 중...' : 'GAEBANG 로그인'}
           </button>
         </form>
 

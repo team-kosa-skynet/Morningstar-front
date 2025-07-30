@@ -9,5 +9,20 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     }
+  },
+  server: {
+    port: 8081,
+    proxy: {
+      '/api': {
+        target: 'https://gaebang.site',
+        changeOrigin: true,
+        secure: true
+      },
+      '/login': {
+        target: 'https://gaebang.site',
+        changeOrigin: true,
+        secure: true
+      }
+    }
   }
 })
