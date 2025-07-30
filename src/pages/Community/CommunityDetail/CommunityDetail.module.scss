@@ -339,7 +339,6 @@
     .commentList {
       margin-top: 10px;
       .commentItem {
-        padding: 0 4px;
         border-bottom: 1px solid #F5F5F5;
         
         &:last-child {
@@ -423,7 +422,6 @@
 
         // 댓글 수정 입력창
         .commentEditInput {
-          margin-top: 10px;
           margin-bottom: 8px;
           
           .inputWrapper {
@@ -435,11 +433,11 @@
             align-items: center;
             
             .commentTextField {
-              flex: 1;
+              width: 100%;
               height: 100%;
               border: none;
               outline: none;
-              padding: 10px 15px;
+              padding: 10px 55px 10px 15px;
               font-family: 'Pretendard', sans-serif;
               font-weight: 500;
               font-size: 14px;
@@ -452,55 +450,32 @@
               }
             }
             
-            .editButtons {
+            .submitEditButton {
+              position: absolute;
+              right: 0;
+              top: 0;
+              width: 40px;
+              height: 40px;
+              background: #000D1C;
+              border: none;
+              cursor: pointer;
               display: flex;
               align-items: center;
-              gap: 5px;
-              padding-right: 10px;
+              justify-content: center;
+              transition: all 0.2s ease;
               
-              .cancelEditButton {
-                background: none;
-                border: 1px solid #DDDDDD;
-                color: #666666;
-                font-family: 'Pretendard', sans-serif;
-                font-size: 12px;
-                font-weight: 500;
-                padding: 4px 8px;
-                border-radius: 3px;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                
-                &:hover {
-                  background-color: #f5f5f5;
-                  border-color: #999999;
-                }
+              i {
+                font-size: 20px;
+                color: #FFFFFF;
               }
               
-              .submitEditButton {
-                width: 30px;
-                height: 30px;
-                background: #000D1C;
-                border: none;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 3px;
-                transition: all 0.2s ease;
-                
-                i {
-                  font-size: 14px;
-                  color: #FFFFFF;
-                }
-                
-                &:hover {
-                  background: #001a33;
-                }
-                
-                &:disabled {
-                  opacity: 0.6;
-                  cursor: not-allowed;
-                }
+              &:hover {
+                background: #001a33;
+              }
+              
+              &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
               }
             }
           }

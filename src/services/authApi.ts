@@ -394,10 +394,10 @@ export const deleteBoard = async (boardId: number, token: string): Promise<Delet
   }
 };
 
-export const updateComment = async (commentId: number, commentData: UpdateCommentRequest, token: string): Promise<UpdateCommentResponse> => {
+export const updateComment = async (commentId: number, commentData: UpdateCommentRequest, token: string): Promise<void> => {
   try {
-    const response = await axios.patch<UpdateCommentResponse>(
-      `${API_BASE_URL}/comment/${commentId}`,
+    await axios.patch(
+      `${API_BASE_URL}/comments/${commentId}`,
       commentData,
       {
         headers: {
@@ -406,7 +406,6 @@ export const updateComment = async (commentId: number, commentData: UpdateCommen
         }
       }
     );
-    return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       throw error.response.data;

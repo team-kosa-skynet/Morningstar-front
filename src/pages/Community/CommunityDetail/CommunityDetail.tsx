@@ -89,6 +89,11 @@ const CommunityDetail = () => {
     setEditingCommentText('');
   };
 
+  // 수정창 바깥 클릭 시 수정창 닫기
+  const handleEditInputClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   // 댓글 수정 제출
   const handleCommentEditSubmit = async () => {
     if (!editingCommentText.trim()) {
@@ -222,6 +227,31 @@ const CommunityDetail = () => {
   useEffect(() => {
     fetchBoardDetail();
   }, [boardId]);
+
+  // 수정창 바깥 클릭 시 닫기 이벤트 리스너
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (editingCommentId) {
+        handleCancelEdit();
+      }
+    };
+
+    if (editingCommentId) {
+      // 약간의 지연을 두어 수정 버튼 클릭과 겹치지 않도록 함
+      const timer = setTimeout(() => {
+        document.addEventListener('click', handleClickOutside);
+      }, 100);
+
+      return () => {
+        clearTimeout(timer);
+        document.removeEventListener('click', handleClickOutside);
+      };
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [editingCommentId]);
 
   const handleBackClick = () => {
     navigate('/community');
@@ -444,7 +474,7 @@ const CommunityDetail = () => {
                     
                     {/* 댓글 수정 입력창 */}
                     {editingCommentId === comment.commentId && (
-                      <div className={styles.commentEditInput}>
+                      <div className={styles.commentEditInput} onClick={handleEditInputClick}>
                         <div className={styles.inputWrapper}>
                           <input
                             type="text"
@@ -462,26 +492,17 @@ const CommunityDetail = () => {
                             disabled={isSubmittingEdit}
                             autoFocus
                           />
-                          <div className={styles.editButtons}>
-                            <button 
-                              className={styles.cancelEditButton}
-                              onClick={handleCancelEdit}
-                              disabled={isSubmittingEdit}
-                            >
-                              취소
-                            </button>
-                            <button 
-                              className={styles.submitEditButton}
-                              onClick={handleCommentEditSubmit}
-                              disabled={isSubmittingEdit}
-                            >
-                              {isSubmittingEdit ? (
-                                <span>...</span>
-                              ) : (
-                                <i className="bi bi-vector-pen"></i>
-                              )}
-                            </button>
-                          </div>
+                          <button 
+                            className={styles.submitEditButton}
+                            onClick={handleCommentEditSubmit}
+                            disabled={isSubmittingEdit}
+                          >
+                            {isSubmittingEdit ? (
+                              <span>...</span>
+                            ) : (
+                              <i className="bi bi-vector-pen"></i>
+                            )}
+                          </button>
                         </div>
                       </div>
                     )}
