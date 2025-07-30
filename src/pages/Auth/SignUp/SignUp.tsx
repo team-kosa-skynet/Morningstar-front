@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './SignUp.module.scss';
 import logo from '../../../assets/images/logo2.png';
 import kakaoIcon from '../../../assets/icons/kakao.svg';
 import googleIcon from '../../../assets/icons/google.svg';
-import { signUp } from '../../../services/authApi';
+import { sendEmailVerification } from '../../../services/authApi';
 
 interface FormData {
   email: string;
@@ -31,6 +32,7 @@ interface ValidationState {
 }
 
 const SignUp: React.FC = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
@@ -130,23 +132,23 @@ const SignUp: React.FC = () => {
       setErrorMessage('');
 
       try {
-        const response = await signUp({
-          email: formData.email,
-          password: formData.password
+        // 이메일 인증 코드 발송
+        const response = await sendEmailVerification({
+          email: formData.email
         });
 
-        console.log('회원가입 성공:', response);
-        alert(`회원가입이 완료되었습니다! 환영합니다, ${response.data.name}님!`);
+        console.log('이메일 인증 코드 발송 성공:', response);
         
-        // 폼 초기화
-        setFormData({
-          email: '',
-          password: '',
-          confirmPassword: ''
+        // 이메일 인증 페이지로 이동하면서 필요한 데이터 전달
+        navigate('/email-verify', { 
+          state: { 
+            email: formData.email,
+            password: formData.password
+          } 
         });
       } catch (error: any) {
-        console.error('회원가입 실패:', error);
-        setErrorMessage(error?.message || '회원가입 중 오류가 발생했습니다.');
+        console.error('이메일 인증 코드 발송 실패:', error);
+        setErrorMessage(error?.message || '이메일 인증 코드 발송 중 오류가 발생했습니다.');
       } finally {
         setIsLoading(false);
       }

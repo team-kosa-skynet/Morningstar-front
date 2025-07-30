@@ -1,54 +1,40 @@
 .emailVerifyContainer {
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  background-color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #ffffff;
-  position: relative;
-  overflow: hidden;
 }
 
-.backgroundImages {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 0;
+.verifyCard {
+  width: 360px;
+  height: 552px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
-.spaceshipImage {
-  position: absolute;
-  right: 100px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 268px;
-  height: 134px;
-  object-fit: cover;
+/* 그룹 1: 로고랑 타이틀 */
+.logoTitleGroup {
+  width: 260px;
+  height: 126px;
+  margin-left: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
 }
 
-.emailImage {
-  position: absolute;
-  right: 190px;
-  top: 226px;
+.logoImage {
   width: 80px;
   height: 80px;
   object-fit: cover;
 }
 
-.verifyCard {
-  background: transparent;
-  width: 360px;
-  padding: 0;
-  position: relative;
-  z-index: 1;
-}
-
-.headerSection {
-  margin-bottom: 184px;
-}
-
 .title {
+  width: 260px;
+  height: 31px;
   font-family: 'Pretendard', sans-serif;
   font-weight: 700;
   font-size: 26px;
@@ -58,77 +44,114 @@
   text-align: left;
 }
 
+/* 그룹 2: 이미지와 안내문구 */
+.imageGuideGroup {
+  width: 268px;
+  height: 204px;
+  margin-left: 46px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+.spaceshipImage {
+  width: 268px;
+  height: 134px;
+  object-fit: cover;
+}
+
 .description {
+  width: 220px;
+  height: 38px;
   font-family: 'Pretendard', sans-serif;
   font-weight: 400;
   font-size: 16px;
   line-height: 1.193359375em;
   color: #333333;
   text-align: center;
-  margin: 0 0 40px 0;
+  margin: 0;
 }
 
-.verifyForm {
+/* 그룹 3: 이메일 (입력필드 + 버튼) */
+.emailGroup {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 10px;
 }
 
 .inputGroup {
+  width: 360px;
+  height: 98px;
   display: flex;
   flex-direction: column;
   gap: 5px;
+  position: relative;
 }
 
 .label {
+  width: 56px;
+  height: 19px;
   font-family: 'Pretendard', sans-serif;
   font-weight: 500;
   font-size: 16px;
   line-height: 1.193359375em;
   color: #000000;
-  margin-bottom: 5px;
+  margin: 0;
 }
 
 .input {
-  width: 100%;
+  width: 360px;
   height: 50px;
-  border: none;
+  border: 1px solid #bdbdbd;
   border-radius: 10px;
   padding: 0 20px;
   font-family: 'Pretendard', sans-serif;
   font-weight: 400;
   font-size: 18px;
   line-height: 1.193359375em;
-  color: #ED2040;
+  color: #999999;
   background: #ffffff;
   box-sizing: border-box;
   
   &::placeholder {
-    color: #ED2040;
+    color: #999999;
   }
   
   &:focus {
     outline: none;
-    border: 0.5px solid #ED2040;
+    border: 1px solid #bdbdbd;
   }
 }
 
 .inputError {
-  border: 0.5px solid #ED2040 !important;
+  border: 1px solid #ED2040 !important;
+  color: #ED2040 !important;
+  
+  &::placeholder {
+    color: #ED2040 !important;
+  }
 }
 
 .errorMessage {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 8px;
   margin-top: 7px;
   
   i {
+    width: 12px;
+    height: 16px;
     color: #ED2040;
     font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   span {
+    width: 100%;
     font-family: 'Pretendard', sans-serif;
     font-weight: 400;
     font-size: 14px;
@@ -137,8 +160,15 @@
   }
 }
 
+/* 그룹 4: 가입하기 (버튼) */
+.buttonGroup {
+  width: 360px;
+  height: 50px;
+  display: flex;
+}
+
 .verifyButton {
-  width: 100%;
+  width: 360px;
   height: 50px;
   background-color: #000D1C;
   color: #ffffff;

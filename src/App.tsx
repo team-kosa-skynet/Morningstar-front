@@ -9,6 +9,7 @@ import Navigation from './components/Navigation/Navigation';
 import './styles/global.scss';
 import styles from './App.module.scss';
 import Login from "./pages/Auth/Login/Login.tsx";
+import EmailVerify from "./pages/Auth/EmailVerify/EmailVerify.tsx";
 import CommunityList from "./pages/Community/CommunityList/CommunityList.tsx";
 import CommunityWrite from "./pages/Community/CommunityWrite/CommunityWrite.tsx";
 import CommunityEdit from "./pages/Community/CommunityEdit/CommunityEdit.tsx";
@@ -18,7 +19,7 @@ import { useAuthStore } from './stores/authStore';
 
 function AppContent() {
     const location = useLocation();
-    const hideLayout = location.pathname === '/signup' || location.pathname === '/login';
+    const hideLayout = location.pathname === '/signup' || location.pathname === '/login' || location.pathname === '/email-verify';
 
     return (
         <div className={styles.layoutWrapper}>
@@ -30,6 +31,7 @@ function AppContent() {
                         <Route path="/" element={<Home />} />
                         <Route path="/signup" element={<SignUp />} />
                         <Route path="/login" element={<Login />} />
+                        <Route path="/email-verify" element={<EmailVerify />} />
                         <Route path="/community" element={<CommunityList />} />
                         <Route path="/community/write" element={<CommunityWrite />} />
                         <Route path="/community/edit/:boardId" element={<CommunityEdit />} />

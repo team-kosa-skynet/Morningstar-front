@@ -159,6 +159,28 @@ interface DeleteCommentResponse {
   data: any;
 }
 
+interface SendEmailVerificationRequest {
+  email: string;
+}
+
+interface SendEmailVerificationResponse {
+  code: number;
+  message: string;
+}
+
+interface VerifyEmailRequest {
+  email: string;
+  code: string;
+}
+
+interface VerifyEmailResponse {
+  code: number;
+  message: string;
+  data: {
+    emailVerified: boolean;
+  };
+}
+
 interface CreateBoardRequest {
   title: string;
   content: string;
@@ -421,6 +443,46 @@ export const deleteComment = async (commentId: number, token: string): Promise<D
       {
         headers: {
           Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const sendEmailVerification = async (emailData: SendEmailVerificationRequest): Promise<SendEmailVerificationResponse> => {
+  try {
+    const response = await axios.post<SendEmailVerificationResponse>(
+      `${API_BASE_URL}/email/confirmation`,
+      emailData,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const verifyEmail = async (verifyData: VerifyEmailRequest): Promise<VerifyEmailResponse> => {
+  try {
+    const response = await axios.post<VerifyEmailResponse>(
+      `${API_BASE_URL}/email/verify`,
+      verifyData,
+      {
+        headers: {
+          'Content-Type': 'application/json'
         }
       }
     );
