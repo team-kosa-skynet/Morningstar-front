@@ -11,6 +11,7 @@
   align-items: center;
   margin-bottom: 25px;
   position: relative;
+  justify-content: space-between;
 }
 
 .backButton {
@@ -18,15 +19,12 @@
   border: none;
   cursor: pointer;
   padding: 0;
-  margin-right: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
   
   i {
-    font-size: 24px;
+    font-size: 28px;
     color: #000000;
   }
   
@@ -40,7 +38,7 @@
   font-weight: 500;
   font-size: 18px;
   color: #333333;
-  margin: 0;
+  margin-left: 3px;
 }
 
 .content {
@@ -78,9 +76,9 @@
 
 .checkMessage {
   font-family: 'Pretendard', sans-serif;
-  font-weight: 400;
+  font-weight: 500;
   font-size: 12px;
-  margin-top: 5px;
+  margin-left: 5px;
   
   &.available {
     color: #2ECC71;
@@ -94,7 +92,7 @@
 .buttonSection {
   display: flex;
   gap: 15px;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
 .checkButton,

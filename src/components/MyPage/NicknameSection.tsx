@@ -44,10 +44,10 @@ const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
+        <h2 className={styles.title}>닉네임 설정</h2>
         <button className={styles.backButton} onClick={onBack}>
           <i className="bi bi-arrow-left-short"></i>
         </button>
-        <h2 className={styles.title}>닉네임 설정</h2>
       </div>
 
       <div className={styles.content}>
