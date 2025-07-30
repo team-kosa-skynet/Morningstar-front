@@ -1,13 +1,17 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CommunityWrite.module.scss';
+import { createBoard } from '../../../services/authApi';
+import { useAuthStore } from '../../../stores/authStore';
 
 const CommunityWrite: React.FC = () => {
   const navigate = useNavigate();
+  const { token } = useAuthStore();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCancel = () => {
@@ -16,7 +20,7 @@ const CommunityWrite: React.FC = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!title.trim()) {
       alert('제목을 입력해주세요.');
       return;
@@ -25,14 +29,38 @@ const CommunityWrite: React.FC = () => {
       alert('내용을 입력해주세요.');
       return;
     }
-    
-    // TODO: API 호출하여 글 작성
-    console.log('제목:', title);
-    console.log('내용:', content);
-    console.log('이미지:', uploadedImages);
-    
-    alert('글이 작성되었습니다.');
-    navigate('/community');
+
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await createBoard(
+        {
+          title: title.trim(),
+          content: content.trim(),
+          category: '일반', // 기본 카테고리로 설정
+          imageUrl: uploadedImages // 현재는 base64 이미지, 실제로는 서버 업로드 후 URL을 받아야 함
+        },
+        token
+      );
+      
+      alert('글이 작성되었습니다.');
+      navigate('/community');
+    } catch (error: any) {
+      console.error('게시글 작성 실패:', error);
+      if (error.code === 401) {
+        alert('로그인이 필요합니다.');
+      } else {
+        alert('게시글 작성에 실패했습니다.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleImageClick = () => {
@@ -137,8 +165,16 @@ const CommunityWrite: React.FC = () => {
               <button className={styles.imageBtn} onClick={handleImageClick}>
                 <i className="bi bi-image"></i>
               </button>
-              <button className={styles.submitBtn} onClick={handleSubmit}>
-                <i className="bi bi-vector-pen"></i>
+              <button 
+                className={styles.submitBtn} 
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <span>...</span>
+                ) : (
+                  <i className="bi bi-vector-pen"></i>
+                )}
               </button>
             </div>
 

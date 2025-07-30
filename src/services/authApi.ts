@@ -142,6 +142,27 @@ interface CreateCommentResponse {
   data: CommentItem | null;
 }
 
+interface CreateBoardRequest {
+  title: string;
+  content: string;
+  category: string;
+  imageUrl: string[];
+}
+
+interface CreateBoardResponse {
+  code: number;
+  message: string;
+  data: {
+    boardId: number;
+    title: string;
+    content: string;
+    category: string;
+    writer: string;
+    createdDate: string;
+    imageUrl: string[];
+  } | null;
+}
+
 export const signUp = async (signUpData: SignUpRequest): Promise<SignUpResponse> => {
   try {
     const response = await axios.post<SignUpResponse>(
@@ -236,6 +257,27 @@ export const createComment = async (commentData: CreateCommentRequest, token: st
     const response = await axios.post<CreateCommentResponse>(
       `${API_BASE_URL}/comments`,
       commentData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const createBoard = async (boardData: CreateBoardRequest, token: string): Promise<CreateBoardResponse> => {
+  try {
+    const response = await axios.post<CreateBoardResponse>(
+      `${API_BASE_URL}/boards`,
+      boardData,
       {
         headers: {
           Authorization: `Bearer ${token}`,
