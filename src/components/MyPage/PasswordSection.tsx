@@ -29,19 +29,19 @@ const PasswordSection: React.FC<PasswordSectionProps> = ({ onBack }) => {
       const newRules = validationRules.map(rule => {
         switch (rule.id) {
           case 'complexity':
-            const hasLetter = /[a-zA-Z]/.test(newPassword);
+            { const hasLetter = /[a-zA-Z]/.test(newPassword);
             const hasNumber = /[0-9]/.test(newPassword);
             const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword);
             const complexity = [hasLetter, hasNumber, hasSpecial].filter(Boolean).length;
-            return { ...rule, isValid: complexity >= 2 };
+            return { ...rule, isValid: complexity >= 2 }; }
           
           case 'length':
-            const cleanPassword = newPassword.replace(/\s/g, '');
-            return { ...rule, isValid: cleanPassword.length >= 8 && cleanPassword.length <= 32 };
+            { const cleanPassword = newPassword.replace(/\s/g, '');
+            return { ...rule, isValid: cleanPassword.length >= 8 && cleanPassword.length <= 32 }; }
           
           case 'consecutive':
-            const hasConsecutive = /(.)\1{2,}/.test(newPassword);
-            return { ...rule, isValid: !hasConsecutive };
+            { const hasConsecutive = /(.)\1{2,}/.test(newPassword);
+            return { ...rule, isValid: !hasConsecutive }; }
           
           default:
             return rule;
@@ -61,30 +61,24 @@ const PasswordSection: React.FC<PasswordSectionProps> = ({ onBack }) => {
     if (!currentPassword.trim()) return;
     
     setIsVerifying(true);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('로그인이 필요합니다.');
-        return;
-      }
-
-      // TODO: 실제 현재 비밀번호 확인 API 호출
-      // 현재는 임시로 성공으로 시뮬레이션
-      setTimeout(() => {
-        setIsCurrentPasswordValid(true);
-        setIsVerifying(false);
-        alert('현재 비밀번호가 확인되었습니다.');
-      }, 1000);
-    } catch (error) {
-      console.error('비밀번호 확인 오류:', error);
-      alert('비밀번호 확인 중 오류가 발생했습니다.');
+    // TODO: 현재 비밀번호 확인 API가 나중에 추가될 예정
+    // 현재는 임시로 성공으로 시뮬레이션
+    setTimeout(() => {
+      setIsCurrentPasswordValid(true);
       setIsVerifying(false);
-    }
+      alert('현재 비밀번호가 확인되었습니다.');
+    }, 1000);
   };
 
   const handleSave = async () => {
     const allRulesValid = validationRules.every(rule => rule.isValid);
-    if (!isCurrentPasswordValid || !allRulesValid || !newPassword.trim() || isSaving) return;
+    if (!allRulesValid || !newPassword.trim() || isSaving) return;
+    
+    // 현재 비밀번호가 입력되지 않았을 경우 확인
+    if (!currentPassword.trim()) {
+      alert('현재 비밀번호를 입력해주세요.');
+      return;
+    }
     
     setIsSaving(true);
     try {
@@ -94,7 +88,6 @@ const PasswordSection: React.FC<PasswordSectionProps> = ({ onBack }) => {
         return;
       }
 
-      // TODO: 실제 비밀번호 변경 API 호출
       const response = await fetch('/api/member/password', {
         method: 'PATCH',
         headers: {
@@ -109,6 +102,10 @@ const PasswordSection: React.FC<PasswordSectionProps> = ({ onBack }) => {
 
       if (response.ok) {
         alert('비밀번호가 성공적으로 변경되었습니다.');
+        // 폼 초기화
+        setCurrentPassword('');
+        setNewPassword('');
+        setIsCurrentPasswordValid(false);
         onBack();
       } else {
         const errorData = await response.json();
@@ -190,7 +187,7 @@ const PasswordSection: React.FC<PasswordSectionProps> = ({ onBack }) => {
           <button 
             className={styles.saveButton}
             onClick={handleSave}
-            disabled={!isCurrentPasswordValid || !allRulesValid || !newPassword.trim() || isSaving}
+            disabled={!currentPassword.trim() || !allRulesValid || !newPassword.trim() || isSaving}
           >
             {isSaving ? '저장 중...' : '저장'}
           </button>
