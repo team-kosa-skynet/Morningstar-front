@@ -12,7 +12,12 @@
       "WebFetch(domain:documenter.getpostman.com)",
       "WebFetch(domain:mesonia.tistory.com)",
       "Bash(tskill:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(cat:*)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "mcp__figma__get_figma_data"
     ],
     "deny": []
   }

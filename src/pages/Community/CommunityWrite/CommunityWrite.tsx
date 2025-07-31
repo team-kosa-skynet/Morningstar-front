@@ -6,7 +6,7 @@ import { useAuthStore } from '../../../stores/authStore';
 
 const CommunityWrite: React.FC = () => {
   const navigate = useNavigate();
-  const { token } = useAuthStore();
+  const { token, refreshUserPoint } = useAuthStore();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [showImagePreview, setShowImagePreview] = useState(false);
@@ -70,6 +70,9 @@ const CommunityWrite: React.FC = () => {
         },
         token
       );
+      
+      // 게시글 작성 성공 후 포인트 정보 새로고침
+      await refreshUserPoint();
       
       alert('글이 작성되었습니다.');
       navigate('/community');

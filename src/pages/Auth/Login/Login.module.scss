@@ -54,6 +54,11 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-sm;
+
+  .errorMessage {
+    color: red;
+    margin-left: 5px;
+  }
 }
 
 .inputGroup {

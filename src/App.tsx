@@ -10,6 +10,8 @@ import './styles/global.scss';
 import styles from './App.module.scss';
 import Login from "./pages/Auth/Login/Login.tsx";
 import EmailVerify from "./pages/Auth/EmailVerify/EmailVerify.tsx";
+import FindPassword from "./pages/Auth/FindPassword/FindPassword.tsx";
+import ResetPassword from "./pages/Auth/ResetPassword/ResetPassword.tsx";
 import CommunityList from "./pages/Community/CommunityList/CommunityList.tsx";
 import CommunityWrite from "./pages/Community/CommunityWrite/CommunityWrite.tsx";
 import CommunityEdit from "./pages/Community/CommunityEdit/CommunityEdit.tsx";
@@ -19,7 +21,7 @@ import { useAuthStore } from './stores/authStore';
 
 function AppContent() {
     const location = useLocation();
-    const hideLayout = location.pathname === '/signup' || location.pathname === '/login' || location.pathname === '/email-verify';
+    const hideLayout = location.pathname === '/signup' || location.pathname === '/login' || location.pathname === '/email-verify' || location.pathname === '/find-password' || location.pathname === '/reset-password';
 
     return (
         <div className={styles.layoutWrapper}>
@@ -32,6 +34,8 @@ function AppContent() {
                         <Route path="/signup" element={<SignUp />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/email-verify" element={<EmailVerify />} />
+                        <Route path="/find-password" element={<FindPassword />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
                         <Route path="/community" element={<CommunityList />} />
                         <Route path="/community/write" element={<CommunityWrite />} />
                         <Route path="/community/edit/:boardId" element={<CommunityEdit />} />

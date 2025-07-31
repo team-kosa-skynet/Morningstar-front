@@ -33,7 +33,7 @@ interface CommentItem {
 const CommunityDetail = () => {
   const navigate = useNavigate();
   const { boardId } = useParams<{ boardId: string }>();
-  const { token, user } = useAuthStore();
+  const { token, user, refreshUserPoint } = useAuthStore();
   const [currentPage, setCurrentPage] = useState(1);
   const [commentText, setCommentText] = useState('');
   const [boardDetail, setBoardDetail] = useState<BoardDetail | null>(null);
@@ -289,6 +289,9 @@ const CommunityDetail = () => {
       
       // 게시글 상세 정보 다시 불러오기 (댓글 목록 새로고침)
       await fetchBoardDetail();
+      
+      // 댓글 작성 성공 후 포인트 정보 새로고침
+      await refreshUserPoint();
       
       alert('댓글이 작성되었습니다.');
     } catch (error: any) {
