@@ -36,6 +36,14 @@ interface LoginResponse {
   };
 }
 
+interface UserPointResponse {
+  code: number;
+  message: string;
+  data: {
+    point: number;
+  };
+}
+
 
 interface BoardItem {
   boardId: number;
@@ -237,6 +245,25 @@ export const login = async (loginData: LoginRequest): Promise<LoginResponse> => 
     const response = await axios.post<LoginResponse>(
       '/login',
       loginData
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const getUserPoint = async (token: string): Promise<UserPointResponse> => {
+  try {
+    const response = await axios.get<UserPointResponse>(
+      `${API_BASE_URL}/user/point`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
     );
     return response.data;
   } catch (error) {

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { getUserPoint } from '../services/authApi';
 
 interface User {
   email: string;
@@ -17,7 +18,8 @@ interface AuthState {
   login: (user: User, token: string) => void;
   logout: () => void;
   initializeAuth: () => void;
-  setPoint: (point: number) => void;
+  updateUserPoint: (point: number) => void;
+  refreshUserPoint: () => Promise<void>;
   updateUserName: (newName: string) => void;
 }
 
@@ -71,12 +73,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
 
-  setPoint: (point: number) => {
+  updateUserPoint: (point: number) => {
     const { user } = get();
     if (user) {
       const updatedUser = { ...user, point };
       localStorage.setItem('user', JSON.stringify(updatedUser));
       set({ user: updatedUser });
+    }
+  },
+
+  refreshUserPoint: async () => {
+    const { token } = get();
+    if (!token) return;
+    
+    try {
+      const pointResponse = await getUserPoint(token);
+      const { user } = get();
+      if (user) {
+        const updatedUser = { ...user, point: pointResponse.data.point };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        set({ user: updatedUser });
+      }
+    } catch (error) {
+      console.error('Failed to refresh user point:', error);
     }
   },
 
