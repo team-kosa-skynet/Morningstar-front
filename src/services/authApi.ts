@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://gaebang.site/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL.trim() !== '' 
+  ? import.meta.env.VITE_API_BASE_URL 
+  : 'https://gaebang.site/api';
+
+console.log('Environment VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
+console.log('Final API_BASE_URL:', API_BASE_URL);
 
 interface SignUpRequest {
   email: string;
@@ -258,7 +263,7 @@ export const signUp = async (signUpData: SignUpRequest): Promise<SignUpResponse>
 
 export const login = async (loginData: LoginRequest): Promise<LoginResponse> => {
   try {
-    const LOGIN_URL = import.meta.env.VITE_API_BASE_URL ? `${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/login` : 'https://gaebang.site/login';
+    const LOGIN_URL = API_BASE_URL.replace('/api', '') + '/login';
     const response = await axios.post<LoginResponse>(
       LOGIN_URL,
       loginData
@@ -274,7 +279,7 @@ export const login = async (loginData: LoginRequest): Promise<LoginResponse> => 
 
 export const getUserPoint = async (token: string): Promise<UserPointResponse> => {
   try {
-    const POINT_URL = import.meta.env.VITE_API_BASE_URL ? `${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/user/point` : 'https://gaebang.site/user/point';
+    const POINT_URL = API_BASE_URL.replace('/api', '') + '/user/point';
     const response = await axios.get<UserPointResponse>(
       POINT_URL,
       {
