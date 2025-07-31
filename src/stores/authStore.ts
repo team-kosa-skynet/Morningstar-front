@@ -142,7 +142,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return;
     }
 
-    const today = new Date().toDateString();
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식
     
     // 오늘 이미 출석체크를 했는지 확인
     if (lastAttendanceCheck === today) {

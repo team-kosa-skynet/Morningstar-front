@@ -1,11 +1,22 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL.trim() !== '' 
-  ? import.meta.env.VITE_API_BASE_URL 
-  : 'https://gaebang.site/api';
+// 현재 도메인에 맞춰 API URL 설정 (www 유무 자동 매칭)
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL.trim() !== '') {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  
+  // 프로덕션 환경에서 현재 도메인과 동일한 형식 사용
+  if (typeof window !== 'undefined' && window.location.hostname.includes('gaebang.site')) {
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname; // www.gaebang.site 또는 gaebang.site
+    return `${protocol}//${hostname}/api`;
+  }
+  
+  return 'https://gaebang.site/api';
+};
 
-console.log('Environment VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
-console.log('Final API_BASE_URL:', API_BASE_URL);
+const API_BASE_URL = getApiBaseUrl();
 
 interface SignUpRequest {
   email: string;
@@ -263,9 +274,8 @@ export const signUp = async (signUpData: SignUpRequest): Promise<SignUpResponse>
 
 export const login = async (loginData: LoginRequest): Promise<LoginResponse> => {
   try {
-    const LOGIN_URL = API_BASE_URL.replace('/api', '') + '/login';
     const response = await axios.post<LoginResponse>(
-      LOGIN_URL,
+      API_BASE_URL.replace('/api', '') + '/login',
       loginData
     );
     return response.data;
@@ -279,9 +289,8 @@ export const login = async (loginData: LoginRequest): Promise<LoginResponse> => 
 
 export const getUserPoint = async (token: string): Promise<UserPointResponse> => {
   try {
-    const POINT_URL = API_BASE_URL.replace('/api', '') + '/user/point';
     const response = await axios.get<UserPointResponse>(
-      POINT_URL,
+      API_BASE_URL.replace('/api', '') + '/user/point',
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -405,7 +414,7 @@ export const uploadImage = async (imageFile: File, token: string): Promise<strin
     formData.append('image', imageFile);
 
     const response = await axios.post<string>(
-      '/api/s3/upload',
+      `${API_BASE_URL}/s3/upload`,
       formData,
       {
         headers: {
