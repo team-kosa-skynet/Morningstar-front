@@ -1,22 +1,29 @@
 import axios from 'axios';
 
-// 현재 도메인에 맞춰 API URL 설정 (www 유무 자동 매칭)
-const getApiBaseUrl = () => {
-  if (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL.trim() !== '') {
-    return import.meta.env.VITE_API_BASE_URL;
+// API Base URL 설정
+const API_BASE_URL = (() => {
+  // 디버깅을 위한 상세 로그
+  console.log('=== MORNINGSTAR API CONFIG ===');
+  console.log('Build Version: 2025-01-31-v2'); // 빌드할 때마다 버전 변경
+  console.log('Environment VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
+  console.log('Current Domain:', typeof window !== 'undefined' ? window.location.hostname : 'SSR');
+  console.log('Current Protocol:', typeof window !== 'undefined' ? window.location.protocol : 'SSR');
+  
+  // 환경변수가 설정되어 있고 빈 문자열이 아닌 경우 사용
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (envUrl && envUrl.trim() !== '') {
+    console.log('Using environment URL:', envUrl);
+    console.log('==============================');
+    return envUrl;
   }
   
-  // 프로덕션 환경에서 현재 도메인과 동일한 형식 사용
-  if (typeof window !== 'undefined' && window.location.hostname.includes('gaebang.site')) {
-    const protocol = window.location.protocol;
-    const hostname = window.location.hostname; // www.gaebang.site 또는 gaebang.site
-    return `${protocol}//${hostname}/api`;
-  }
-  
-  return 'https://gaebang.site/api';
-};
-
-const API_BASE_URL = getApiBaseUrl();
+  // 프로덕션 환경에서는 항상 https://www.gaebang.site/api 사용
+  // (백엔드에서 www 없는 도메인도 CORS 허용해야 함)
+  const defaultUrl = 'https://www.gaebang.site/api';
+  console.log('Using default URL:', defaultUrl);
+  console.log('==============================');
+  return defaultUrl;
+})();
 
 interface SignUpRequest {
   email: string;
@@ -274,8 +281,10 @@ export const signUp = async (signUpData: SignUpRequest): Promise<SignUpResponse>
 
 export const login = async (loginData: LoginRequest): Promise<LoginResponse> => {
   try {
+    const loginUrl = API_BASE_URL.replace('/api', '') + '/login';
+    console.log('[login] Calling API:', loginUrl);
     const response = await axios.post<LoginResponse>(
-      API_BASE_URL.replace('/api', '') + '/login',
+      loginUrl,
       loginData
     );
     return response.data;
@@ -333,8 +342,12 @@ export const getBoards = async (page: number = 0, size: number = 10, sort: strin
       headers.Authorization = `Bearer ${token}`;
     }
     
+    const boardsUrl = `${API_BASE_URL}/boards?page=${page}&size=${size}&sort=${sort}`;
+    console.log('[getBoards] Calling API:', boardsUrl);
+    console.log('[getBoards] Using API_BASE_URL:', API_BASE_URL);
+    
     const response = await axios.get<BoardsResponse>(
-      `${API_BASE_URL}/boards?page=${page}&size=${size}&sort=${sort}`,
+      boardsUrl,
       token ? { headers } : undefined
     );
     return response.data;
@@ -553,8 +566,10 @@ export const verifyEmail = async (verifyData: VerifyEmailRequest): Promise<Verif
 
 export const markAttendance = async (token: string): Promise<AttendanceResponse> => {
   try {
+    const attendanceUrl = `${API_BASE_URL}/attendance`;
+    console.log('[markAttendance] Calling API:', attendanceUrl);
     const response = await axios.post<AttendanceResponse>(
-      `${API_BASE_URL}/attendance`,
+      attendanceUrl,
       {},
       {
         headers: {
