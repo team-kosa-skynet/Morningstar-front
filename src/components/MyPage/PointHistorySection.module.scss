@@ -1,0 +1,136 @@
+.container {
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 15px;
+  margin-bottom: 10px;
+  padding: 25px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+  justify-content: space-between;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  i {
+    font-size: 28px;
+    color: #000000;
+  }
+  
+  &:hover i {
+    color: #333333;
+  }
+}
+
+.title {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  color: #333333;
+  margin-left: 3px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+}
+
+.transactionList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.transactionItem {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 11px 4px;
+  border-bottom: 1px solid #dddddd;
+  height: 40px;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.transactionType {
+  width: 120px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: #000000;
+  text-align: left;
+}
+
+.transactionBalance {
+  width: 130px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: #000000;
+  text-align: left;
+}
+
+.transactionAmount {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  text-align: left;
+  width: 80px;
+  
+  &.positive {
+    color: #008000;
+  }
+  
+  &.negative {
+    color: #FF0000;
+  }
+}
+
+.transactionDate {
+  width: 84px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  color: #777777;
+  text-align: left;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+  
+  .transactionItem {
+    flex-direction: column;
+    align-items: flex-start;
+    height: auto;
+    padding: 15px 20px;
+    gap: 8px;
+  }
+  
+  .transactionType,
+  .transactionAmount,
+  .transactionBalance,
+  .transactionDate {
+    flex: none;
+    text-align: left;
+    width: 100%;
+  }
+  
+  .transactionDate {
+    font-size: 11px;
+  }
+}

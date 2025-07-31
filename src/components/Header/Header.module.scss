@@ -11,7 +11,7 @@
     .headerContainer {
       max-width: 1440px;
       margin: 0 auto;
-      padding: 20px 48px 14px 30px;
+      padding: 20px 30px 14px 30px;
       height: 100%;
       display: flex;
       align-items: center;
@@ -53,11 +53,12 @@
         }
       }
       
-      .authSection {
+      .rightSection {
         display: flex;
         align-items: center;
-        gap: 22px;
+        gap: 32px;
         
+        // 로그인 전 상태
         .loginText,
         .signupText {
           font-family: $font-family-base;
@@ -71,6 +72,59 @@
             opacity: 0.7;
           }
         }
+        
+        // 로그인 후 상태
+        .userInfo {
+          display: flex;
+          align-items: center;
+          gap: 32px;
+          margin-right: 26px;
+          
+          .userProfile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            
+            &:hover {
+              opacity: 0.9;
+            }
+            
+            .levelIcon {
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              overflow: hidden;
+              
+              img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+              }
+            }
+            
+            .userName {
+              font-family: $font-family-base;
+              font-weight: 600;
+              font-size: 18px;
+              line-height: 1.193359375em;
+              color: #000D1C;
+            }
+          }
+          
+          .pointText {
+            font-family: $font-family-base;
+            font-weight: 600;
+            font-size: 18px;
+            line-height: 1.193359375em;
+            color: #000D1C;
+          }
+          
+          .pointValue {
+            color: #4E4EFF;
+          }
+        }
+        
       }
     }
   }
@@ -117,13 +171,32 @@
           }
         }
         
-        .authSection {
-          gap: 24px;
+        .rightSection {
+          gap: 16px;
+          flex-direction: column;
           
           .loginText,
           .signupText {
             font-size: 18px;
           }
+          
+          .userInfo {
+            gap: 16px;
+            flex-direction: column;
+            
+            .userProfile {
+              gap: 6px;
+              
+              .userName {
+                font-size: 18px;
+              }
+            }
+            
+            .pointText {
+              font-size: 18px;
+            }
+          }
+          
         }
       }
     }

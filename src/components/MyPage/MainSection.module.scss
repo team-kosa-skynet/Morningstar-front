@@ -1,0 +1,37 @@
+.accountSection,
+.communitySection {
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 15px;
+  margin-bottom: 10px;
+  padding: 20px 21px 10px;
+}
+
+.sectionTitle {
+  font-family: 'Spoqa Han Sans Neo', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  color: #333333;
+  margin-bottom: 20px;
+}
+
+.menuItem {
+  background: #ffffff;
+  border: none;
+  padding: 8px 0;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  span {
+    font-family: 'Spoqa Han Sans Neo', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    color: #333333;
+  }
+}

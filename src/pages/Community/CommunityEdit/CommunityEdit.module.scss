@@ -1,6 +1,6 @@
 @import '../../../styles/variables';
 
-.communityWrite {
+.communityEdit {
   background-color: $bg-white;
 
   .container {
@@ -11,6 +11,15 @@
   .inner {
     max-width: 930px;
     margin: 0 auto;
+  }
+
+  .loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    font-size: $font-size-lg;
+    color: $text-gray;
   }
 
   .writeHeader {

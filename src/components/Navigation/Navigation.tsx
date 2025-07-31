@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styles from './Navigation.module.scss';
+import {useNavigate} from "react-router-dom";
 
 const Navigation: React.FC = () => {
   const [activeItem, setActiveItem] = useState('프롬프트 가이드');
@@ -18,9 +19,14 @@ const Navigation: React.FC = () => {
     '커뮤니티'
   ];
 
+  const navigate = useNavigate();
+
   const handleItemClick = (item: string) => {
     if (item !== 'divider') {
       setActiveItem(item);
+    }
+    if (item === '커뮤니티') {
+      navigate('/community');
     }
   };
 

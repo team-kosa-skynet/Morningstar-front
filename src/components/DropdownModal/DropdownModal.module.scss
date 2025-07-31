@@ -1,0 +1,56 @@
+// 배경 클릭 감지용 투명 레이어
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  background: transparent;
+}
+
+// 모달 컨테이너
+.modal {
+  position: fixed;
+  z-index: 1000;
+  background: #ffffff;
+  border: 1px solid #999999;
+  border-radius: 10px;
+  padding: 10px;
+  min-width: 65px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  
+  // 위치 조정 (3dots 버튼 아래에 나타나도록)
+  transform: translateX(-90%);
+}
+
+// 메뉴 아이템
+.menuItem {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  color: #555555;
+  text-align: center;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: #000000;
+  }
+  
+  &:focus {
+    outline: none;
+  }
+}
+
+// 구분선
+.divider {
+  width: 45px;
+  height: 1px;
+  background: #555555;
+  margin: 8px auto;
+}
