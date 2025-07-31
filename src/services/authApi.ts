@@ -1,29 +1,6 @@
 import axios from 'axios';
 
-// API Base URL 설정
-const API_BASE_URL = (() => {
-  // 디버깅을 위한 상세 로그
-  console.log('=== MORNINGSTAR API CONFIG ===');
-  console.log('Build Version: 2025-01-31-v2'); // 빌드할 때마다 버전 변경
-  console.log('Environment VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
-  console.log('Current Domain:', typeof window !== 'undefined' ? window.location.hostname : 'SSR');
-  console.log('Current Protocol:', typeof window !== 'undefined' ? window.location.protocol : 'SSR');
-  
-  // 환경변수가 설정되어 있고 빈 문자열이 아닌 경우 사용
-  const envUrl = import.meta.env.VITE_API_BASE_URL;
-  if (envUrl && envUrl.trim() !== '') {
-    console.log('Using environment URL:', envUrl);
-    console.log('==============================');
-    return envUrl;
-  }
-  
-  // 프로덕션 환경에서는 항상 https://www.gaebang.site/api 사용
-  // (백엔드에서 www 없는 도메인도 CORS 허용해야 함)
-  const defaultUrl = 'https://www.gaebang.site/api';
-  console.log('Using default URL:', defaultUrl);
-  console.log('==============================');
-  return defaultUrl;
-})();
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://www.gaebang.site/api';
 
 interface SignUpRequest {
   email: string;
