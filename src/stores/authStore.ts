@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getUserPoint } from '../services/authApi';
+import { getMemberInfo } from '../services/authApi';
 
 interface User {
   email: string;
@@ -85,28 +85,37 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   refreshUserPoint: async () => {
     const { token } = get();
     if (!token) {
-      console.log('토큰이 없어서 포인트 새로고침을 건너뜁니다.');
+      console.log('토큰이 없어서 멤버 정보 새로고침을 건너뜁니다.');
       return;
     }
     
     try {
-      console.log('포인트 새로고침 API 호출 시작...');
-      const pointResponse = await getUserPoint(token);
-      console.log('포인트 API 응답:', pointResponse);
+      console.log('멤버 정보 새로고침 API 호출 시작...');
+      const memberInfoResponse = await getMemberInfo(token);
+      console.log('멤버 정보 API 응답:', memberInfoResponse);
       
       const { user } = get();
       if (user) {
         const oldPoint = user.point;
-        const newPoint = pointResponse.data.point;
-        const updatedUser = { ...user, point: newPoint };
+        const oldLevel = user.level;
+        const newPoint = memberInfoResponse.data.point;
+        const newLevel = memberInfoResponse.data.level;
+        
+        const updatedUser = { 
+          ...user, 
+          point: newPoint, 
+          level: newLevel,
+          name: memberInfoResponse.data.nickname // 닉네임도 함께 업데이트
+        };
         
         localStorage.setItem('user', JSON.stringify(updatedUser));
         set({ user: updatedUser });
         
         console.log(`포인트 업데이트: ${oldPoint} → ${newPoint}`);
+        console.log(`레벨 업데이트: ${oldLevel} → ${newLevel}`);
       }
     } catch (error) {
-      console.error('포인트 새로고침 실패:', error);
+      console.error('멤버 정보 새로고침 실패:', error);
     }
   },
 

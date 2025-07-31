@@ -44,6 +44,17 @@ interface UserPointResponse {
   };
 }
 
+interface MemberInfoResponse {
+  code: number;
+  message: string;
+  data: {
+    email: string;
+    nickname: string;
+    point: number;
+    level: number;
+  };
+}
+
 
 interface BoardItem {
   boardId: number;
@@ -252,6 +263,25 @@ export const getUserPoint = async (token: string): Promise<UserPointResponse> =>
   try {
     const response = await axios.get<UserPointResponse>(
       `/user/point`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const getMemberInfo = async (token: string): Promise<MemberInfoResponse> => {
+  try {
+    const response = await axios.get<MemberInfoResponse>(
+      `${API_BASE_URL}/member/info`,
       {
         headers: {
           Authorization: `Bearer ${token}`
