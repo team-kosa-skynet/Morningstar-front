@@ -9,6 +9,10 @@ const ProfileSection: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
 
+  // 디버깅을 위한 로그
+  console.log('ProfileSection - user:', user);
+  console.log('ProfileSection - user.point:', user?.point);
+
   const handleLogout = () => {
     logout();
     navigate('/');

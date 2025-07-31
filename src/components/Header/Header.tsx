@@ -9,6 +9,11 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const { isLoggedIn, user } = useAuthStore();
 
+  // 디버깅을 위한 로그
+  console.log('Header - isLoggedIn:', isLoggedIn);
+  console.log('Header - user:', user);
+  console.log('Header - user.point:', user?.point);
+
   const handleLogoClick = () => {
     navigate('/');
   };
