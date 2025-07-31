@@ -16,7 +16,7 @@ interface AuthState {
   isAuthInitialized: boolean;
   login: (user: User, token: string) => void;
   logout: () => void;
-  initializeAuth: () => Promise<void>;
+  initializeAuth: () => void;
   setPoint: (point: number) => void;
   updateUserName: (newName: string) => void;
 }
