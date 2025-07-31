@@ -4,26 +4,47 @@ import styles from './FindPassword.module.scss';
 import logo from '../../../assets/images/logo.png';
 
 const FindPassword: React.FC = () => {
-  useNavigate();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
+    if (errorMessage) {
+      setErrorMessage('');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email) {
+    if (!email.trim()) {
+      setErrorMessage('이메일을 입력해주세요');
       return;
     }
 
     setIsLoading(true);
+    setErrorMessage('');
     
     try {
-      // API 호출은 나중에 구현
-      console.log('비밀번호 재설정 코드 전송:', email);
+      const response = await fetch('https://gaebang.site/api/email/confirmation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || '이메일 전송에 실패했습니다');
+      }
+
+      const data = await response.json();
+      console.log('이메일 전송 성공:', data);
       
       // 성공 후 이메일 인증 페이지로 이동
       navigate('/email-verify?type=reset-password', {
@@ -33,8 +54,9 @@ const FindPassword: React.FC = () => {
         }
       });
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('비밀번호 찾기 실패:', error);
+      setErrorMessage(error.message || '이메일 전송에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsLoading(false);
     }
@@ -68,9 +90,15 @@ const FindPassword: React.FC = () => {
               value={email}
               onChange={handleEmailChange}
               placeholder="example@email.com"
-              className={styles.emailInput}
+              className={`${styles.emailInput} ${errorMessage ? styles.inputError : ''}`}
               required
             />
+            {errorMessage && (
+              <div className={styles.errorMessage}>
+                <i className="bi bi-x-lg"></i>
+                <span>{errorMessage}</span>
+              </div>
+            )}
           </div>
 
           <button 

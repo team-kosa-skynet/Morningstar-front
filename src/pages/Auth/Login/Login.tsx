@@ -121,7 +121,7 @@ const Login: React.FC = () => {
             className={styles.linkButton}
             onClick={() => navigate('/find-password')}
           >
-            아이디/비밀번호 찾기
+            비밀번호 찾기
           </button>
         </div>
 

@@ -113,10 +113,7 @@ const EmailVerify: React.FC = () => {
         <div className={styles.logoTitleGroup}>
           <img src={spaceship} alt="로고" className={styles.logoImage} />
           <h1 className={styles.title}>
-            {finalType === 'reset-password' 
-              ? '비밀번호 재설정 코드를 보내드렸어요' 
-              : '인증 메일을 보내드렸어요'
-            }
+            인증 메일을 보내드렸어요
           </h1>
         </div>
 
