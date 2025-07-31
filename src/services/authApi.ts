@@ -44,6 +44,17 @@ interface UserPointResponse {
   };
 }
 
+interface MemberInfoResponse {
+  code: number;
+  message: string;
+  data: {
+    email: string;
+    nickname: string;
+    point: number;
+    level: number;
+  };
+}
+
 
 interface BoardItem {
   boardId: number;
@@ -150,13 +161,6 @@ interface UpdateCommentRequest {
   boardId: string;
   content: string;
 }
-
-interface UpdateCommentResponse {
-  code: number;
-  message: string;
-  data: any;
-}
-
 interface DeleteCommentResponse {
   code: number;
   message: string;
@@ -258,7 +262,26 @@ export const login = async (loginData: LoginRequest): Promise<LoginResponse> => 
 export const getUserPoint = async (token: string): Promise<UserPointResponse> => {
   try {
     const response = await axios.get<UserPointResponse>(
-      `${API_BASE_URL}/user/point`,
+      `/user/point`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const getMemberInfo = async (token: string): Promise<MemberInfoResponse> => {
+  try {
+    const response = await axios.get<MemberInfoResponse>(
+      `${API_BASE_URL}/member/info`,
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -363,7 +386,7 @@ export const uploadImage = async (imageFile: File, token: string): Promise<strin
     formData.append('image', imageFile);
 
     const response = await axios.post<string>(
-      '/s3/upload',
+      '/api/s3/upload',
       formData,
       {
         headers: {
