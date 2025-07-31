@@ -25,7 +25,13 @@ const FindPassword: React.FC = () => {
       // API 호출은 나중에 구현
       console.log('비밀번호 재설정 코드 전송:', email);
       
-      // 성공 후 처리 (예: 이메일 인증 페이지로 이동 등)
+      // 성공 후 이메일 인증 페이지로 이동
+      navigate('/email-verify?type=reset-password', {
+        state: {
+          email: email,
+          type: 'reset-password'
+        }
+      });
       
     } catch (error) {
       console.error('비밀번호 찾기 실패:', error);
