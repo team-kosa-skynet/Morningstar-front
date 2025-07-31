@@ -54,10 +54,19 @@ function AppContent() {
 function App() {
     const initializeAuth = useAuthStore((state) => state.initializeAuth);
     const isAuthInitialized = useAuthStore((state) => state.isAuthInitialized);
+    const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+    const checkDailyAttendance = useAuthStore((state) => state.checkDailyAttendance);
 
     useEffect(() => {
         initializeAuth();
     }, [initializeAuth]);
+
+    // 인증 초기화 완료 후 로그인된 사용자의 경우 출석 체크
+    useEffect(() => {
+        if (isAuthInitialized && isLoggedIn) {
+            checkDailyAttendance();
+        }
+    }, [isAuthInitialized, isLoggedIn, checkDailyAttendance]);
 
     // 인증 초기화가 완료되지 않았으면 로딩 화면 표시
     if (!isAuthInitialized) {

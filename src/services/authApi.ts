@@ -189,6 +189,18 @@ interface VerifyEmailResponse {
   };
 }
 
+interface AttendanceResponse {
+  code: number;
+  message: string;
+  data: {
+    attendanceId: number;
+    memberId: number;
+    attendanceDate: string;
+    isNewAttendance: boolean;
+    pointsEarned: number;
+  };
+}
+
 interface CreateBoardRequest {
   title: string;
   content: string;
@@ -511,6 +523,26 @@ export const verifyEmail = async (verifyData: VerifyEmailRequest): Promise<Verif
       {
         headers: {
           'Content-Type': 'application/json'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const markAttendance = async (token: string): Promise<AttendanceResponse> => {
+  try {
+    const response = await axios.post<AttendanceResponse>(
+      `${API_BASE_URL}/attendance`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
       }
     );

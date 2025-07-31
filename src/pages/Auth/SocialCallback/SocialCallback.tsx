@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../stores/authStore';
+import { markAttendance } from '../../../services/authApi';
 import styles from './SocialCallback.module.scss';
 
 const SocialCallback: React.FC = () => {
@@ -35,6 +36,18 @@ const SocialCallback: React.FC = () => {
         };
 
         login(user, token);
+
+        // 출석 API 호출
+        try {
+          const attendanceResponse = await markAttendance(token);
+          console.log('출석 체크 결과:', attendanceResponse);
+          
+          if (attendanceResponse.data.isNewAttendance && attendanceResponse.data.pointsEarned > 0) {
+            console.log(`출석 완료! ${attendanceResponse.data.pointsEarned}포인트 획득`);
+          }
+        } catch (attendanceError) {
+          console.error('출석 체크 실패:', attendanceError);
+        }
 
         setTimeout(() => {
           navigate('/', { replace: true });

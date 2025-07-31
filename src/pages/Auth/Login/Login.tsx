@@ -4,7 +4,7 @@ import styles from './Login.module.scss';
 import logo from '../../../assets/images/logo.png';
 import googleIcon from '../../../assets/icons/google.svg';
 import kakaoIcon from '../../../assets/icons/kakao.svg';
-import { login } from '../../../services/authApi';
+import { login, markAttendance } from '../../../services/authApi';
 import { useAuthStore } from '../../../stores/authStore';
 
 const Login: React.FC = () => {
@@ -49,6 +49,18 @@ const Login: React.FC = () => {
         point: response.data.point,
         level: response.data.level
       }, response.data.token);
+
+      // 출석 API 호출
+      try {
+        const attendanceResponse = await markAttendance(response.data.token);
+        console.log('출석 체크 결과:', attendanceResponse);
+        
+        if (attendanceResponse.data.isNewAttendance && attendanceResponse.data.pointsEarned > 0) {
+          console.log(`출석 완료! ${attendanceResponse.data.pointsEarned}포인트 획득`);
+        }
+      } catch (attendanceError) {
+        console.error('출석 체크 실패:', attendanceError);
+      }
 
       // 루트로 리다이렉트
       navigate('/');

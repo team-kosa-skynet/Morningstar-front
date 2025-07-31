@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getMemberInfo } from '../services/authApi';
+import { getMemberInfo, markAttendance } from '../services/authApi';
 
 interface User {
   email: string;
@@ -15,12 +15,14 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isAuthInitialized: boolean;
+  lastAttendanceCheck: string | null;
   login: (user: User, token: string) => void;
   logout: () => void;
   initializeAuth: () => void;
   updateUserPoint: (point: number) => void;
   refreshUserPoint: () => Promise<void>;
   updateUserName: (newName: string) => void;
+  checkDailyAttendance: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -28,6 +30,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   token: null,
   isAuthInitialized: false,
+  lastAttendanceCheck: null,
 
   login: (user: User, token: string) => {
     localStorage.setItem('token', token);
@@ -42,16 +45,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('lastAttendanceCheck');
     set({
       isLoggedIn: false,
       user: null,
       token: null,
+      lastAttendanceCheck: null,
     });
   },
 
   initializeAuth: () => {
     const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
+    const lastAttendanceCheck = localStorage.getItem('lastAttendanceCheck');
     
     if (token && userStr) {
       try {
@@ -60,11 +66,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           isLoggedIn: true,
           user,
           token,
+          lastAttendanceCheck,
         });
       } catch (error) {
         console.error('Failed to parse user data:', error);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('lastAttendanceCheck');
       }
     }
     
@@ -125,6 +133,45 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const updatedUser = { ...user, name: newName };
       localStorage.setItem('user', JSON.stringify(updatedUser));
       set({ user: updatedUser });
+    }
+  },
+
+  checkDailyAttendance: async () => {
+    const { token, lastAttendanceCheck } = get();
+    if (!token) {
+      return;
+    }
+
+    const today = new Date().toDateString();
+    
+    // 오늘 이미 출석체크를 했는지 확인
+    if (lastAttendanceCheck === today) {
+      console.log('오늘은 이미 출석체크를 완료했습니다.');
+      return;
+    }
+
+    try {
+      console.log('일일 출석 체크 시도...');
+      const attendanceResponse = await markAttendance(token);
+      console.log('출석 체크 결과:', attendanceResponse);
+      
+      // 출석체크 날짜 저장
+      localStorage.setItem('lastAttendanceCheck', today);
+      set({ lastAttendanceCheck: today });
+      
+      if (attendanceResponse.data.isNewAttendance && attendanceResponse.data.pointsEarned > 0) {
+        console.log(`출석 완료! ${attendanceResponse.data.pointsEarned}포인트 획득`);
+        
+        // 포인트 업데이트
+        const { user } = get();
+        if (user) {
+          const updatedUser = { ...user, point: user.point + attendanceResponse.data.pointsEarned };
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          set({ user: updatedUser });
+        }
+      }
+    } catch (error) {
+      console.error('일일 출석 체크 실패:', error);
     }
   },
 }));
