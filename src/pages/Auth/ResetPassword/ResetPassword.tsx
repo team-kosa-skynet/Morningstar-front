@@ -21,7 +21,7 @@ interface FormValidation {
 }
 
 const ResetPassword: React.FC = () => {
-  const navigate = useNavigate();
+  useNavigate();
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: ''
