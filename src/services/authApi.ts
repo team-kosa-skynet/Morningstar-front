@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://gaebang.site/api';
 
 interface SignUpRequest {
   email: string;
@@ -189,6 +189,18 @@ interface VerifyEmailResponse {
   };
 }
 
+interface AttendanceResponse {
+  code: number;
+  message: string;
+  data: {
+    attendanceId: number;
+    memberId: number;
+    attendanceDate: string;
+    isNewAttendance: boolean;
+    pointsEarned: number;
+  };
+}
+
 interface CreateBoardRequest {
   title: string;
   content: string;
@@ -246,8 +258,9 @@ export const signUp = async (signUpData: SignUpRequest): Promise<SignUpResponse>
 
 export const login = async (loginData: LoginRequest): Promise<LoginResponse> => {
   try {
+    const LOGIN_URL = import.meta.env.VITE_API_BASE_URL ? `${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/login` : 'https://gaebang.site/login';
     const response = await axios.post<LoginResponse>(
-      '/login',
+      LOGIN_URL,
       loginData
     );
     return response.data;
@@ -261,8 +274,9 @@ export const login = async (loginData: LoginRequest): Promise<LoginResponse> => 
 
 export const getUserPoint = async (token: string): Promise<UserPointResponse> => {
   try {
+    const POINT_URL = import.meta.env.VITE_API_BASE_URL ? `${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/user/point` : 'https://gaebang.site/user/point';
     const response = await axios.get<UserPointResponse>(
-      `/user/point`,
+      POINT_URL,
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -511,6 +525,26 @@ export const verifyEmail = async (verifyData: VerifyEmailRequest): Promise<Verif
       {
         headers: {
           'Content-Type': 'application/json'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const markAttendance = async (token: string): Promise<AttendanceResponse> => {
+  try {
+    const response = await axios.post<AttendanceResponse>(
+      `${API_BASE_URL}/attendance`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
       }
     );
