@@ -156,8 +156,13 @@ const SignUp: React.FC = () => {
   };
 
   const handleSocialLogin = (provider: 'kakao' | 'google') => {
-    console.log(`${provider} 로그인`);
-    // 소셜 로그인 처리
+    if (provider === 'google') {
+      // 로컬 개발: http://localhost:8080/oauth2/authorization/google
+      // 배포 환경: https://gaebang.site/oauth2/authorization/google
+      window.location.href = 'https://gaebang.site/oauth2/authorization/google';
+    } else {
+      console.log(`${provider} 로그인`);
+    }
   };
 
   return (

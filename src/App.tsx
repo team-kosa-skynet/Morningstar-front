@@ -12,6 +12,7 @@ import Login from "./pages/Auth/Login/Login.tsx";
 import EmailVerify from "./pages/Auth/EmailVerify/EmailVerify.tsx";
 import FindPassword from "./pages/Auth/FindPassword/FindPassword.tsx";
 import ResetPassword from "./pages/Auth/ResetPassword/ResetPassword.tsx";
+import SocialCallback from "./pages/Auth/SocialCallback/SocialCallback.tsx";
 import CommunityList from "./pages/Community/CommunityList/CommunityList.tsx";
 import CommunityWrite from "./pages/Community/CommunityWrite/CommunityWrite.tsx";
 import CommunityEdit from "./pages/Community/CommunityEdit/CommunityEdit.tsx";
@@ -21,7 +22,7 @@ import { useAuthStore } from './stores/authStore';
 
 function AppContent() {
     const location = useLocation();
-    const hideLayout = location.pathname === '/signup' || location.pathname === '/login' || location.pathname === '/email-verify' || location.pathname === '/find-password' || location.pathname === '/reset-password';
+    const hideLayout = location.pathname === '/signup' || location.pathname === '/login' || location.pathname === '/email-verify' || location.pathname === '/find-password' || location.pathname === '/reset-password' || location.pathname === '/auth/social';
 
     return (
         <div className={styles.layoutWrapper}>
@@ -36,6 +37,7 @@ function AppContent() {
                         <Route path="/email-verify" element={<EmailVerify />} />
                         <Route path="/find-password" element={<FindPassword />} />
                         <Route path="/reset-password" element={<ResetPassword />} />
+                        <Route path="/auth/social" element={<SocialCallback />} />
                         <Route path="/community" element={<CommunityList />} />
                         <Route path="/community/write" element={<CommunityWrite />} />
                         <Route path="/community/edit/:boardId" element={<CommunityEdit />} />
@@ -52,10 +54,19 @@ function AppContent() {
 function App() {
     const initializeAuth = useAuthStore((state) => state.initializeAuth);
     const isAuthInitialized = useAuthStore((state) => state.isAuthInitialized);
+    const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+    const checkDailyAttendance = useAuthStore((state) => state.checkDailyAttendance);
 
     useEffect(() => {
         initializeAuth();
     }, [initializeAuth]);
+
+    // 인증 초기화 완료 후 로그인된 사용자의 경우 출석 체크
+    useEffect(() => {
+        if (isAuthInitialized && isLoggedIn) {
+            checkDailyAttendance();
+        }
+    }, [isAuthInitialized, isLoggedIn, checkDailyAttendance]);
 
     // 인증 초기화가 완료되지 않았으면 로딩 화면 표시
     if (!isAuthInitialized) {

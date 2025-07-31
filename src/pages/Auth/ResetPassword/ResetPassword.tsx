@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './ResetPassword.module.scss';
 import logo from '../../../assets/images/logo.png';
 
@@ -21,7 +21,9 @@ interface FormValidation {
 }
 
 const ResetPassword: React.FC = () => {
-  useNavigate();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { email: userEmail } = location.state || {};
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: ''
@@ -116,16 +118,54 @@ const ResetPassword: React.FC = () => {
       return;
     }
 
+    if (!userEmail) {
+      alert('사용자 이메일 정보가 없습니다.');
+      return;
+    }
+
     setIsLoading(true);
     
     try {
-      // API 호출은 나중에 구현
-      console.log('비밀번호 재설정:', formData.password);
-      
-      // 성공 후 처리 (예: 로그인 페이지로 이동)
+      // 1. 이메일로 userId 조회
+      const userIdResponse = await fetch(`https://gaebang.site/api/member/id?email=${userEmail}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!userIdResponse.ok) {
+        const errorData = await userIdResponse.json();
+        alert(errorData.message || '사용자 정보를 찾을 수 없습니다.');
+        return;
+      }
+
+      const userIdData = await userIdResponse.json();
+      const userId = userIdData.data.userId;
+
+      // 2. userId로 비밀번호 변경
+      const response = await fetch(`/api/member/password/user/${userId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          newPassword: formData.password
+        })
+      });
+
+      if (response.ok) {
+        const message = await response.text();
+        alert(message);
+        navigate('/login');
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || '비밀번호 재설정에 실패했습니다.');
+      }
       
     } catch (error) {
       console.error('비밀번호 재설정 실패:', error);
+      alert('서버 오류가 발생했습니다. 다시 시도해주세요.');
     } finally {
       setIsLoading(false);
     }
