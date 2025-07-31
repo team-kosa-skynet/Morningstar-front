@@ -40,11 +40,14 @@ const Login: React.FC = () => {
 
       console.log('로그인 성공:', response);
       
-      // Zustand 스토어에 로그인 정보 저장 (포인트 정보도 자동으로 조회됨)
-      await loginStore({
+      // Zustand 스토어에 로그인 정보 저장
+      loginStore({
         email: response.data.email,
         name: response.data.name,
-        userId: response.data.userId
+        userId: response.data.userId,
+        role: response.data.role,
+        point: response.data.point,
+        level: response.data.level
       }, response.data.token);
 
       // 루트로 리다이렉트
