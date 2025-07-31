@@ -1,22 +1,17 @@
 import axios from 'axios';
 
-// 현재 도메인에 맞춰 API URL 설정 (www 유무 자동 매칭)
-const getApiBaseUrl = () => {
-  if (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL.trim() !== '') {
-    return import.meta.env.VITE_API_BASE_URL;
+// API Base URL 설정
+const API_BASE_URL = (() => {
+  // 환경변수가 설정되어 있고 빈 문자열이 아닌 경우 사용
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (envUrl && envUrl.trim() !== '') {
+    return envUrl;
   }
   
-  // 프로덕션 환경에서 현재 도메인과 동일한 형식 사용
-  if (typeof window !== 'undefined' && window.location.hostname.includes('gaebang.site')) {
-    const protocol = window.location.protocol;
-    const hostname = window.location.hostname; // www.gaebang.site 또는 gaebang.site
-    return `${protocol}//${hostname}/api`;
-  }
-  
-  return 'https://gaebang.site/api';
-};
-
-const API_BASE_URL = getApiBaseUrl();
+  // 프로덕션 환경에서는 항상 https://www.gaebang.site/api 사용
+  // (백엔드에서 www 없는 도메인도 CORS 허용해야 함)
+  return 'https://www.gaebang.site/api';
+})();
 
 interface SignUpRequest {
   email: string;
