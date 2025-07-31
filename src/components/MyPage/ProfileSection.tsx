@@ -7,7 +7,11 @@ import avatarImage from '../../assets/images/avatar.png';
 
 const ProfileSection: React.FC = () => {
   const navigate = useNavigate();
-  const { user, point, logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
+
+  // 디버깅을 위한 로그
+  console.log('ProfileSection - user:', user);
+  console.log('ProfileSection - user.point:', user?.point);
 
   const handleLogout = () => {
     logout();
@@ -35,7 +39,7 @@ const ProfileSection: React.FC = () => {
         <div className={styles.userInfo}>
           <div className={styles.nicknameSection}>
             <img 
-              src={getLevelIcon(point || 0)} 
+              src={getLevelIcon(user.level || 1)} 
               alt="레벨 아이콘" 
               className={styles.levelIcon} 
             />
@@ -45,7 +49,7 @@ const ProfileSection: React.FC = () => {
         </div>
         
         <div className={styles.points}>
-          보유 포인트 : <span className={styles.pointValue}>{point || 0}p</span>
+          보유 포인트 : <span className={styles.pointValue}>{user.point || 0}p</span>
         </div>
       </div>
     </div>

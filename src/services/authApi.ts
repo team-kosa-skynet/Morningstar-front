@@ -30,16 +30,20 @@ interface LoginResponse {
     name: string;
     token: string;
     userId: number;
+    role: string;
+    point: number;
+    level: number;
   };
 }
 
-interface PointResponse {
+interface UserPointResponse {
   code: number;
   message: string;
   data: {
     point: number;
   };
 }
+
 
 interface BoardItem {
   boardId: number;
@@ -251,10 +255,10 @@ export const login = async (loginData: LoginRequest): Promise<LoginResponse> => 
   }
 };
 
-export const getCurrentPoint = async (token: string): Promise<PointResponse> => {
+export const getUserPoint = async (token: string): Promise<UserPointResponse> => {
   try {
-    const response = await axios.get<PointResponse>(
-      `${API_BASE_URL}/point/current`,
+    const response = await axios.get<UserPointResponse>(
+      `${API_BASE_URL}/user/point`,
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -269,6 +273,7 @@ export const getCurrentPoint = async (token: string): Promise<PointResponse> => 
     throw error;
   }
 };
+
 
 export const getBoards = async (page: number = 0, size: number = 10, sort: string = 'createdAt,asc', token?: string): Promise<BoardsResponse> => {
   try {
