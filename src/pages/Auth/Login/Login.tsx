@@ -116,7 +116,11 @@ const Login: React.FC = () => {
 
         {/* 회원가입 / 아이디/비밀번호 찾기 링크 */}
         <div className={styles.linkSection}>
-          <button type="button" className={styles.linkButton}>
+          <button 
+            type="button" 
+            className={styles.linkButton}
+            onClick={() => navigate('/signup')}
+          >
             회원가입
           </button>
           <button 
