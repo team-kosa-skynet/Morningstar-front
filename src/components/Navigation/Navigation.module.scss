@@ -1,0 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700&display=swap');
+
+.navigation {
+  width: 100%;
+  height: 54px;
+  border-bottom: 1px solid #dddddd;
+  background-color: #ffffff;
+  
+  .navContainer {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 8px 48px 0 40px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    
+    .navItem {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 46px;
+      cursor: pointer;
+      
+      span {
+        font-family: 'Pretendard', sans-serif;
+        font-weight: 700;
+        font-size: 18px;
+        line-height: 1.193359375em;
+        color: #000000;
+        white-space: nowrap;
+        margin-bottom: 10px;
+      }
+      
+      &:hover span {
+        color: #4E4EFF;
+      }
+      
+      .activeNavItem {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 46px;
+        border-bottom: 3px solid #4E4EFF;
+        
+        span {
+          color: #4E4EFF;
+        }
+      }
+    }
+    
+    .navDivider {
+      width: 16px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      img {
+        width: 1px;
+        height: 18px;
+      }
+    }
+  }
+}
+
+// 반응형 디자인
+@media (max-width: 1440px) {
+  .navigation {
+    .navContainer {
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .navigation {
+    height: auto;
+    
+    .navContainer {
+      padding: 8px 16px;
+      flex-wrap: wrap;
+      gap: 16px;
+      
+      .navItem span {
+        font-size: 16px;
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+// src/App.module.scss
+@use './styles/variables' as *;
+.layoutWrapper {
+  width: 100%;
+  min-width: 1440px;
+
+  .frameContainer {
+    width: 100%;
+    margin: 0 auto;
+
+    .mainSection {
+      width: 1440px;
+      margin: 0 auto;
+      padding: 40px 40px 40px 40px;
+      min-height: calc(100vh - $header-height - $nav-height - $footer-height);
+    }
+
+    .fullPageMain {
+      width: 100%;
+      height: 100vh;
+      padding: 0;
+      margin: 0;
+    }
+  }
+}

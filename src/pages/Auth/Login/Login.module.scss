@@ -1,0 +1,220 @@
+@import '../../../styles/variables';
+
+.loginContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: $bg-white;
+  padding: $spacing-lg;
+}
+
+.loginCard {
+  width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-lg;
+}
+
+// 로고 섹션
+.logoSection {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-right: 20px;
+}
+
+.logoContainer {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.brandName {
+  font-family: $font-family-base;
+  font-weight: $font-weight-bold;
+  font-size: 32px;
+  line-height: 1.193359375;
+  color: #333333;
+  margin: 0;
+}
+
+// 로그인 폼
+.loginForm {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.inputGroup {
+  width: 100%;
+}
+
+.input {
+  width: 100%;
+  height: 44px;
+  padding: 0 15px;
+  border: none;
+  border-radius: 15px;
+  background-color: $bg-light-gray;
+  font-family: $font-family-base;
+  font-weight: $font-weight-regular;
+  font-size: $font-size-base;
+  color: #333333;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: #999999;
+  }
+
+  &:focus {
+    outline: none;
+    background-color: darken($bg-light-gray, 2%);
+  }
+}
+
+.loginButton {
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 15px;
+  background-color: $bg-dark;
+  color: $text-white;
+  font-family: $font-family-base;
+  font-weight: $font-weight-bold;
+  font-size: $font-size-base;
+  cursor: pointer;
+  margin-top: $spacing-sm;
+  transition: $transition-base;
+
+  &:hover {
+    background-color: lighten($bg-dark, 10%);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+// 링크 섹션
+.linkSection {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.linkButton {
+  background: none;
+  border: none;
+  font-family: $font-family-base;
+  font-weight: $font-weight-regular;
+  font-size: $font-size-sm;
+  color: #333333;
+  cursor: pointer;
+  transition: $transition-base;
+
+  &:hover {
+    color: $primary-color;
+  }
+}
+
+// 간편 로그인 섹션
+.socialLoginSection {
+  width: 100%;
+  margin-top: $spacing-sm;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-lg;
+  gap: $spacing-md;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background-color: #999999;
+}
+
+.dividerText {
+  font-family: $font-family-base;
+  font-weight: $font-weight-regular;
+  font-size: $font-size-sm;
+  color: #999999;
+  white-space: nowrap;
+}
+
+.socialButtons {
+  display: flex;
+  justify-content: center;
+  gap: $spacing-sm;
+}
+
+.socialButton {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: $transition-base;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.kakaoButton {
+  background-color: #FFD43B;
+
+  &:hover {
+    background-color: darken(#FFD43B, 5%);
+  }
+}
+
+.googleButton {
+  background-color: #EEEEEE;
+
+  &:hover {
+    background-color: darken(#EEEEEE, 5%);
+  }
+}
+
+.socialIcon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+// 반응형 디자인
+@media (max-width: $breakpoint-mobile) {
+  .loginContainer {
+    padding: $spacing-md;
+  }
+
+  .loginCard {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .brandName {
+    font-size: 28px;
+  }
+}

@@ -1,0 +1,374 @@
+@use '../../styles/variables' as *;
+
+.homeContainer {
+  width: 100%;
+  min-height: 100vh;
+  background-color: $bg-white;
+}
+
+// 배너 섹션
+.bannerSection {
+  width: 100%;
+  height: 688px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: $spacing-2xl;
+  border-radius: 50px 50px 0 0;
+  
+  .bannerBackground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../../assets/images/space-bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  
+  .bannerContent {
+    position: absolute;
+    bottom: 40px;
+    right: 77px;
+    z-index: 2;
+    
+    .bannerTitle {
+      font-family: $font-family-base;
+      font-weight: $font-weight-bold;
+      font-size: $font-size-5xl;
+      color: $text-white;
+      text-align: right;
+      line-height: $line-height-tight;
+    }
+  }
+}
+
+// 어바웃 섹션
+.aboutSection {
+  background-color: $bg-dark;
+  padding: $spacing-sm 0;
+  margin-top: -40px;
+  position: relative;
+}
+
+.aboutContent {
+  max-width: $container-width;
+  margin: 0 auto;
+  padding: 0 $container-padding;
+}
+
+// 소개 섹션
+.introSection {
+  margin-bottom: $spacing-4xl;
+  
+  .introHeader {
+    position: relative;
+    
+    .introBackground {
+      background-color: $bg-dark;
+      padding: $spacing-3xl 0 $spacing-xl;
+    }
+    
+    .introTitleSection {
+      display: flex;
+      align-items: center;
+      gap: $spacing-lg;
+      justify-content: flex-start;
+      padding-left: 4px;
+      
+      .morningStarIcon {
+        width: 54px;
+        height: 54px;
+        background-image: url('../../assets/images/morning-star.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+      
+      .introTitle {
+        font-family: $font-family-base;
+        font-weight: $font-weight-bold;
+        font-size: $font-size-2xl;
+        color: $text-white;
+        line-height: $line-height-tight;
+      }
+    }
+  }
+  
+  .introDescription {
+    padding-left: 84px;
+    max-width: 639px;
+    
+    .introText {
+      font-family: $font-family-base;
+      font-weight: $font-weight-medium;
+      font-size: $font-size-base;
+      color: $text-secondary;
+      line-height: $line-height-normal;
+      white-space: pre-line;
+    }
+  }
+}
+
+// 기능 섹션
+.featuresSection {
+  margin-bottom: $spacing-4xl;
+  
+  .featuresHeader {
+    display: flex;
+    align-items: center;
+    gap: $spacing-lg;
+    margin-bottom: 30px;
+    padding-left: 4px;
+    
+    .compassIcon {
+      width: 54px;
+      height: 55px;
+      background-image: url('../../assets/images/compass.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    
+    .featuresTitle {
+      font-family: $font-family-base;
+      font-weight: $font-weight-bold;
+      font-size: $font-size-2xl;
+      color: $text-white;
+      line-height: $line-height-tight;
+    }
+  }
+  
+  .featuresList {
+    padding-left: 108px;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-2xl;
+    
+    .featureItem {
+      .featureTitle {
+        font-family: $font-family-base;
+        font-weight: $font-weight-medium;
+        font-size: $font-size-lg;
+        color: $text-primary;
+        line-height: $line-height-tight;
+        margin-bottom: $spacing-lg;
+      }
+      
+      .featureDescription {
+        padding-left: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-sm;
+        
+        .featurePoint {
+          font-family: $font-family-base;
+          font-weight: $font-weight-medium;
+          font-size: $font-size-base;
+          color: $text-secondary;
+          line-height: $line-height-normal;
+          margin-bottom: $spacing-sm;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+// 팀원 섹션
+.teamSection {
+  margin-bottom: $spacing-4xl;
+  padding-left: 82px;
+  margin-top: $spacing-3xl;
+
+  .teamTitle {
+    font-family: $font-family-base;
+    font-weight: $font-weight-bold;
+    font-size: $font-size-2xl;
+    color: $text-white;
+    line-height: $line-height-tight;
+    margin-bottom: $spacing-xl;
+  }
+  
+  .teamGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: $spacing-lg;
+    margin-left: 20px;
+    
+    .teamMember {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+
+      .memberName {
+        font-family: $font-family-base;
+        font-weight: $font-weight-medium;
+        font-size: $font-size-lg;
+        color: $text-secondary;
+        line-height: $line-height-tight;
+      }
+      
+      .memberRole {
+        font-family: $font-family-base;
+        font-weight: $font-weight-medium;
+        font-size: $font-size-base;
+        color: $text-secondary;
+        line-height: $line-height-normal;
+      }
+      
+      .memberGithub,
+      .memberEmail {
+        font-family: $font-family-base;
+        font-weight: $font-weight-medium;
+        font-size: $font-size-base;
+        color: $text-secondary;
+        line-height: $line-height-normal;
+        text-decoration: none;
+        
+        &:hover {
+          color: $primary-color;
+        }
+      }
+    }
+  }
+}
+
+// 연락처 섹션
+.contactSection {
+  padding-left: 82px;
+  
+  .contactTitle {
+    font-family: $font-family-base;
+    font-weight: $font-weight-bold;
+    font-size: $font-size-2xl;
+    color: $text-white;
+    line-height: $line-height-tight;
+    margin-bottom: $spacing-xl;
+  }
+  
+  .contactContent {
+    .contactDescription {
+      font-family: $font-family-base;
+      font-weight: $font-weight-medium;
+      font-size: $font-size-base;
+      color: $text-secondary;
+      line-height: 2em;
+      margin-bottom: $spacing-lg;
+    }
+    
+    .contactEmail {
+      font-family: $font-family-base;
+      font-weight: $font-weight-medium;
+      font-size: $font-size-base;
+      color: $text-secondary;
+      line-height: 2em;
+      white-space: pre-line;
+    }
+  }
+}
+
+// 반응형 디자인
+@media (max-width: $breakpoint-tablet) {
+  .bannerSection {
+    height: 400px;
+    
+    .bannerContent {
+      bottom: $spacing-3xl;
+      right: $spacing-lg;
+      
+      .bannerTitle {
+        font-size: $font-size-3xl;
+      }
+    }
+  }
+  
+  .aboutContent {
+    padding: 0 $spacing-lg;
+  }
+  
+  .introSection {
+    .introHeader {
+      .introTitleSection {
+        padding-left: $spacing-lg;
+        
+        .morningStarIcon {
+          width: 40px;
+          height: 40px;
+        }
+        
+        .introTitle {
+          font-size: $font-size-xl;
+        }
+      }
+    }
+    
+    .introDescription {
+      padding-left: $spacing-lg;
+    }
+  }
+  
+  .featuresSection {
+    padding-left: 0;
+    
+    .featuresHeader {
+      padding-left: $spacing-lg;
+      
+      .compassIcon {
+        width: 40px;
+        height: 40px;
+      }
+      
+      .featuresTitle {
+        font-size: $font-size-xl;
+      }
+    }
+    
+    .featuresList {
+      padding-left: $spacing-lg;
+    }
+  }
+  
+  .teamSection {
+    padding-left: $spacing-lg;
+    
+    .teamTitle {
+      font-size: $font-size-xl;
+    }
+    
+    .teamGrid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: $spacing-lg;
+    }
+  }
+  
+  .contactSection {
+    padding-left: $spacing-lg;
+    
+    .contactTitle {
+      font-size: $font-size-xl;
+    }
+  }
+}
+
+@media (max-width: $breakpoint-mobile) {
+  .bannerSection {
+    height: 300px;
+    
+    .bannerContent {
+      .bannerTitle {
+        font-size: $font-size-2xl;
+      }
+    }
+  }
+  
+  .teamSection {
+    .teamGrid {
+      grid-template-columns: 1fr;
+    }
+  }
+}
