@@ -258,8 +258,10 @@ export const signUp = async (signUpData: SignUpRequest): Promise<SignUpResponse>
 
 export const login = async (loginData: LoginRequest): Promise<LoginResponse> => {
   try {
+    const loginUrl = API_BASE_URL.replace('/api', '') + '/login';
+    console.log('[login] Calling API:', loginUrl);
     const response = await axios.post<LoginResponse>(
-      API_BASE_URL.replace('/api', '') + '/login',
+      loginUrl,
       loginData
     );
     return response.data;
@@ -317,8 +319,12 @@ export const getBoards = async (page: number = 0, size: number = 10, sort: strin
       headers.Authorization = `Bearer ${token}`;
     }
     
+    const boardsUrl = `${API_BASE_URL}/boards?page=${page}&size=${size}&sort=${sort}`;
+    console.log('[getBoards] Calling API:', boardsUrl);
+    console.log('[getBoards] Using API_BASE_URL:', API_BASE_URL);
+    
     const response = await axios.get<BoardsResponse>(
-      `${API_BASE_URL}/boards?page=${page}&size=${size}&sort=${sort}`,
+      boardsUrl,
       token ? { headers } : undefined
     );
     return response.data;
@@ -537,8 +543,10 @@ export const verifyEmail = async (verifyData: VerifyEmailRequest): Promise<Verif
 
 export const markAttendance = async (token: string): Promise<AttendanceResponse> => {
   try {
+    const attendanceUrl = `${API_BASE_URL}/attendance`;
+    console.log('[markAttendance] Calling API:', attendanceUrl);
     const response = await axios.post<AttendanceResponse>(
-      `${API_BASE_URL}/attendance`,
+      attendanceUrl,
       {},
       {
         headers: {
