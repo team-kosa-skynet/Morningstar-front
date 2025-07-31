@@ -84,18 +84,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   refreshUserPoint: async () => {
     const { token } = get();
-    if (!token) return;
+    if (!token) {
+      console.log('토큰이 없어서 포인트 새로고침을 건너뜁니다.');
+      return;
+    }
     
     try {
+      console.log('포인트 새로고침 API 호출 시작...');
       const pointResponse = await getUserPoint(token);
+      console.log('포인트 API 응답:', pointResponse);
+      
       const { user } = get();
       if (user) {
-        const updatedUser = { ...user, point: pointResponse.data.point };
+        const oldPoint = user.point;
+        const newPoint = pointResponse.data.point;
+        const updatedUser = { ...user, point: newPoint };
+        
         localStorage.setItem('user', JSON.stringify(updatedUser));
         set({ user: updatedUser });
+        
+        console.log(`포인트 업데이트: ${oldPoint} → ${newPoint}`);
       }
     } catch (error) {
-      console.error('Failed to refresh user point:', error);
+      console.error('포인트 새로고침 실패:', error);
     }
   },
 

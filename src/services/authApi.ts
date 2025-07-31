@@ -150,13 +150,6 @@ interface UpdateCommentRequest {
   boardId: string;
   content: string;
 }
-
-interface UpdateCommentResponse {
-  code: number;
-  message: string;
-  data: any;
-}
-
 interface DeleteCommentResponse {
   code: number;
   message: string;
@@ -258,7 +251,7 @@ export const login = async (loginData: LoginRequest): Promise<LoginResponse> => 
 export const getUserPoint = async (token: string): Promise<UserPointResponse> => {
   try {
     const response = await axios.get<UserPointResponse>(
-      `${API_BASE_URL}/user/point`,
+      `/user/point`,
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -363,7 +356,7 @@ export const uploadImage = async (imageFile: File, token: string): Promise<strin
     formData.append('image', imageFile);
 
     const response = await axios.post<string>(
-      '/s3/upload',
+      '/api/s3/upload',
       formData,
       {
         headers: {

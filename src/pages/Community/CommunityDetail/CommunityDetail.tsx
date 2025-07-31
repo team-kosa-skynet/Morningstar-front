@@ -291,7 +291,12 @@ const CommunityDetail = () => {
       await fetchBoardDetail();
       
       // 댓글 작성 성공 후 포인트 정보 새로고침
-      await refreshUserPoint();
+      try {
+        await refreshUserPoint();
+        console.log('포인트 새로고침 완료');
+      } catch (error) {
+        console.error('포인트 새로고침 실패:', error);
+      }
       
       alert('댓글이 작성되었습니다.');
     } catch (error: any) {
