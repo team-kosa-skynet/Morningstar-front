@@ -10,7 +10,7 @@ const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
   const {updateUserName } = useAuthStore();
   const [newNickname, setNewNickname] = useState('');
   const [isChecking, setIsChecking] = useState(false);
-  const [setIsChecked] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
   const [checkResult, setCheckResult] = useState<'available' | 'unavailable' | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -27,7 +27,6 @@ const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
       } else {
         setCheckResult('unavailable');
       }
-      // @ts-ignore
       setIsChecked(true);
     } catch (error) {
       console.error('닉네임 중복확인 오류:', error);
@@ -78,7 +77,6 @@ const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewNickname(e.target.value);
-    // @ts-ignore
     setIsChecked(false);
     setCheckResult(null);
   };
