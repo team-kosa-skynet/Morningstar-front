@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './PointHistorySection.module.scss';
+import { getPointHistory } from '../../services/authApi';
+import type { PointHistoryItem } from '../../services/authApi';
 
 interface PointHistorySectionProps {
   onBack: () => void;
@@ -15,73 +17,62 @@ interface PointTransaction {
 }
 
 const PointHistorySection: React.FC<PointHistorySectionProps> = ({ onBack }) => {
-  // 더미 데이터
-  const dummyTransactions: PointTransaction[] = [
-    {
-      id: 1,
-      type: '출석 체크',
-      amount: 1000,
-      balance: 1000,
-      date: '25.07.22',
-      time: '17:29'
-    },
-    {
-      id: 2,
-      type: '출석 체크',
-      amount: 1000,
-      balance: 2000,
-      date: '25.07.23',
-      time: '09:15'
-    },
-    {
-      id: 3,
-      type: '출석 체크',
-      amount: 1000,
-      balance: 3000,
-      date: '25.07.24',
-      time: '08:45'
-    },
-    {
-      id: 4,
-      type: '출석 체크',
-      amount: 1000,
-      balance: 4000,
-      date: '25.07.25',
-      time: '10:20'
-    },
-    {
-      id: 5,
-      type: '출석 체크',
-      amount: 1000,
-      balance: 5000,
-      date: '25.07.26',
-      time: '11:30'
-    },
-    {
-      id: 6,
-      type: '모의 면접',
-      amount: -50,
-      balance: 4950,
-      date: '25.07.26',
-      time: '14:15'
-    },
-    {
-      id: 7,
-      type: '커뮤니티 글 작성',
-      amount: 500,
-      balance: 5450,
-      date: '25.07.27',
-      time: '16:40'
-    },
-    {
-      id: 8,
-      type: 'AI 분석 사용',
-      amount: -30,
-      balance: 5420,
-      date: '25.07.28',
-      time: '13:25'
-    }
-  ];
+  const [transactions, setTransactions] = useState<PointTransaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPointHistory = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('로그인이 필요합니다.');
+          return;
+        }
+
+        const response = await getPointHistory(token);
+        const apiTransactions = response.data.map((item: PointHistoryItem) => {
+          const [datePart, timePart] = item.date.split(' ');
+          const formattedDate = datePart.replace(/\./g, '.');
+          
+          return {
+            id: item.pointId,
+            type: getTypeDisplayName(item.type),
+            amount: item.amount,
+            balance: 0,
+            date: formattedDate,
+            time: timePart
+          };
+        });
+        
+        let runningBalance = 0;
+        const transactionsWithBalance = apiTransactions.reverse().map(transaction => {
+          runningBalance += transaction.amount;
+          return { ...transaction, balance: runningBalance };
+        });
+        
+        setTransactions(transactionsWithBalance.reverse());
+      } catch (err: any) {
+        console.error('포인트 내역 조회 실패:', err);
+        setError('포인트 내역을 불러오는데 실패했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPointHistory();
+  }, []);
+
+  const getTypeDisplayName = (type: string): string => {
+    const typeMap: { [key: string]: string } = {
+      'ATTENDANCE': '출석 체크',
+      'BOARD': '게시글 작성',
+      'COMMENT': '댓글 작성',
+      'SPONSORSHIP': '스폰서십',
+      'FEEDBACK': '피드백'
+    };
+    return typeMap[type] || type;
+  };
 
   const formatAmount = (amount: number) => {
     return amount > 0 ? `+${amount}` : `${amount}`;
@@ -101,24 +92,34 @@ const PointHistorySection: React.FC<PointHistorySectionProps> = ({ onBack }) => 
       </div>
 
       <div className={styles.content}>
-        <div className={styles.transactionList}>
-          {dummyTransactions.map((transaction) => (
-            <div key={transaction.id} className={styles.transactionItem}>
-              <div className={styles.transactionType}>
-                {transaction.type}
-              </div>
-              <div className={`${styles.transactionAmount} ${getAmountColor(transaction.amount)}`}>
-                {formatAmount(transaction.amount)}
-              </div>
-              <div className={styles.transactionBalance}>
-                잔액 : {transaction.balance}p
-              </div>
-              <div className={styles.transactionDate}>
-                {transaction.date}  {transaction.time}
-              </div>
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className={styles.loading}>로딩 중...</div>
+        ) : error ? (
+          <div className={styles.error}>{error}</div>
+        ) : (
+          <div className={styles.transactionList}>
+            {transactions.length === 0 ? (
+              <div className={styles.noData}>포인트 내역이 없습니다.</div>
+            ) : (
+              transactions.map((transaction) => (
+                <div key={transaction.id} className={styles.transactionItem}>
+                  <div className={styles.transactionType}>
+                    {transaction.type}
+                  </div>
+                  <div className={`${styles.transactionAmount} ${getAmountColor(transaction.amount)}`}>
+                    {formatAmount(transaction.amount)}
+                  </div>
+                  <div className={styles.transactionBalance}>
+                    잔액 : {transaction.balance}p
+                  </div>
+                  <div className={styles.transactionDate}>
+                    {transaction.date}  {transaction.time}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
