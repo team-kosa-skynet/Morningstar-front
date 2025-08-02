@@ -14,6 +14,14 @@ const SocialCallback: React.FC = () => {
   useEffect(() => {
     const processOAuthCallback = async () => {
       try {
+        // 디버깅을 위한 로그 추가
+        console.log('=== OAuth Callback Debug Info ===');
+        console.log('Current URL:', window.location.href);
+        console.log('Pathname:', window.location.pathname);
+        console.log('Hash:', window.location.hash);
+        console.log('Search:', window.location.search);
+        console.log('Search Params:', Object.fromEntries(searchParams.entries()));
+        
         const email = searchParams.get('email');
         const name = searchParams.get('name');
         const token = searchParams.get('token');
@@ -21,6 +29,8 @@ const SocialCallback: React.FC = () => {
         const role = searchParams.get('role');
         const point = searchParams.get('point');
         const level = searchParams.get('level');
+        
+        console.log('Extracted params:', { email, name, token, userId, role, point, level });
 
         if (!email || !token || !userId) {
           throw new Error('필수 파라미터가 누락되었습니다.');
@@ -35,7 +45,9 @@ const SocialCallback: React.FC = () => {
           level: level ? parseInt(level) : 1
         };
 
+        console.log('Logging in with user:', user);
         login(user, token);
+        console.log('Login function called successfully');
 
         // 출석 API 호출
         try {
