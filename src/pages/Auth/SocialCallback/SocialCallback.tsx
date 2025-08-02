@@ -8,7 +8,6 @@ const SocialCallback: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { login } = useAuthStore();
-  const [isProcessing, setIsProcessing] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -61,9 +60,8 @@ const SocialCallback: React.FC = () => {
           console.error('출석 체크 실패:', attendanceError);
         }
 
-        setTimeout(() => {
-          navigate('/', { replace: true });
-        }, 2000);
+        // 즉시 메인 페이지로 이동
+        navigate('/', { replace: true });
 
       } catch (error) {
         console.error('OAuth 콜백 처리 오류:', error);
@@ -72,8 +70,6 @@ const SocialCallback: React.FC = () => {
         setTimeout(() => {
           navigate('/login', { replace: true });
         }, 3000);
-      } finally {
-        setIsProcessing(false);
       }
     };
 
@@ -93,26 +89,8 @@ const SocialCallback: React.FC = () => {
     );
   }
 
-  return (
-    <div className={styles.callbackPage}>
-      <div className={styles.container}>
-        {isProcessing ? (
-          <>
-            <div className={styles.spinner}></div>
-            <h2 className={styles.title}>로그인 처리 중...</h2>
-            <p className={styles.message}>잠시만 기다려주세요.</p>
-          </>
-        ) : (
-          <>
-            <div className={styles.successIcon}>✅</div>
-            <h2 className={styles.title}>로그인 성공!</h2>
-            <p className={styles.message}>환영합니다!</p>
-            <p className={styles.redirect}>홈페이지로 이동합니다...</p>
-          </>
-        )}
-      </div>
-    </div>
-  );
+  // 로딩 중에는 아무것도 표시하지 않음
+  return null;
 };
 
 export default SocialCallback;
