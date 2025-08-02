@@ -106,23 +106,3 @@
   font-weight: 600;
 }
 
-@media (max-width: 768px) {
-  .profileImage {
-    width: 80px;
-    height: 80px;
-    
-    img {
-      width: 32px;
-      height: 32px;
-    }
-  }
-  
-  .userInfo {
-    margin-left: 70px;
-  }
-  
-  .points {
-    position: static;
-    margin-top: 10px;
-  }
-}

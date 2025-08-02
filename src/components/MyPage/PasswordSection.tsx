@@ -61,13 +61,41 @@ const PasswordSection: React.FC<PasswordSectionProps> = ({ onBack }) => {
     if (!currentPassword.trim()) return;
     
     setIsVerifying(true);
-    // TODO: 현재 비밀번호 확인 API가 나중에 추가될 예정
-    // 현재는 임시로 성공으로 시뮬레이션
-    setTimeout(() => {
-      setIsCurrentPasswordValid(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('로그인이 필요합니다.');
+        setIsVerifying(false);
+        return;
+      }
+
+      const response = await fetch('/api/member/check-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          currentPassword: currentPassword.trim()
+        })
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.code === 200) {
+        setIsCurrentPasswordValid(true);
+        alert('현재 비밀번호가 확인되었습니다.');
+      } else {
+        setIsCurrentPasswordValid(false);
+        alert(result.message || '현재 비밀번호가 일치하지 않습니다.');
+      }
+    } catch (error) {
+      console.error('비밀번호 확인 오류:', error);
+      alert('네트워크 오류가 발생했습니다.');
+      setIsCurrentPasswordValid(false);
+    } finally {
       setIsVerifying(false);
-      alert('현재 비밀번호가 확인되었습니다.');
-    }, 1000);
+    }
   };
 
   const handleSave = async () => {
@@ -187,7 +215,7 @@ const PasswordSection: React.FC<PasswordSectionProps> = ({ onBack }) => {
           <button 
             className={styles.saveButton}
             onClick={handleSave}
-            disabled={!currentPassword.trim() || !allRulesValid || !newPassword.trim() || isSaving}
+            disabled={!currentPassword.trim() || !allRulesValid || !newPassword.trim() || isSaving || !isCurrentPasswordValid}
           >
             {isSaving ? '저장 중...' : '저장'}
           </button>

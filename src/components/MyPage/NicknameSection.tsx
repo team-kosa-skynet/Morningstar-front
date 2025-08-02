@@ -10,7 +10,7 @@ const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
   const {updateUserName } = useAuthStore();
   const [newNickname, setNewNickname] = useState('');
   const [isChecking, setIsChecking] = useState(false);
-  const [setIsChecked] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
   const [checkResult, setCheckResult] = useState<'available' | 'unavailable' | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -18,15 +18,23 @@ const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
     if (!newNickname.trim()) return;
     
     setIsChecking(true);
-    // TODO: 실제 API 호출로 중복 확인
-    // 현재는 임시로 랜덤하게 성공/실패 시뮬레이션
-    setTimeout(() => {
-      const isAvailable = Math.random() > 0.5;
-      setCheckResult(isAvailable ? 'available' : 'unavailable');
-      // @ts-ignore
+    try {
+      const response = await fetch(`/api/member/check-duplicated-nickname?nickname=${encodeURIComponent(newNickname.trim())}`);
+      const result = await response.json();
+      
+      if (response.ok && result.code === 200) {
+        setCheckResult('available');
+      } else {
+        setCheckResult('unavailable');
+      }
       setIsChecked(true);
+    } catch (error) {
+      console.error('닉네임 중복확인 오류:', error);
+      alert('네트워크 오류가 발생했습니다.');
+      setCheckResult(null);
+    } finally {
       setIsChecking(false);
-    }, 1000);
+    }
   };
 
   const handleSave = async () => {
@@ -69,7 +77,6 @@ const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewNickname(e.target.value);
-    // @ts-ignore
     setIsChecked(false);
     setCheckResult(null);
   };
@@ -111,7 +118,7 @@ const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
           <button 
             className={styles.saveButton}
             onClick={handleSave}
-            disabled={!newNickname.trim() || isSaving}
+            disabled={!newNickname.trim() || isSaving || !isChecked || checkResult !== 'available'}
           >
             {isSaving ? '저장 중...' : '저장'}
           </button>

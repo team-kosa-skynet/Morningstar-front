@@ -64,28 +64,3 @@
   }
 }
 
-// 반응형 디자인
-@media (max-width: 1440px) {
-  .navigation {
-    .navContainer {
-      padding-left: 24px;
-      padding-right: 24px;
-    }
-  }
-}
-
-@media (max-width: 768px) {
-  .navigation {
-    height: auto;
-    
-    .navContainer {
-      padding: 8px 16px;
-      flex-wrap: wrap;
-      gap: 16px;
-      
-      .navItem span {
-        font-size: 16px;
-      }
-    }
-  }
-}

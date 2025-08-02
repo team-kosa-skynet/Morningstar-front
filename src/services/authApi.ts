@@ -201,6 +201,19 @@ interface AttendanceResponse {
   };
 }
 
+export interface PointHistoryItem {
+  pointId: number;
+  amount: number;
+  type: 'ATTENDANCE' | 'BOARD' | 'COMMENT' | 'SPONSORSHIP' | 'FEEDBACK';
+  date: string;
+}
+
+interface PointHistoryResponse {
+  code: number;
+  message: string;
+  data: PointHistoryItem[];
+}
+
 interface CreateBoardRequest {
   title: string;
   content: string;
@@ -548,6 +561,25 @@ export const markAttendance = async (token: string): Promise<AttendanceResponse>
     const response = await axios.post<AttendanceResponse>(
       attendanceUrl,
       {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const getPointHistory = async (token: string): Promise<PointHistoryResponse> => {
+  try {
+    const response = await axios.get<PointHistoryResponse>(
+      `${API_BASE_URL}/point/history`,
       {
         headers: {
           Authorization: `Bearer ${token}`
