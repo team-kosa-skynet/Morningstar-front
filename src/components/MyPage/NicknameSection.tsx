@@ -18,15 +18,24 @@ const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
     if (!newNickname.trim()) return;
     
     setIsChecking(true);
-    // TODO: 실제 API 호출로 중복 확인
-    // 현재는 임시로 랜덤하게 성공/실패 시뮬레이션
-    setTimeout(() => {
-      const isAvailable = Math.random() > 0.5;
-      setCheckResult(isAvailable ? 'available' : 'unavailable');
+    try {
+      const response = await fetch(`/api/member/check-duplicated-nickname?nickname=${encodeURIComponent(newNickname.trim())}`);
+      const result = await response.json();
+      
+      if (response.ok && result.code === 200) {
+        setCheckResult('available');
+      } else {
+        setCheckResult('unavailable');
+      }
       // @ts-ignore
       setIsChecked(true);
+    } catch (error) {
+      console.error('닉네임 중복확인 오류:', error);
+      alert('네트워크 오류가 발생했습니다.');
+      setCheckResult(null);
+    } finally {
       setIsChecking(false);
-    }, 1000);
+    }
   };
 
   const handleSave = async () => {
