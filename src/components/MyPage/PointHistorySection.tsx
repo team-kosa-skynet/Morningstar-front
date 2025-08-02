@@ -51,12 +51,18 @@ const PointHistorySection: React.FC<PointHistorySectionProps> = ({ onBack }) => 
           };
         });
         
+        // pointId를 기준으로 내림차순 정렬 (최신 ID가 위로)
+        const sortedTransactions = apiTransactions.sort((a, b) => b.id - a.id);
+        
+        // 잔액 계산 (가장 오래된 것부터 누적)
+        const oldestFirst = [...sortedTransactions].reverse();
         let runningBalance = 0;
-        const transactionsWithBalance = apiTransactions.reverse().map(transaction => {
+        const transactionsWithBalance = oldestFirst.map(transaction => {
           runningBalance += transaction.amount;
           return { ...transaction, balance: runningBalance };
         });
         
+        // 최신순으로 다시 정렬하여 표시
         setTransactions(transactionsWithBalance.reverse());
       } catch (err: any) {
         console.error('포인트 내역 조회 실패:', err);
