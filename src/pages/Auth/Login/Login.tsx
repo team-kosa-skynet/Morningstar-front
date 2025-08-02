@@ -73,8 +73,15 @@ const Login: React.FC = () => {
   };
 
   const handleSocialLogin = (provider: 'kakao' | 'google') => {
-    // 소셜 로그인 로직 구현
-    console.log(`${provider} 로그인`);
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://www.gaebang.site/api';
+    
+    if (provider === 'google') {
+      // 백엔드 OAuth 엔드포인트로 리다이렉션
+      window.location.href = `${API_BASE_URL.replace('/api', '')}/oauth2/authorization/google`;
+    } else if (provider === 'kakao') {
+      // 카카오 로그인 구현 예정
+      console.log('카카오 로그인 구현 예정');
+    }
   };
 
   return (
