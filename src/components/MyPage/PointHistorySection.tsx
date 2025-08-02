@@ -33,7 +33,13 @@ const PointHistorySection: React.FC<PointHistorySectionProps> = ({ onBack }) => 
         const response = await getPointHistory(token);
         const apiTransactions = response.data.map((item: PointHistoryItem) => {
           const [datePart, timePart] = item.date.split(' ');
-          const formattedDate = datePart.replace(/\./g, '.');
+          
+          // 날짜 포맷 변경: 2025.01.15 -> 25.01.15
+          const dateObj = new Date(datePart);
+          const year = dateObj.getFullYear().toString().slice(-2); // 마지막 2자리
+          const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+          const day = dateObj.getDate().toString().padStart(2, '0');
+          const formattedDate = `${year}.${month}.${day}`;
           
           return {
             id: item.pointId,
