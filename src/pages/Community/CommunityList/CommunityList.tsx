@@ -9,13 +9,24 @@ import { useAuthStore } from '../../../stores/authStore';
 import ThumbsUpIcon from '../../../assets/icons/hand-thumbs-up.svg';
 import ClockIcon from '../../../assets/icons/clock.svg';
 
-// 레벨 1 아이콘 import (일시적으로 모든 유저에게 적용)
-import userIcon from '../../../assets/images/level/lv1.png';
+// 레벨별 아이콘 import
+import lv1Icon from '../../../assets/images/level/lv1.png';
+import lv2Icon from '../../../assets/images/level/lv2.png';
+import lv3Icon from '../../../assets/images/level/lv3.png';
+import lv4Icon from '../../../assets/images/level/lv4.png';
+import lv5Icon from '../../../assets/images/level/lv5.png';
+import lv6Icon from '../../../assets/images/level/lv6.png';
+import lv7Icon from '../../../assets/images/level/lv7.png';
+import lv8Icon from '../../../assets/images/level/lv8.png';
+import lv9Icon from '../../../assets/images/level/lv9.png';
+import lv10Icon from '../../../assets/images/level/lv10.png';
+import adminIcon from '../../../assets/images/level/admin.png';
 
 interface PostItem {
   boardId: number;
   title: string;
   writer: string;
+  writerLevel: number;
   imageUrl: string;
   likeCount: number;
   commentCount: number;
@@ -32,6 +43,24 @@ const CommunityList = () => {
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  // 레벨에 따른 아이콘 반환 함수
+  const getLevelIcon = (level: number) => {
+    const levelIcons: { [key: number]: string } = {
+      1: lv1Icon,
+      2: lv2Icon,
+      3: lv3Icon,
+      4: lv4Icon,
+      5: lv5Icon,
+      6: lv6Icon,
+      7: lv7Icon,
+      8: lv8Icon,
+      9: lv9Icon,
+      10: lv10Icon,
+      99: adminIcon // 관리자 레벨
+    };
+    return levelIcons[level] || lv1Icon; // 기본값은 레벨 1
+  };
 
   // API에서 게시글 데이터 가져오기
   const fetchPosts = async (page: number = 0) => {
@@ -144,7 +173,7 @@ const CommunityList = () => {
                     </div>
                   </div>
                   <div className={styles.authorInfo}>
-                    <img src={userIcon} alt="" className={styles.authorIcon} />
+                    <img src={getLevelIcon(post.writerLevel)} alt={`레벨 ${post.writerLevel}`} className={styles.authorIcon} />
                     <span className={styles.authorName}>{post.writer}</span>
                   </div>
                 </div>
