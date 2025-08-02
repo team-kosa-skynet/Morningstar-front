@@ -9,6 +9,15 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
   </head>
   <body>
+    <script>
+      // OAuth 리다이렉트 처리
+      if (window.location.pathname === '/auth/social' && window.location.search) {
+        const queryString = window.location.search;
+        console.log('OAuth redirect detected:', window.location.href);
+        console.log('Query parameters:', queryString);
+        window.location.replace('/#/auth/social' + queryString);
+      }
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
