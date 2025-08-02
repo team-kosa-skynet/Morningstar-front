@@ -134,22 +134,3 @@
   }
 }
 
-@media (max-width: 768px) {
-  .container {
-    padding: 20px;
-  }
-  
-  .content {
-    gap: 20px;
-  }
-  
-  .buttonSection {
-    flex-direction: column;
-    gap: 10px;
-    
-    .checkButton,
-    .saveButton {
-      width: 100%;
-    }
-  }
-}

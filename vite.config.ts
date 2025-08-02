@@ -22,6 +22,11 @@ export default defineConfig({
         target: 'https://gaebang.site',
         changeOrigin: true,
         secure: true
+      },
+      '/oauth2': {
+        target: 'https://gaebang.site',
+        changeOrigin: true,
+        secure: true
       }
     }
   }
