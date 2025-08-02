@@ -118,7 +118,7 @@ const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
           <button 
             className={styles.saveButton}
             onClick={handleSave}
-            disabled={!newNickname.trim() || isSaving}
+            disabled={!newNickname.trim() || isSaving || !isChecked || checkResult !== 'available'}
           >
             {isSaving ? '저장 중...' : '저장'}
           </button>
