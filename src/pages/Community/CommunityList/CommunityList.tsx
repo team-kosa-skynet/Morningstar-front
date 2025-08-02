@@ -68,7 +68,12 @@ const CommunityList = () => {
     setError(null);
     try {
       const response = await getBoards(page, 10, 'createdAt,desc', token || undefined);
-      setPosts(response.data.content);
+      // BoardItem을 PostItem으로 변환 (writerLevel 기본값 추가)
+      const postsWithLevel = response.data.content.map(board => ({
+        ...board,
+        writerLevel: 1 // 기본값으로 1 설정 (추후 API에서 실제 레벨 제공시 수정)
+      }));
+      setPosts(postsWithLevel);
       setTotalPages(response.data.totalPages);
     } catch (error: any) {
       console.error('게시글 조회 실패:', error);
