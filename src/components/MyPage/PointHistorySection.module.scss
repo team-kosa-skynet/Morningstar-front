@@ -153,29 +153,3 @@
   color: #999999;
 }
 
-@media (max-width: 768px) {
-  .container {
-    padding: 20px;
-  }
-  
-  .transactionItem {
-    flex-direction: column;
-    align-items: flex-start;
-    height: auto;
-    padding: 15px 20px;
-    gap: 8px;
-  }
-  
-  .transactionType,
-  .transactionAmount,
-  .transactionBalance,
-  .transactionDate {
-    flex: none;
-    text-align: left;
-    width: 100%;
-  }
-  
-  .transactionDate {
-    font-size: 11px;
-  }
-}

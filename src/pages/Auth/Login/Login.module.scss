@@ -208,18 +208,3 @@
   object-fit: contain;
 }
 
-// 반응형 디자인
-@media (max-width: $breakpoint-mobile) {
-  .loginContainer {
-    padding: $spacing-md;
-  }
-
-  .loginCard {
-    width: 100%;
-    max-width: 360px;
-  }
-
-  .brandName {
-    font-size: 28px;
-  }
-}
