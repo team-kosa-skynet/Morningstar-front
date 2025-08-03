@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import styles from './CommunityDetail.module.scss';
 import Pagination from '../../../components/Pagination/Pagination';
-import { getBoardDetail, createComment, deleteBoard, updateComment, deleteComment } from '../../../services/apiService.ts';
+import { getBoardDetail, createComment, deleteBoard, updateComment, deleteComment, toggleBoardLike } from '../../../services/apiService.ts';
 import { useAuthStore } from '../../../stores/authStore';
 import DropdownModal from '../../../components/DropdownModal/DropdownModal';
 import { getLevelIcon } from '../../../utils/levelUtils';
@@ -43,6 +43,7 @@ const CommunityDetail = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [isLikeLoading, setIsLikeLoading] = useState(false);
   
   // 댓글 수정 상태
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
@@ -264,6 +265,31 @@ const CommunityDetail = () => {
     setCurrentPage(page);
   };
 
+  const handleLikeClick = async () => {
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    if (!boardDetail || isLikeLoading) return;
+
+    setIsLikeLoading(true);
+    try {
+      await toggleBoardLike(boardDetail.boardId, token);
+      // 좋아요 처리 후 게시글 상세 정보 다시 불러오기
+      await fetchBoardDetail();
+    } catch (error: any) {
+      console.error('좋아요 처리 실패:', error);
+      if (error.code === 401) {
+        alert('로그인이 필요합니다.');
+      } else {
+        alert('좋아요 처리에 실패했습니다.');
+      }
+    } finally {
+      setIsLikeLoading(false);
+    }
+  };
+
   const handleCommentSubmit = async () => {
     if (!commentText.trim()) {
       alert('댓글 내용을 입력해주세요.');
@@ -363,16 +389,18 @@ const CommunityDetail = () => {
             {/* 제목 영역 */}
             <div className={styles.titleSection}>
               <h1 className={styles.postTitle}>{boardDetail.title}</h1>
-              <button 
-                className={styles.menuButton}
-                onClick={(e) => handleDotsClick(e, 'post')}
-              >
-                <svg width="6" height="24" viewBox="0 0 6 24" fill="none">
-                  <circle cx="3" cy="3" r="2" fill="#000"/>
-                  <circle cx="3" cy="12" r="2" fill="#000"/>  
-                  <circle cx="3" cy="21" r="2" fill="#000"/>
-                </svg>
-              </button>
+              {token && (
+                <button 
+                  className={styles.menuButton}
+                  onClick={(e) => handleDotsClick(e, 'post')}
+                >
+                  <svg width="6" height="24" viewBox="0 0 6 24" fill="none">
+                    <circle cx="3" cy="3" r="2" fill="#000"/>
+                    <circle cx="3" cy="12" r="2" fill="#000"/>  
+                    <circle cx="3" cy="21" r="2" fill="#000"/>
+                  </svg>
+                </button>
+              )}
             </div>
             
             {/* 메타 정보 */}
@@ -413,7 +441,11 @@ const CommunityDetail = () => {
               
               {/* 반응 박스 */}
               <div className={styles.reactionSection}>
-                <button className={styles.likeButton}>
+                <button 
+                  className={styles.likeButton}
+                  onClick={handleLikeClick}
+                  disabled={isLikeLoading}
+                >
                   <i className="bi bi-hand-thumbs-up"></i>
                   <span>{boardDetail.likeCount}</span>
                 </button>
@@ -431,34 +463,36 @@ const CommunityDetail = () => {
               </div>
               
               {/* 댓글 입력창 */}
-              <div className={styles.commentInput}>
-                <div className={styles.inputWrapper}>
-                  <input
-                    type="text"
-                    placeholder="댓글을 입력해주세요!"
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !isSubmittingComment) {
-                        handleCommentSubmit();
-                      }
-                    }}
-                    className={styles.commentTextField}
-                    disabled={isSubmittingComment}
-                  />
-                  <button 
-                    className={styles.submitButton}
-                    onClick={handleCommentSubmit}
-                    disabled={isSubmittingComment}
-                  >
-                    {isSubmittingComment ? (
-                      <span>...</span>
-                    ) : (
-                      <i className="bi bi-vector-pen"></i>
-                    )}
-                  </button>
+              {token && (
+                <div className={styles.commentInput}>
+                  <div className={styles.inputWrapper}>
+                    <input
+                      type="text"
+                      placeholder="댓글을 입력해주세요!"
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !isSubmittingComment) {
+                          handleCommentSubmit();
+                        }
+                      }}
+                      className={styles.commentTextField}
+                      disabled={isSubmittingComment}
+                    />
+                    <button 
+                      className={styles.submitButton}
+                      onClick={handleCommentSubmit}
+                      disabled={isSubmittingComment}
+                    >
+                      {isSubmittingComment ? (
+                        <span>...</span>
+                      ) : (
+                        <i className="bi bi-vector-pen"></i>
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
               
               {/* 댓글 목록 */}
               <div className={styles.commentList}>
@@ -469,12 +503,14 @@ const CommunityDetail = () => {
                         <img src={getLevelIcon(comment.writerLevel)} alt="프로필" className={styles.profileImage} />
                         <span className={styles.nickname}>{comment.writer}</span>
                       </div>
-                      <button 
-                        className={styles.menuButton}
-                        onClick={(e) => handleDotsClick(e, 'comment', comment.commentId)}
-                      >
-                        <i className="bi bi-three-dots-vertical"></i>
-                      </button>
+                      {token && (
+                        <button 
+                          className={styles.menuButton}
+                          onClick={(e) => handleDotsClick(e, 'comment', comment.commentId)}
+                        >
+                          <i className="bi bi-three-dots-vertical"></i>
+                        </button>
+                      )}
                     </div>
                     <div className={styles.commentMeta}>
                       <div className={styles.commentContent}>

@@ -622,3 +622,22 @@ export const searchBoards = async (
     throw error;
   }
 };
+
+export const toggleBoardLike = async (boardId: number, token: string): Promise<void> => {
+  try {
+    await axios.post(
+      `${API_BASE_URL}/boards/${boardId}/like`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
