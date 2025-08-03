@@ -38,8 +38,13 @@ const CommunityList = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = useAuthStore();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
+  
+  // location.state에서 초기값 설정
+  const initialSearchQuery = location.state?.searchQuery || '';
+  const initialIsSearching = !!location.state?.searchQuery;
+  
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
+  const [isSearching, setIsSearching] = useState(initialIsSearching);
   const [currentPage, setCurrentPage] = useState(0); // API는 0부터 시작
   const [posts, setPosts] = useState<PostItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -55,6 +60,11 @@ const CommunityList = () => {
       setIsSearching(false);
       setCurrentPage(0);
       // state 초기화 (중복 실행 방지)
+      navigate('/community', { replace: true, state: {} });
+    }
+    
+    // state 초기화 (이미 초기값으로 설정했으므로 여기서는 state만 클리어)
+    if (location.state?.searchQuery) {
       navigate('/community', { replace: true, state: {} });
     }
   }, [location, navigate]);
@@ -111,7 +121,7 @@ const CommunityList = () => {
 
   useEffect(() => {
     fetchPosts(currentPage);
-  }, [currentPage, isSearching, searchTrigger]);
+  }, [currentPage, searchTrigger]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page - 1); // Pagination 컴포넌트는 1부터 시작하지만 API는 0부터 시작
