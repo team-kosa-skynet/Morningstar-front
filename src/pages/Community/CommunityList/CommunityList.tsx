@@ -194,17 +194,7 @@ const CommunityList = () => {
               <div className={styles.empty}>
                 {isSearching ? (
                   <>
-                    <p>"{searchQuery}"에 대한 검색 결과가 없습니다.</p>
-                    <button 
-                      className={styles.backToListButton}
-                      onClick={() => {
-                        setIsSearching(false);
-                        setSearchQuery('');
-                        setCurrentPage(0);
-                      }}
-                    >
-                      전체 글 보기
-                    </button>
+                    <p>"{searchQuery}"에 대한 검색 결과가 없습니다."</p>
                   </>
                 ) : (
                   '게시글이 없습니다.'
