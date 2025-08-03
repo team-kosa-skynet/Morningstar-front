@@ -48,6 +48,7 @@
     height: 610px;
     display: flex;
     flex-direction: column;
+    border-radius: $radius-sm;
 
     .titleSection {
       height: 50px;
@@ -84,6 +85,10 @@
         font-weight: $font-weight-medium;
         resize: none;
         box-sizing: border-box;
+        border-bottom: 1px solid #777777;
+        border-top: none;
+        border-left: none;
+        border-right: none;
         
         &::placeholder {
           color: #999999;
