@@ -79,8 +79,7 @@ const Login: React.FC = () => {
       // 백엔드 OAuth 엔드포인트로 리다이렉션
       window.location.href = `${API_BASE_URL.replace('/api', '')}/oauth2/authorization/google`;
     } else if (provider === 'kakao') {
-      // 카카오 로그인 구현 예정
-      console.log('카카오 로그인 구현 예정');
+      window.location.href = 'https://gaebang.site/oauth2/authorization/kakao';
     }
   };
 

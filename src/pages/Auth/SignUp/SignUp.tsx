@@ -160,8 +160,8 @@ const SignUp: React.FC = () => {
       // 로컬 개발: http://localhost:8080/oauth2/authorization/google
       // 배포 환경: https://gaebang.site/oauth2/authorization/google
       window.location.href = 'https://gaebang.site/oauth2/authorization/google';
-    } else {
-      console.log(`${provider} 로그인`);
+    } else if (provider === 'kakao') {
+      window.location.href = 'https://gaebang.site/oauth2/authorization/kakao';
     }
   };
 
