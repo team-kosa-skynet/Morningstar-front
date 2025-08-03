@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getMemberInfo, markAttendance } from '../services/authApi';
+import { getMemberInfo, markAttendance } from '../services/apiService.ts';
 
 interface User {
   email: string;

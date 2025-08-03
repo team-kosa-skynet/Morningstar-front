@@ -1,4 +1,6 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../stores/authStore';
 import styles from './MainSection.module.scss';
 
 type CurrentSection = 'main' | 'nickname' | 'password' | 'points';
@@ -8,6 +10,14 @@ interface MainSectionProps {
 }
 
 const MainSection: React.FC<MainSectionProps> = ({ onSectionChange }) => {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+
+  const handleMyPostsClick = () => {
+    if (user?.name) {
+      navigate('/community', { state: { searchQuery: user.name } });
+    }
+  };
   return (
     <>
       {/* 계정 섹션 */}
@@ -27,7 +37,7 @@ const MainSection: React.FC<MainSectionProps> = ({ onSectionChange }) => {
       {/* 커뮤니티 섹션 */}
       <div className={styles.communitySection}>
         <h3 className={styles.sectionTitle}>커뮤니티</h3>
-        <div className={styles.menuItem}>
+        <div className={styles.menuItem} onClick={handleMyPostsClick}>
           <span>내가 쓴 글</span>
         </div>
         <div className={styles.menuItem} onClick={() => onSectionChange('points')}>

@@ -97,8 +97,9 @@ interface BoardsResponse {
 
 interface CommentItem {
   commentId: number;
-  comment: string;
+  content: string;
   writer: string;
+  writerLevel: number;
   createdDate: number[];
 }
 
@@ -112,6 +113,7 @@ interface BoardDetailResponse {
     imageUrl: string[];
     content: string;
     writer: string;
+    writerLevel: number;
     createdDate: string;
     viewCount: number;
     likeCount: number;
@@ -585,6 +587,32 @@ export const getPointHistory = async (token: string): Promise<PointHistoryRespon
           Authorization: `Bearer ${token}`
         }
       }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const searchBoards = async (
+  condition: string,
+  page: number = 0,
+  size: number = 10,
+  sort: string = 'createdDate,desc',
+  token?: string
+): Promise<BoardsResponse> => {
+  try {
+    const headers: any = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    
+    const response = await axios.get<BoardsResponse>(
+      `${API_BASE_URL}/boards/search?condition=${encodeURIComponent(condition)}&page=${page}&size=${size}&sort=${sort}`,
+      token ? { headers } : undefined
     );
     return response.data;
   } catch (error) {

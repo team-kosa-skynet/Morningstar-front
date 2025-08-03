@@ -3,7 +3,7 @@ import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import styles from './EmailVerify.module.scss';
 import spaceship from '../../../assets/images/spaceship.png';
 import email from '../../../assets/images/email.png';
-import { verifyEmail, signUp } from '../../../services/authApi';
+import { verifyEmail, signUp } from '../../../services/apiService.ts';
 
 const EmailVerify: React.FC = () => {
   const navigate = useNavigate();
