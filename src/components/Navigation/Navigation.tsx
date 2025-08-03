@@ -26,7 +26,7 @@ const Navigation: React.FC = () => {
       setActiveItem(item);
     }
     if (item === '커뮤니티') {
-      navigate('/community');
+      navigate('/community', { state: { resetSearch: true } });
     }
   };
 

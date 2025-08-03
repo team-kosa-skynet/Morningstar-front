@@ -155,7 +155,7 @@ AI로 취업이 힘들어졌지만 동시에 AI를 활용해야 하는 역설적
             <h3 className={styles.contactTitle}>연락하기</h3>
             <div className={styles.contactContent}>
               <p className={styles.contactDescription}>
-                문의사항은 아래 이메일로 연락 부탁드립니다
+                문의사항은 아래 이메일로 연락 부탁드립니다.
               </p>
               <p className={styles.contactEmail}>
                 {`후원 및 사이트 관련 문의 :

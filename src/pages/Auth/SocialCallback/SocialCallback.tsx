@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../stores/authStore';
-import { markAttendance } from '../../../services/authApi';
+import { markAttendance } from '../../../services/apiService.ts';
 import styles from './SocialCallback.module.scss';
 
 const SocialCallback: React.FC = () => {

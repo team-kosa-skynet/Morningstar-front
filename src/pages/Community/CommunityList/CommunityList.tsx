@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './CommunityList.module.scss';
 import Pagination from '../../../components/Pagination/Pagination';
-import { getBoards } from '../../../services/authApi';
+import { getBoards, searchBoards } from '../../../services/apiService.ts';
 import { useAuthStore } from '../../../stores/authStore';
 
 // 아이콘 import
@@ -36,13 +36,37 @@ interface PostItem {
 
 const CommunityList = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { token } = useAuthStore();
-  const [searchQuery, setSearchQuery] = useState('');
+  
+  // location.state에서 초기값 설정
+  const initialSearchQuery = location.state?.searchQuery || '';
+  const initialIsSearching = !!location.state?.searchQuery;
+  
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
+  const [isSearching, setIsSearching] = useState(initialIsSearching);
   const [currentPage, setCurrentPage] = useState(0); // API는 0부터 시작
   const [posts, setPosts] = useState<PostItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  // URL 변경 감지하여 검색 상태 초기화
+  useEffect(() => {
+    // 네비게이션에서 커뮤니티 버튼을 클릭했을 때
+    if (location.state?.resetSearch) {
+      setSearchQuery('');
+      setIsSearching(false);
+      setCurrentPage(0);
+      // state 초기화 (중복 실행 방지)
+      navigate('/community', { replace: true, state: {} });
+    }
+    
+    // state 초기화 (이미 초기값으로 설정했으므로 여기서는 state만 클리어)
+    if (location.state?.searchQuery) {
+      navigate('/community', { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   // 레벨에 따른 아이콘 반환 함수
   const getLevelIcon = (level: number) => {
@@ -67,7 +91,14 @@ const CommunityList = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getBoards(page, 10, 'createdAt,desc', token || undefined);
+      let response;
+      if (isSearching && searchQuery.trim()) {
+        // 검색 모드일 때
+        response = await searchBoards(searchQuery.trim(), page, 10, 'createdAt,desc', token || undefined);
+      } else {
+        // 일반 목록 조회
+        response = await getBoards(page, 10, 'createdAt,desc', token || undefined);
+      }
       // BoardItem을 PostItem으로 변환 (writerLevel 기본값 추가)
       const postsWithLevel = response.data.content.map(board => ({
         ...board,
@@ -89,10 +120,32 @@ const CommunityList = () => {
 
   useEffect(() => {
     fetchPosts(currentPage);
-  }, [currentPage]);
+  }, [currentPage, isSearching]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page - 1); // Pagination 컴포넌트는 1부터 시작하지만 API는 0부터 시작
+  };
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      setIsSearching(true);
+      setCurrentPage(0); // 검색 시 첫 페이지로 이동
+    }
+  };
+
+  const handleSearchInputKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    // 검색어가 비어있으면 일반 목록으로 돌아가기
+    if (!e.target.value.trim() && isSearching) {
+      setIsSearching(false);
+      setCurrentPage(0);
+    }
   };
 
   const handleWriteClick = () => {
@@ -106,7 +159,7 @@ const CommunityList = () => {
           {/* 헤더 */}
           <div className={styles.listHeader}>
             <div className={styles.titleSection}>
-              <h1 className={styles.title}>전체 글</h1>
+              <h1 className={styles.title}>{isSearching ? `"${searchQuery}" 검색 결과` : '전체 글'}</h1>
               <button className={styles.writeButton} onClick={handleWriteClick}>글쓰기</button>
             </div>
             <div className={styles.searchBox}>
@@ -114,10 +167,11 @@ const CommunityList = () => {
                 type="text"
                 placeholder="제목, 본문, 작성자를 검색해보세요!"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchInputChange}
+                onKeyPress={handleSearchInputKeyPress}
                 className={styles.searchInput}
               />
-              <button className={styles.searchButton}>
+              <button className={styles.searchButton} onClick={handleSearch}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path
                     d="M9.16667 15.8333C12.8486 15.8333 15.8333 12.8486 15.8333 9.16667C15.8333 5.48477 12.8486 2.5 9.16667 2.5C5.48477 2.5 2.5 5.48477 2.5 9.16667C2.5 12.8486 5.48477 15.8333 9.16667 15.8333Z"
@@ -145,7 +199,15 @@ const CommunityList = () => {
             ) : error ? (
               <div className={styles.error}>{error}</div>
             ) : posts.length === 0 ? (
-              <div className={styles.empty}>게시글이 없습니다.</div>
+              <div className={styles.empty}>
+                {isSearching ? (
+                  <>
+                    <p>"{searchQuery}"에 대한 검색 결과가 없습니다."</p>
+                  </>
+                ) : (
+                  '게시글이 없습니다.'
+                )}
+              </div>
             ) : (
               posts.map((post) => (
                 <div 

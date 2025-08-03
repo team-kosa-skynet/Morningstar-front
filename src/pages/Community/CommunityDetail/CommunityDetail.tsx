@@ -2,9 +2,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import styles from './CommunityDetail.module.scss';
 import Pagination from '../../../components/Pagination/Pagination';
-import { getBoardDetail, createComment, deleteBoard, updateComment, deleteComment } from '../../../services/authApi';
+import { getBoardDetail, createComment, deleteBoard, updateComment, deleteComment } from '../../../services/apiService.ts';
 import { useAuthStore } from '../../../stores/authStore';
 import DropdownModal from '../../../components/DropdownModal/DropdownModal';
+import { getLevelIcon } from '../../../utils/levelUtils';
 
 interface BoardDetail {
   boardId: number;
@@ -13,6 +14,7 @@ interface BoardDetail {
   imageUrl: string[];
   content: string;
   writer: string;
+  writerLevel: number;
   createdDate: string;
   viewCount: number;
   likeCount: number;
@@ -25,8 +27,9 @@ interface BoardDetail {
 
 interface CommentItem {
   commentId: number;
-  comment: string;
+  content: string;
   writer: string;
+  writerLevel: number;
   createdDate: number[];
 }
 
@@ -150,7 +153,7 @@ const CommunityDetail = () => {
         const comment = boardDetail.comments.content.find(c => c.commentId === modalTargetId);
         if (!comment) return;
 
-        handleStartCommentEdit(modalTargetId, comment.comment);
+        handleStartCommentEdit(modalTargetId, comment.content);
       }
     } catch (error: any) {
       console.error('수정 실패:', error);
@@ -375,7 +378,7 @@ const CommunityDetail = () => {
             {/* 메타 정보 */}
             <div className={styles.metaSection}>
               <div className={styles.userInfo}>
-                <img src="/src/assets/images/level/lv1.png" alt="프로필" className={styles.profileImage} />
+                <img src={getLevelIcon(boardDetail.writerLevel)} alt="프로필" className={styles.profileImage} />
                 <span className={styles.nickname}>{boardDetail.writer}</span>
               </div>
               <div className={styles.postMeta}>
@@ -463,7 +466,7 @@ const CommunityDetail = () => {
                   <div key={comment.commentId} className={styles.commentItem}>
                     <div className={styles.commentHeader}>
                       <div className={styles.userInfo}>
-                        <img src="/src/assets/images/level/lv1.png" alt="프로필" className={styles.profileImage} />
+                        <img src={getLevelIcon(comment.writerLevel)} alt="프로필" className={styles.profileImage} />
                         <span className={styles.nickname}>{comment.writer}</span>
                       </div>
                       <button 
@@ -475,7 +478,7 @@ const CommunityDetail = () => {
                     </div>
                     <div className={styles.commentMeta}>
                       <div className={styles.commentContent}>
-                        <p>{comment.comment}</p>
+                        <p>{comment.content}</p>
                       </div>
                       <span className={styles.commentDate}>{formatDateArray(comment.createdDate)}</span>
                     </div>
