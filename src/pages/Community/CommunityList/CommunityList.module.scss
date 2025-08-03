@@ -62,7 +62,7 @@
   width: 100%;
   height: 44px;
   padding: 12px 45px 12px 15px;
-  border: 1px solid $bg-dark;
+  border: 1px solid #777777;
   border-radius: 10px;
   font-size: $font-size-base;
   font-weight: $font-weight-medium;
@@ -102,7 +102,7 @@
 
 // 게시글 리스트
 .postList {
-  border-top: 2px solid $bg-dark;
+  border-top: 1px solid #999999;
 }
 
 .postItem {
@@ -198,16 +198,16 @@
 }
 
 .authorIcon {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   object-fit: cover;
   border-radius: 50%;
 }
 
 .authorName {
-  font-size: $font-size-base;
+  font-size: 14px;
   font-weight: $font-weight-bold;
-  color: $text-black;
+  color: #333333;
 }
 
 // 이미지 없을 때 빈 배경
