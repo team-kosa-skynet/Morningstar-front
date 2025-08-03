@@ -402,7 +402,7 @@ export default CommunityList;
 ### 2. API 서비스 패턴
 
 ```typescript
-// src/services/authApi.ts
+// src/services/apiService.ts
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://www.gaebang.site/api';

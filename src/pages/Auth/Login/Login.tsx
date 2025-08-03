@@ -4,7 +4,7 @@ import styles from './Login.module.scss';
 import logo from '../../../assets/images/logo.png';
 import googleIcon from '../../../assets/icons/google.svg';
 import kakaoIcon from '../../../assets/icons/kakao.svg';
-import { login, markAttendance } from '../../../services/authApi';
+import { login, markAttendance } from '../../../services/apiService.ts';
 import { useAuthStore } from '../../../stores/authStore';
 
 const Login: React.FC = () => {

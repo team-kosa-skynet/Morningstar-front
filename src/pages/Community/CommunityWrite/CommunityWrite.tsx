@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CommunityWrite.module.scss';
-import { createBoard, uploadImage } from '../../../services/authApi';
+import { createBoard, uploadImage } from '../../../services/apiService.ts';
 import { useAuthStore } from '../../../stores/authStore';
 
 const CommunityWrite: React.FC = () => {

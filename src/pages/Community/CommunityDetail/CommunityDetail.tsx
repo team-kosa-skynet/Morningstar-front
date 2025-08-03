@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import styles from './CommunityDetail.module.scss';
 import Pagination from '../../../components/Pagination/Pagination';
-import { getBoardDetail, createComment, deleteBoard, updateComment, deleteComment } from '../../../services/authApi';
+import { getBoardDetail, createComment, deleteBoard, updateComment, deleteComment } from '../../../services/apiService.ts';
 import { useAuthStore } from '../../../stores/authStore';
 import DropdownModal from '../../../components/DropdownModal/DropdownModal';
 import { getLevelIcon } from '../../../utils/levelUtils';

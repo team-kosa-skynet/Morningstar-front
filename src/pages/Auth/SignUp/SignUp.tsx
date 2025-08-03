@@ -4,7 +4,7 @@ import styles from './SignUp.module.scss';
 import logo from '../../../assets/images/logo2.png';
 import kakaoIcon from '../../../assets/icons/kakao.svg';
 import googleIcon from '../../../assets/icons/google.svg';
-import { sendEmailVerification } from '../../../services/authApi';
+import { sendEmailVerification } from '../../../services/apiService.ts';
 
 interface FormData {
   email: string;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './PointHistorySection.module.scss';
-import { getPointHistory } from '../../services/authApi';
-import type { PointHistoryItem } from '../../services/authApi';
+import { getPointHistory } from '../../services/apiService.ts';
+import type { PointHistoryItem } from '../../services/apiService.ts';
 
 interface PointHistorySectionProps {
   onBack: () => void;

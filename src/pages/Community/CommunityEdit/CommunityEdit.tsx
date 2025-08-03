@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './CommunityEdit.module.scss';
-import { updateBoard, uploadImage, getBoardDetail } from '../../../services/authApi';
+import { updateBoard, uploadImage, getBoardDetail } from '../../../services/apiService.ts';
 import { useAuthStore } from '../../../stores/authStore';
 
 const CommunityEdit: React.FC = () => {

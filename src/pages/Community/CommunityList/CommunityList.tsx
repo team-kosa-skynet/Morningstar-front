@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CommunityList.module.scss';
 import Pagination from '../../../components/Pagination/Pagination';
-import { getBoards } from '../../../services/authApi';
+import { getBoards } from '../../../services/apiService.ts';
 import { useAuthStore } from '../../../stores/authStore';
 
 // 아이콘 import
