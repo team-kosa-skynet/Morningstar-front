@@ -83,8 +83,9 @@
       margin-right: 1px;
       
       svg {
-        width: 6px;
-        height: 24px;
+        width: 4px;
+        height: 18px;
+        color: #dddddd;
       }
       
       &:hover {
@@ -317,6 +318,7 @@
           width: 40px;
           height: 40px;
           background: #000D1C;
+          opacity: 0.9;
           border: none;
           cursor: pointer;
           display: flex;
@@ -457,6 +459,7 @@
               width: 40px;
               height: 40px;
               background: #000D1C;
+              opacity: 0.9;
               border: none;
               cursor: pointer;
               display: flex;
