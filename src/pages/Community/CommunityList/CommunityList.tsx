@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './CommunityList.module.scss';
 import Pagination from '../../../components/Pagination/Pagination';
 import { getBoards, searchBoards } from '../../../services/apiService.ts';
@@ -36,6 +36,7 @@ interface PostItem {
 
 const CommunityList = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { token } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -44,6 +45,18 @@ const CommunityList = () => {
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  // URL 변경 감지하여 검색 상태 초기화
+  useEffect(() => {
+    // 네비게이션에서 커뮤니티 버튼을 클릭했을 때
+    if (location.state?.resetSearch) {
+      setSearchQuery('');
+      setIsSearching(false);
+      setCurrentPage(0);
+      // state 초기화 (중복 실행 방지)
+      navigate('/community', { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   // 레벨에 따른 아이콘 반환 함수
   const getLevelIcon = (level: number) => {
