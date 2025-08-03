@@ -97,8 +97,9 @@ interface BoardsResponse {
 
 interface CommentItem {
   commentId: number;
-  comment: string;
+  content: string;
   writer: string;
+  writerLevel: number;
   createdDate: number[];
 }
 
@@ -112,6 +113,7 @@ interface BoardDetailResponse {
     imageUrl: string[];
     content: string;
     writer: string;
+    writerLevel: number;
     createdDate: string;
     viewCount: number;
     likeCount: number;
