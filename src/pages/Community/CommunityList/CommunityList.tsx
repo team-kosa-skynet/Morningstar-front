@@ -71,7 +71,7 @@ const CommunityList = () => {
       let response;
       if (isSearching && searchQuery.trim()) {
         // 검색 모드일 때
-        response = await searchBoards(searchQuery.trim(), page, 10, 'createdDate,desc', token || undefined);
+        response = await searchBoards(searchQuery.trim(), page, 10, 'createdAt,desc', token || undefined);
       } else {
         // 일반 목록 조회
         response = await getBoards(page, 10, 'createdAt,desc', token || undefined);
