@@ -50,7 +50,6 @@ const CommunityList = () => {
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [searchTrigger, setSearchTrigger] = useState(0); // 검색 트리거
 
   // URL 변경 감지하여 검색 상태 초기화
   useEffect(() => {
@@ -121,7 +120,7 @@ const CommunityList = () => {
 
   useEffect(() => {
     fetchPosts(currentPage);
-  }, [currentPage, searchTrigger]);
+  }, [currentPage, isSearching]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page - 1); // Pagination 컴포넌트는 1부터 시작하지만 API는 0부터 시작
@@ -131,7 +130,6 @@ const CommunityList = () => {
     if (searchQuery.trim()) {
       setIsSearching(true);
       setCurrentPage(0); // 검색 시 첫 페이지로 이동
-      setSearchTrigger(prev => prev + 1); // 검색 트리거 증가
     }
   };
 
