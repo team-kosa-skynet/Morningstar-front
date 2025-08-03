@@ -160,7 +160,7 @@ const CommunityList = () => {
           <div className={styles.listHeader}>
             <div className={styles.titleSection}>
               <h1 className={styles.title}>{isSearching ? `"${searchQuery}" 검색 결과` : '전체 글'}</h1>
-              <button className={styles.writeButton} onClick={handleWriteClick}>글쓰기</button>
+              {token && <button className={styles.writeButton} onClick={handleWriteClick}>글쓰기</button>}
             </div>
             <div className={styles.searchBox}>
               <input

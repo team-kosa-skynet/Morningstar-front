@@ -389,16 +389,18 @@ const CommunityDetail = () => {
             {/* 제목 영역 */}
             <div className={styles.titleSection}>
               <h1 className={styles.postTitle}>{boardDetail.title}</h1>
-              <button 
-                className={styles.menuButton}
-                onClick={(e) => handleDotsClick(e, 'post')}
-              >
-                <svg width="6" height="24" viewBox="0 0 6 24" fill="none">
-                  <circle cx="3" cy="3" r="2" fill="#000"/>
-                  <circle cx="3" cy="12" r="2" fill="#000"/>  
-                  <circle cx="3" cy="21" r="2" fill="#000"/>
-                </svg>
-              </button>
+              {token && (
+                <button 
+                  className={styles.menuButton}
+                  onClick={(e) => handleDotsClick(e, 'post')}
+                >
+                  <svg width="6" height="24" viewBox="0 0 6 24" fill="none">
+                    <circle cx="3" cy="3" r="2" fill="#000"/>
+                    <circle cx="3" cy="12" r="2" fill="#000"/>  
+                    <circle cx="3" cy="21" r="2" fill="#000"/>
+                  </svg>
+                </button>
+              )}
             </div>
             
             {/* 메타 정보 */}
@@ -461,34 +463,36 @@ const CommunityDetail = () => {
               </div>
               
               {/* 댓글 입력창 */}
-              <div className={styles.commentInput}>
-                <div className={styles.inputWrapper}>
-                  <input
-                    type="text"
-                    placeholder="댓글을 입력해주세요!"
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !isSubmittingComment) {
-                        handleCommentSubmit();
-                      }
-                    }}
-                    className={styles.commentTextField}
-                    disabled={isSubmittingComment}
-                  />
-                  <button 
-                    className={styles.submitButton}
-                    onClick={handleCommentSubmit}
-                    disabled={isSubmittingComment}
-                  >
-                    {isSubmittingComment ? (
-                      <span>...</span>
-                    ) : (
-                      <i className="bi bi-vector-pen"></i>
-                    )}
-                  </button>
+              {token && (
+                <div className={styles.commentInput}>
+                  <div className={styles.inputWrapper}>
+                    <input
+                      type="text"
+                      placeholder="댓글을 입력해주세요!"
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !isSubmittingComment) {
+                          handleCommentSubmit();
+                        }
+                      }}
+                      className={styles.commentTextField}
+                      disabled={isSubmittingComment}
+                    />
+                    <button 
+                      className={styles.submitButton}
+                      onClick={handleCommentSubmit}
+                      disabled={isSubmittingComment}
+                    >
+                      {isSubmittingComment ? (
+                        <span>...</span>
+                      ) : (
+                        <i className="bi bi-vector-pen"></i>
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
               
               {/* 댓글 목록 */}
               <div className={styles.commentList}>
@@ -499,12 +503,14 @@ const CommunityDetail = () => {
                         <img src={getLevelIcon(comment.writerLevel)} alt="프로필" className={styles.profileImage} />
                         <span className={styles.nickname}>{comment.writer}</span>
                       </div>
-                      <button 
-                        className={styles.menuButton}
-                        onClick={(e) => handleDotsClick(e, 'comment', comment.commentId)}
-                      >
-                        <i className="bi bi-three-dots-vertical"></i>
-                      </button>
+                      {token && (
+                        <button 
+                          className={styles.menuButton}
+                          onClick={(e) => handleDotsClick(e, 'comment', comment.commentId)}
+                        >
+                          <i className="bi bi-three-dots-vertical"></i>
+                        </button>
+                      )}
                     </div>
                     <div className={styles.commentMeta}>
                       <div className={styles.commentContent}>
