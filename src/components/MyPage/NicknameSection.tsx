@@ -48,7 +48,8 @@ const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
         return;
       }
 
-      const response = await fetch('/api/member/nickname', {
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://www.gaebang.site/api';
+      const response = await fetch(`${API_BASE_URL}/member/nickname`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -60,6 +61,7 @@ const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
       });
 
       if (response.ok) {
+        await response.json();
         alert('닉네임이 성공적으로 변경되었습니다.');
         updateUserName(newNickname.trim());
         onBack();
