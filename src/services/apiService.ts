@@ -216,6 +216,12 @@ interface PointHistoryResponse {
   data: PointHistoryItem[];
 }
 
+interface CheckNicknameResponse {
+  code: number;
+  message: string;
+  data: any;
+}
+
 interface CreateBoardRequest {
   title: string;
   content: string;
@@ -634,6 +640,20 @@ export const toggleBoardLike = async (boardId: number, token: string): Promise<v
         }
       }
     );
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const checkNicknameDuplicate = async (nickname: string): Promise<CheckNicknameResponse> => {
+  try {
+    const response = await axios.get<CheckNicknameResponse>(
+      `${API_BASE_URL}/member/check-duplicated-nickname?nickname=${encodeURIComponent(nickname)}`
+    );
+    return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       throw error.response.data;
