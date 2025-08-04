@@ -52,7 +52,7 @@ const CommunityWrite: React.FC = () => {
             imageUrls.push(imageUrl);
           } catch (error) {
             console.error(`이미지 ${i + 1} 업로드 실패:`, error);
-            alert(`이미지 ${i + 1} 업로드에 실패했습니다. 다시 시도해주세요.`);
+            alert(`이미지 ${i + 1} 업로드에 실패했습니다. 1MB 이하 이미지만 업로드 가능합니다.`);
             setUploadProgress('');
             return;
           }
