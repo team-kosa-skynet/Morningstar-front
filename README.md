@@ -1,69 +1,63 @@
-# React + TypeScript + Vite
+<img width="640" height="170" alt="Image" src="https://github.com/user-attachments/assets/e97825dc-f2d9-4013-96bd-fd1932830685" />
+<br/>
+<br/>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
+# 1. Project Overview (프로젝트 개요)
+- 프로젝트 이름: 샛별 (서비스명 : 개발자의 방주)
+- 프로젝트 설명: 개발자의 방주 (줄여서 개방) 는 AI시대 흐름에 맞춘 개발자들을 위한 커뮤니티 입니다.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+<br/>
 
-## Expanding the ESLint configuration
+# 9. 구현 화면
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+<details>
+  <summary>메인 페이지</summary>
+  <br/>
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+메인 화면<br/>
+<img src="https://github.com/user-attachments/assets/633ed2fd-9af9-4f51-a6a3-20876ad80bd3" alt="메인 페이지"/>
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+</details>
+<details>
+  <summary>회원가입/로그인</summary>
+  <br/>
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+회원가입<br/>
+<img src="https://github.com/user-attachments/assets/944bb82d-1269-48f1-a69f-16219d5fa2df" alt="회원가입"/>
+이메일 인증<br/>
+<img src="https://github.com/user-attachments/assets/76e2a2a8-bc63-4584-a468-136e246692d6" alt="이메일 인증"/>
+로그인<br/>
+<img src="https://github.com/user-attachments/assets/10142e40-a314-48ef-943e-7a6e91708c95" alt="로그인"/>
+비밀번호 찾기<br/>
+<img src="https://github.com/user-attachments/assets/fec2a7f8-0b72-4cf4-a34b-c39c9ab70603" alt="비밀번호 찾기"/>
+비밀번호 재설정<br/>
+<img src="https://github.com/user-attachments/assets/9681b336-de30-4ab4-9891-3fd1258112ff" alt="비밀번호 재설정"/>
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+</details>
+<details>
+  <summary>마이페이지</summary>
+  <br/>
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+마이페이지 메인<br/>
+<img src="https://github.com/user-attachments/assets/e63465da-82a7-4d31-919d-15884a5e46a1" alt="마이페이지"/>
+닉네임 변경<br/>
+<img src="https://github.com/user-attachments/assets/3eb68688-c531-4914-a433-1f4d54b0911d" alt="마이페이지 - 닉네임 변경"/>
+비밀번호 변경<br/>
+<img src="https://github.com/user-attachments/assets/93b82dba-dd71-45aa-9d82-c845bc333558" alt="마이페이지 - 비밀번호 변경"/>
+포인트 내역<br/>
+<img src="https://github.com/user-attachments/assets/a87eec0e-c1e5-46e3-a5c4-abb848e28c72" alt="마이페이지 - 포인트 내역"/>
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+</details>
+<details>
+  <summary>커뮤니티</summary>
+  <br/>
+
+게시글 리스트<br/>
+<img src="https://github.com/user-attachments/assets/9b6f9795-0a9e-478b-81f0-b166ccb77a3b" alt="커뮤니티 - 리스트"/>
+글쓰기<br/>
+<img src="https://github.com/user-attachments/assets/116a88a2-56a3-461b-afaa-5004e5f32766" alt="커뮤니티 - 글쓰기"/>
+상세페이지<br/>
+<img src="https://github.com/user-attachments/assets/82812191-0cc9-42db-83f7-5c04e45707b4" alt="커뮤니티 - 상세페이지"/>
+
+</details>
