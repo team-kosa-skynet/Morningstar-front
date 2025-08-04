@@ -34,6 +34,14 @@
 ![SCSS](https://img.shields.io/badge/SCSS-CC6699?style=for-the-badge&logo=sass&logoColor=white)
 
 <br/>
+
+# 2. Team Members (팀원 및 팀 소개)
+| 이동규 | 이유상 | 유성호 | 조민희 |
+|:------:|:------:|:------:|:------:|
+| <img src="https://github.com/user-attachments/assets/c6cb2f22-b13b-4377-bee1-a8aa86509dca" alt="이동규" width="150"> | <img src="https://github.com/user-attachments/assets/2e1fcc35-54e8-4deb-8444-fac933a3dcdf" alt="이유상" width="150"> | <img src="https://github.com/user-attachments/assets/6e9fefda-a6e0-4b32-be73-72881aa55d4a" alt="유성호" width="150"> | <img src="https://github.com/user-attachments/assets/2426819f-237b-4428-b9cb-7fd1a10e54e7" alt="조민희" width="150"> |
+| PL | BE | BE | BE |
+| [GitHub](https://github.com/Gorani77) | [GitHub](https://github.com/liyusang1) | [GitHub](https://github.com/Dorosiya) | [GitHub](https://github.com/minimini1212) |
+
 <br/>
 
 # 9. 구현 화면
