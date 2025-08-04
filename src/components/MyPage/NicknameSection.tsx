@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../../stores/authStore';
+import { checkNicknameDuplicate } from '../../services/apiService';
 import styles from './NicknameSection.module.scss';
 
 interface NicknameSectionProps {
@@ -19,10 +20,9 @@ const NicknameSection: React.FC<NicknameSectionProps> = ({ onBack }) => {
     
     setIsChecking(true);
     try {
-      const response = await fetch(`/api/member/check-duplicated-nickname?nickname=${encodeURIComponent(newNickname.trim())}`);
-      const result = await response.json();
+      const result = await checkNicknameDuplicate(newNickname.trim());
       
-      if (response.ok && result.code === 200) {
+      if (result.code === 200) {
         setCheckResult('available');
       } else {
         setCheckResult('unavailable');

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { checkPassword, updatePassword } from '../../services/apiService';
 import styles from './PasswordSection.module.scss';
 
 interface PasswordSectionProps {
@@ -69,20 +70,12 @@ const PasswordSection: React.FC<PasswordSectionProps> = ({ onBack }) => {
         return;
       }
 
-      const response = await fetch('/api/member/check-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          currentPassword: currentPassword.trim()
-        })
-      });
+      const result = await checkPassword(
+        { currentPassword: currentPassword.trim() },
+        token
+      );
 
-      const result = await response.json();
-
-      if (response.ok && result.code === 200) {
+      if (result.code === 200) {
         setIsCurrentPasswordValid(true);
         alert('현재 비밀번호가 확인되었습니다.');
       } else {
@@ -116,19 +109,15 @@ const PasswordSection: React.FC<PasswordSectionProps> = ({ onBack }) => {
         return;
       }
 
-      const response = await fetch('/api/member/password', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
+      const result = await updatePassword(
+        {
           currentPassword: currentPassword.trim(),
           newPassword: newPassword.trim()
-        })
-      });
+        },
+        token
+      );
 
-      if (response.ok) {
+      if (result.code === 200) {
         alert('비밀번호가 성공적으로 변경되었습니다.');
         // 폼 초기화
         setCurrentPassword('');
@@ -136,8 +125,7 @@ const PasswordSection: React.FC<PasswordSectionProps> = ({ onBack }) => {
         setIsCurrentPasswordValid(false);
         onBack();
       } else {
-        const errorData = await response.json();
-        alert(errorData.message || '비밀번호 변경에 실패했습니다.');
+        alert(result.message || '비밀번호 변경에 실패했습니다.');
       }
     } catch (error) {
       console.error('비밀번호 변경 오류:', error);
