@@ -82,9 +82,13 @@ const PasswordSection: React.FC<PasswordSectionProps> = ({ onBack }) => {
         setIsCurrentPasswordValid(false);
         alert(result.message || '현재 비밀번호가 일치하지 않습니다.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('비밀번호 확인 오류:', error);
-      alert('네트워크 오류가 발생했습니다.');
+      if (error.code === 400 && error.message) {
+        alert(error.message);
+      } else {
+        alert('네트워크 오류가 발생했습니다.');
+      }
       setIsCurrentPasswordValid(false);
     } finally {
       setIsVerifying(false);
