@@ -222,6 +222,27 @@ interface CheckNicknameResponse {
   data: any;
 }
 
+interface CheckPasswordRequest {
+  currentPassword: string;
+}
+
+interface CheckPasswordResponse {
+  code: number;
+  message: string;
+  data: any;
+}
+
+interface UpdatePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+interface UpdatePasswordResponse {
+  code: number;
+  message: string;
+  data: any;
+}
+
 interface CreateBoardRequest {
   title: string;
   content: string;
@@ -652,6 +673,48 @@ export const checkNicknameDuplicate = async (nickname: string): Promise<CheckNic
   try {
     const response = await axios.get<CheckNicknameResponse>(
       `${API_BASE_URL}/member/check-duplicated-nickname?nickname=${encodeURIComponent(nickname)}`
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const checkPassword = async (passwordData: CheckPasswordRequest, token: string): Promise<CheckPasswordResponse> => {
+  try {
+    const response = await axios.post<CheckPasswordResponse>(
+      `${API_BASE_URL}/member/check-password`,
+      passwordData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const updatePassword = async (passwordData: UpdatePasswordRequest, token: string): Promise<UpdatePasswordResponse> => {
+  try {
+    const response = await axios.patch<UpdatePasswordResponse>(
+      `${API_BASE_URL}/member/password`,
+      passwordData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      }
     );
     return response.data;
   } catch (error) {
