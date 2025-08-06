@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './AIChatDetail.module.scss';
 
 interface Message {
@@ -18,6 +18,7 @@ const AIChatDetail: React.FC = () => {
   const [isModelDetailOpen, setIsModelDetailOpen] = useState(false);
   const [selectedModelBrand, setSelectedModelBrand] = useState('');
   const [isImageMode, setIsImageMode] = useState(false);
+  const chatInputRef = useRef<HTMLDivElement>(null);
   const [messages] = useState<Message[]>([
     {
       id: '1',
@@ -171,6 +172,24 @@ Claude 4 모델 패밀리의 일원으로, 현재 Claude Opus 4와 Claude Sonnet
     }
   };
 
+  // 채팅 입력창 높이 계산 및 CSS 변수 업데이트
+  const updateChatInputHeight = () => {
+    if (chatInputRef.current) {
+      const height = chatInputRef.current.offsetHeight;
+      document.documentElement.style.setProperty('--chat-input-height', `${height + 20}px`); // 20px는 bottom 여백
+    }
+  };
+
+  // selectedModels가 변경될 때마다 높이 재계산
+  useEffect(() => {
+    updateChatInputHeight();
+  }, [selectedModels]);
+
+  // 컴포넌트 마운트 시 초기 높이 설정
+  useEffect(() => {
+    updateChatInputHeight();
+  }, []);
+
   return (
     <div className={styles.container}>
       <div className={styles.content}>
@@ -261,7 +280,10 @@ Claude 4 모델 패밀리의 일원으로, 현재 Claude Opus 4와 Claude Sonnet
         </div>
 
         {/* 채팅 입력창 */}
-        <div className={`${styles.chatInput} ${(isModelSelectionOpen || isModelDetailOpen) ? styles.modalOpen : ''}`}>
+        <div 
+          ref={chatInputRef}
+          className={`${styles.chatInput} ${(isModelSelectionOpen || isModelDetailOpen) ? styles.modalOpen : ''}`}
+        >
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
