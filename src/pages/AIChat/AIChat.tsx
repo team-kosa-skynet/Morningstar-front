@@ -72,9 +72,9 @@ const AIChat: React.FC = () => {
         brand: selectedModelBrand
       };
       
-      // 중복 체크
+      // 중복 체크 및 최대 2개 제한
       const isAlreadySelected = selectedModels.some(model => model.id === modelId);
-      if (!isAlreadySelected) {
+      if (!isAlreadySelected && selectedModels.length < 2) {
         setSelectedModels(prev => [...prev, newSelectedModel]);
       }
     }
@@ -141,25 +141,6 @@ const AIChat: React.FC = () => {
                 rows={1}
               />
               
-              {selectedModels.length > 0 && (
-                <div className={styles.selectedModels}>
-                  {selectedModels.map((model) => (
-                    <div key={model.id} className={styles.selectedModelItem}>
-                      <div className={styles.modelInfo}>
-                        <img src={model.icon} alt={model.name} className={styles.selectedModelIcon} />
-                        <span className={styles.selectedModelName}>{model.name}</span>
-                      </div>
-                      <button 
-                        className={styles.removeModelButton}
-                        onClick={() => handleRemoveModel(model.id)}
-                      >
-                        <i className="bi bi-x-lg"></i>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              
               <div className={styles.buttonGroup}>
                 <div className={styles.leftButtonGroup}>
                   <button
@@ -185,6 +166,25 @@ const AIChat: React.FC = () => {
                   <i className="bi bi-send"></i>
                 </button>
               </div>
+              
+              {selectedModels.length > 0 && (
+                <div className={styles.selectedModels}>
+                  {selectedModels.map((model) => (
+                    <div key={model.id} className={styles.selectedModelItem}>
+                      <div className={styles.modelInfo}>
+                        <img src={model.icon} alt={model.name} className={styles.selectedModelIcon} />
+                        <span className={styles.selectedModelName}>{model.name}</span>
+                      </div>
+                      <button 
+                        className={styles.removeModelButton}
+                        onClick={() => handleRemoveModel(model.id)}
+                      >
+                        <i className="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
