@@ -18,6 +18,7 @@ const AIChatDetail: React.FC = () => {
   const [isModelDetailOpen, setIsModelDetailOpen] = useState(false);
   const [selectedModelBrand, setSelectedModelBrand] = useState('');
   const [isImageMode, setIsImageMode] = useState(false);
+  const [isChatInputFocused, setIsChatInputFocused] = useState(false);
   const chatInputRef = useRef<HTMLDivElement>(null);
   const [messages] = useState<Message[]>([
     {
@@ -282,44 +283,62 @@ Claude 4 모델 패밀리의 일원으로, 현재 Claude Opus 4와 Claude Sonnet
         {/* 채팅 입력창 */}
         <div 
           ref={chatInputRef}
-          className={`${styles.chatInput} ${(isModelSelectionOpen || isModelDetailOpen) ? styles.modalOpen : ''}`}
+          className={`${styles.chatInput} ${(isModelSelectionOpen || isModelDetailOpen) ? styles.modalOpen : ''} ${isChatInputFocused ? styles.focused : styles.unfocused}`}
         >
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="질문을 입력해주세요."
-            className={styles.messageInput}
-            onKeyDown={handleKeyPress}
-            rows={1}
-          />
+          {!isChatInputFocused && !message ? (
+            <div 
+              className={styles.simplePlaceholder}
+              onClick={() => setIsChatInputFocused(true)}
+            >
+              질문을 입력해주세요
+            </div>
+          ) : (
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="질문을 입력해주세요."
+              className={styles.messageInput}
+              onKeyDown={handleKeyPress}
+              onFocus={() => setIsChatInputFocused(true)}
+              onBlur={() => {
+                if (!message.trim()) {
+                  setIsChatInputFocused(false);
+                }
+              }}
+              rows={1}
+              autoFocus={isChatInputFocused}
+            />
+          )}
           
-          <div className={styles.buttonGroup}>
-            <div className={styles.leftButtonGroup}>
-              <button 
-                className={styles.modelSelectButton}
-                onClick={() => setIsModelSelectionOpen(!isModelSelectionOpen)}
+          {isChatInputFocused && (
+            <div className={styles.buttonGroup}>
+              <div className={styles.leftButtonGroup}>
+                <button 
+                  className={styles.modelSelectButton}
+                  onClick={() => setIsModelSelectionOpen(!isModelSelectionOpen)}
+                >
+                  모델 선택
+                </button>
+                <button 
+                  className={`${styles.imageButton} ${isImageMode ? styles.active : ''}`}
+                  onClick={() => setIsImageMode(!isImageMode)}
+                >
+                  <i className="bi bi-image"></i>
+                </button>
+              </div>
+              
+              <button
+                className={styles.sendButton}
+                onClick={handleSubmit}
+                disabled={!message.trim()}
               >
-                모델 선택
-              </button>
-              <button 
-                className={`${styles.imageButton} ${isImageMode ? styles.active : ''}`}
-                onClick={() => setIsImageMode(!isImageMode)}
-              >
-                <i className="bi bi-image"></i>
+                <i className="bi bi-send"></i>
               </button>
             </div>
-            
-            <button
-              className={styles.sendButton}
-              onClick={handleSubmit}
-              disabled={!message.trim()}
-            >
-              <i className="bi bi-send"></i>
-            </button>
-          </div>
+          )}
 
           {/* 선택된 모델들 표시 */}
-          {selectedModels.length > 0 && (
+          {selectedModels.length > 0 && isChatInputFocused && (
             <div className={styles.selectedModels}>
               {selectedModels.map((model) => (
                 <div key={model.id} className={styles.selectedModelItem}>
