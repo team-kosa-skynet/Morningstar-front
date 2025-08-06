@@ -72,29 +72,14 @@ const AIChat: React.FC = () => {
                 </div>
 
                 <div className={styles.chatSection}>
-                    <div className={styles.chatContainer}>
-                        <div className={styles.inputWrapper}>
-                            <div className={styles.selectedModels}>
-                                {selectedModels.map(modelId => {
-                                    const model = aiModels.find(m => m.id === modelId);
-                                    if (!model) return null;
-                                    
-                                    return (
-                                        <div key={modelId} className={styles.selectedModel}>
-                                            <img src={model.icon} alt={model.name} />
-                                            <span>{model.description}</span>
-                                            <button 
-                                                className={styles.removeButton}
-                                                onClick={() => handleRemoveModel(modelId)}
-                                            >
-                                                <i className="bi bi-x-lg"></i>
-                                            </button>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
-                            <div className={styles.inputArea}>
+                    <div className={styles.chatBox}>
+                        <div className={styles.boxBackground}></div>
+                        
+                        <div className={styles.inputAndButtons}>
+                            <div className={styles.inputBorder}></div>
+                            
+                            <div className={styles.userInput}>
+                                <div className={styles.inputBackground}></div>
                                 <textarea
                                     className={styles.input}
                                     placeholder="질문을 입력해주세요."
@@ -103,8 +88,12 @@ const AIChat: React.FC = () => {
                                     onKeyPress={handleKeyPress}
                                     rows={1}
                                 />
+                            </div>
+                            
+                            <div className={styles.buttons}>
+                                <div className={styles.buttonsBackground}></div>
                                 
-                                <div className={styles.buttonGroup}>
+                                <div className={styles.buttonGroup1}>
                                     <button 
                                         className={styles.modelSelectButton}
                                         onClick={() => setShowModelSelection(!showModelSelection)}
@@ -112,10 +101,16 @@ const AIChat: React.FC = () => {
                                         모델 선택
                                     </button>
                                     
-                                    <button className={styles.imageButton}>
-                                        <i className="bi bi-image"></i>
-                                    </button>
-                                    
+                                    <div className={styles.imageButtonWrapper}>
+                                        <div className={styles.imageButtonBorder}></div>
+                                        <button className={styles.imageButton}>
+                                            <i className="bi bi-image"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div className={styles.sendButtonWrapper}>
+                                    <div className={styles.sendButtonBorder}></div>
                                     <button 
                                         className={styles.sendButton}
                                         onClick={handleSendMessage}
@@ -125,6 +120,26 @@ const AIChat: React.FC = () => {
                                     </button>
                                 </div>
                             </div>
+                        </div>
+                        
+                        <div className={styles.selectedModels}>
+                            {selectedModels.map(modelId => {
+                                const model = aiModels.find(m => m.id === modelId);
+                                if (!model) return null;
+                                
+                                return (
+                                    <div key={modelId} className={styles.selectedModel}>
+                                        <img src={model.icon} alt={model.name} />
+                                        <span>{model.description}</span>
+                                        <button 
+                                            className={styles.removeButton}
+                                            onClick={() => handleRemoveModel(modelId)}
+                                        >
+                                            <i className="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 
