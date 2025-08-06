@@ -69,13 +69,13 @@
   display: flex;
   align-items: center;
   gap: 12px;
-}
 
-.modelIcon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
+  .modelIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
 }
 
 .modelName {
@@ -133,29 +133,25 @@
 // 채팅 입력창
 .chatInput {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 20px;
-}
-
-.inputContainer {
-  max-width: 1360px;
-  margin: 0 auto;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
-}
-
-.inputBox {
+  max-width: 811px;
   background: #ffffff;
   border: 1px solid #dddddd;
   border-radius: 40px;
   padding: 20px 30px;
-  position: relative;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  max-width: 811px;
-  margin: 0 auto;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  z-index: 100;
+
+  &.modalOpen {
+    transform: translateX(-50%) translateY(0px); // 모달이 채팅 입력창 위에 있으므로 이동하지 않음
+  }
 }
 
 .messageInput {
@@ -233,6 +229,15 @@
       color: #4e4eff;
     }
   }
+
+  &.active {
+    background-color: #4e4eff;
+    border-color: #4e4eff;
+    
+    i {
+      color: #ffffff;
+    }
+  }
 }
 
 .sendButton {
@@ -267,39 +272,161 @@
   }
 }
 
-// 반응형 처리
-@media (max-width: 768px) {
-  .content {
-    padding: 20px 10px 120px;
-  }
+// 모델 선택 UI
+.modelSelection {
+  position: fixed;
+  bottom: 150px; // 채팅 입력창 위에 위치
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%;
+  max-width: 811px;
+  background-color: #f5f5ff;
+  border: 1px solid #dddddd;
+  border-radius: 40px;
+  padding: 20px 34px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 99;
+  animation: slideUp 0.3s ease forwards;
+}
 
-  .messageSection,
-  .aiResponsesContainer {
-    padding: 0 10px;
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100%);
   }
-
-  .userMessageContainer {
-    max-width: 100%;
-  }
-
-  .aiResponse {
-    max-width: 100%;
-  }
-
-  .chatInput {
-    padding: 15px;
-  }
-
-  .inputBox {
-    padding: 15px 20px;
-  }
-
-  .leftButtonGroup {
-    gap: 8px;
-  }
-
-  .modelSelectButton {
-    padding: 8px 15px;
-    font-size: 12px;
+  to {
+    transform: translateX(-50%) translateY(0);
   }
 }
+
+.modelSelectionHeader {
+  display: flex;
+  align-items: center;
+  
+  span {
+    font-family: 'Pretendard', sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    color: #333333;
+  }
+}
+
+.modelList {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.modelOption {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 42px;
+  padding: 10px 15px;
+  background-color: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 10px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #333333;
+  cursor: pointer;
+  
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+.modelOption .modelIcon,
+.modelDetailOption .modelIcon {
+  width: 22px;
+  height: 22px;
+  object-fit: cover;
+}
+
+// 모델 세부 선택 (modelSelection과 동일한 스타일 사용)
+
+.modelDetailHeader {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  
+  span {
+    font-family: 'Pretendard', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    color: #333333;
+  }
+}
+
+.backButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  
+  i {
+    color: #000000;
+    font-size: 16px;
+  }
+  
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
+.modelDetailList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 8px;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+    
+    &:hover {
+      background: #a1a1a1;
+    }
+  }
+}
+
+.modelDetailOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 10px 15px;
+  margin-right: 24px;
+  background-color: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 10px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: #333333;
+  cursor: pointer;
+  text-align: left;
+  
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}
+
