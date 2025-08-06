@@ -23,6 +23,7 @@
   display: flex;
   justify-content: flex-end;
   padding: 0 20px;
+  margin-bottom: 60px;
 }
 
 .userMessageContainer {
@@ -48,13 +49,15 @@
   gap: 20px;
   padding: 0 20px;
   justify-content: center;
+  align-items: flex-start; // 상단 정렬 (높이가 다를 때)
 }
 
 .aiResponse {
   display: flex;
   justify-content: flex-start;
-  max-width: 650px;
-  flex: 1;
+  min-width: 300px; // 최소 너비
+  max-width: 650px; // 최대 너비
+  flex: 1 1 0; // 동일한 기본 크기에서 시작하되 내용에 따라 증가
 }
 
 .responseContent {
@@ -100,7 +103,7 @@
 
 .feedbackSection {
   background: rgba(78, 78, 255, 0.06);
-  padding: 4px 29px;
+  padding: 4px 29px 14px 29px; // 하단 패딩 10px 추가
   display: flex;
   justify-content: flex-start;
 }
