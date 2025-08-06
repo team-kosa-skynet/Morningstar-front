@@ -110,7 +110,7 @@ const AIChat: React.FC = () => {
                 {models.map((model) => (
                   <button
                     key={model.id}
-                    className={`${styles.modelOption} ${selectedModel === model.id ? styles.selected : ''}`}
+                    className={styles.modelOption}
                     onClick={() => handleModelSelect(model.id)}
                   >
                     <img src={model.icon} alt={model.name} className={styles.modelIcon} />
