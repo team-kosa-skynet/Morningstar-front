@@ -5,7 +5,7 @@ const AIChat: React.FC = () => {
   const [isModelSelectionOpen, setIsModelSelectionOpen] = useState(false);
   const [isModelDetailOpen, setIsModelDetailOpen] = useState(false);
   const [selectedModelBrand, setSelectedModelBrand] = useState('');
-  const [selectedModel, setSelectedModel] = useState('');
+  const [selectedModels, setSelectedModels] = useState<Array<{id: string, name: string, icon: string, brand: string}>>([]);
   const [isImageMode, setIsImageMode] = useState(false);
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -65,8 +65,24 @@ const AIChat: React.FC = () => {
   };
 
   const handleModelDetailSelect = (modelId: string) => {
-    setSelectedModel(modelId);
+    const selectedModelData = modelDetails[selectedModelBrand]?.find(model => model.id === modelId);
+    if (selectedModelData) {
+      const newSelectedModel = {
+        ...selectedModelData,
+        brand: selectedModelBrand
+      };
+      
+      // 중복 체크
+      const isAlreadySelected = selectedModels.some(model => model.id === modelId);
+      if (!isAlreadySelected) {
+        setSelectedModels(prev => [...prev, newSelectedModel]);
+      }
+    }
     setIsModelDetailOpen(false);
+  };
+
+  const handleRemoveModel = (modelId: string) => {
+    setSelectedModels(prev => prev.filter(model => model.id !== modelId));
   };
 
   const handleBackToModelSelection = () => {
@@ -124,6 +140,25 @@ const AIChat: React.FC = () => {
                 onKeyDown={handleKeyPress}
                 rows={1}
               />
+              
+              {selectedModels.length > 0 && (
+                <div className={styles.selectedModels}>
+                  {selectedModels.map((model) => (
+                    <div key={model.id} className={styles.selectedModelItem}>
+                      <div className={styles.modelInfo}>
+                        <img src={model.icon} alt={model.name} className={styles.selectedModelIcon} />
+                        <span className={styles.selectedModelName}>{model.name}</span>
+                      </div>
+                      <button 
+                        className={styles.removeModelButton}
+                        onClick={() => handleRemoveModel(model.id)}
+                      >
+                        <i className="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
               
               <div className={styles.buttonGroup}>
                 <div className={styles.leftButtonGroup}>
