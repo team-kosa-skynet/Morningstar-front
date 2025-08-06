@@ -1,7 +1,9 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './AIChat.module.scss';
 
 const AIChat: React.FC = () => {
+  const navigate = useNavigate();
   const [isModelSelectionOpen, setIsModelSelectionOpen] = useState(false);
   const [isModelDetailOpen, setIsModelDetailOpen] = useState(false);
   const [selectedModelBrand, setSelectedModelBrand] = useState('');
@@ -93,12 +95,8 @@ const AIChat: React.FC = () => {
   const handleSubmit = () => {
     if (message.trim()) {
       console.log('Submitting message:', message);
-      setMessage('');
-      
-      // textarea 높이 리셋
-      if (textareaRef.current) {
-        textareaRef.current.style.height = '24px';
-      }
+      // AIChatDetail 페이지로 이동
+      navigate('/ai-chat/detail');
     }
   };
 
