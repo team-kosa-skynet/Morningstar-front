@@ -3,6 +3,8 @@ import styles from './AIChat.module.scss';
 
 const AIChat: React.FC = () => {
   const [isModelSelectionOpen, setIsModelSelectionOpen] = useState(false);
+  const [isModelDetailOpen, setIsModelDetailOpen] = useState(false);
+  const [selectedModelBrand, setSelectedModelBrand] = useState('');
   const [selectedModel, setSelectedModel] = useState('');
   const [isImageMode, setIsImageMode] = useState(false);
   const [message, setMessage] = useState('');
@@ -14,9 +16,62 @@ const AIChat: React.FC = () => {
     { id: 'claude', name: 'Claude by Anthropic', icon: '/src/assets/images/클로드-Photoroom.png' }
   ];
 
+  // 더미 데이터 - 모델 세부 리스트
+  const modelDetails: Record<string, Array<{id: string, name: string, icon: string}>> = {
+    gpt: [
+      { id: 'gpt-4o', name: 'GPT-4o', icon: '/src/assets/images/openAI-Photoroom.png' },
+      { id: 'gpt-4o-mini', name: 'GPT-4o mini', icon: '/src/assets/images/openAI-Photoroom.png' },
+      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', icon: '/src/assets/images/openAI-Photoroom.png' },
+      { id: 'gpt-4', name: 'GPT-4', icon: '/src/assets/images/openAI-Photoroom.png' },
+      { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', icon: '/src/assets/images/openAI-Photoroom.png' },
+      { id: 'o1-preview', name: 'OpenAI o1-preview', icon: '/src/assets/images/openAI-Photoroom.png' },
+      { id: 'o1-mini', name: 'OpenAI o1-mini', icon: '/src/assets/images/openAI-Photoroom.png' },
+      { id: 'gpt-oss-120b', name: 'gpt-oss-120b', icon: '/src/assets/images/openAI-Photoroom.png' },
+      { id: 'o3-pro', name: 'OpenAI o3-pro', icon: '/src/assets/images/openAI-Photoroom.png' },
+      { id: 'gpt-4.1', name: 'GPT-4.1', icon: '/src/assets/images/openAI-Photoroom.png' },
+      { id: 'o1', name: 'OpenAI o1', icon: '/src/assets/images/openAI-Photoroom.png' },
+      { id: 'gpt-5', name: 'GPT-5', icon: '/src/assets/images/openAI-Photoroom.png' }
+    ],
+    gemini: [
+      { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
+      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
+      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
+      { id: 'gemini-pro', name: 'Gemini Pro', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
+      { id: 'gemini-ultra', name: 'Gemini Ultra', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
+      { id: 'gemini-nano', name: 'Gemini Nano', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
+      { id: 'gemini-experimental', name: 'Gemini Experimental', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
+      { id: 'gemini-code', name: 'Gemini Code', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
+      { id: 'gemini-vision', name: 'Gemini Vision', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
+      { id: 'gemini-thinking', name: 'Gemini Thinking', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' }
+    ],
+    claude: [
+      { id: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', icon: '/src/assets/images/클로드-Photoroom.png' },
+      { id: 'claude-3.5-haiku', name: 'Claude 3.5 Haiku', icon: '/src/assets/images/클로드-Photoroom.png' },
+      { id: 'claude-3-opus', name: 'Claude 3 Opus', icon: '/src/assets/images/클로드-Photoroom.png' },
+      { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', icon: '/src/assets/images/클로드-Photoroom.png' },
+      { id: 'claude-3-haiku', name: 'Claude 3 Haiku', icon: '/src/assets/images/클로드-Photoroom.png' },
+      { id: 'claude-2.1', name: 'Claude 2.1', icon: '/src/assets/images/클로드-Photoroom.png' },
+      { id: 'claude-2', name: 'Claude 2', icon: '/src/assets/images/클로드-Photoroom.png' },
+      { id: 'claude-instant', name: 'Claude Instant', icon: '/src/assets/images/클로드-Photoroom.png' },
+      { id: 'claude-4', name: 'Claude 4', icon: '/src/assets/images/클로드-Photoroom.png' },
+      { id: 'claude-computer-use', name: 'Claude Computer Use', icon: '/src/assets/images/클로드-Photoroom.png' }
+    ]
+  };
+
   const handleModelSelect = (modelId: string) => {
-    setSelectedModel(modelId);
+    setSelectedModelBrand(modelId);
     setIsModelSelectionOpen(false);
+    setIsModelDetailOpen(true);
+  };
+
+  const handleModelDetailSelect = (modelId: string) => {
+    setSelectedModel(modelId);
+    setIsModelDetailOpen(false);
+  };
+
+  const handleBackToModelSelection = () => {
+    setIsModelDetailOpen(false);
+    setIsModelSelectionOpen(true);
   };
 
   const handleSubmit = () => {
@@ -112,6 +167,32 @@ const AIChat: React.FC = () => {
                     key={model.id}
                     className={styles.modelOption}
                     onClick={() => handleModelSelect(model.id)}
+                  >
+                    <img src={model.icon} alt={model.name} className={styles.modelIcon} />
+                    <span>{model.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isModelDetailOpen && selectedModelBrand && (
+          <div className={styles.modelSelection}>
+            <div className={styles.modelDetailBox}>
+              <div className={styles.modelDetailHeader}>
+                <button className={styles.backButton} onClick={handleBackToModelSelection}>
+                  <i className="bi bi-arrow-left"></i>
+                </button>
+                <span>모델 선택</span>
+              </div>
+              
+              <div className={styles.modelDetailList}>
+                {modelDetails[selectedModelBrand]?.slice(0, 10).map((model) => (
+                  <button
+                    key={model.id}
+                    className={styles.modelDetailOption}
+                    onClick={() => handleModelDetailSelect(model.id)}
                   >
                     <img src={model.icon} alt={model.name} className={styles.modelIcon} />
                     <span>{model.name}</span>
