@@ -59,7 +59,7 @@ Claude 4 모델 패밀리의 일원으로, 현재 Claude Opus 4와 Claude Sonnet
     }
   ]);
 
-  const [selectedModels] = useState([
+  const [selectedModels, setSelectedModels] = useState<Array<{id: string, name: string, icon: string, brand: string}>>([
     {
       id: 'gpt-4o',
       name: 'GPT-4o',
@@ -132,8 +132,24 @@ Claude 4 모델 패밀리의 일원으로, 현재 Claude Opus 4와 Claude Sonnet
   };
 
   const handleModelDetailSelect = (modelId: string) => {
-    console.log('모델 선택:', modelId);
+    const selectedModelData = modelDetails[selectedModelBrand]?.find(model => model.id === modelId);
+    if (selectedModelData) {
+      const newSelectedModel = {
+        ...selectedModelData,
+        brand: selectedModelBrand
+      };
+      
+      // 중복 체크 및 최대 2개 제한
+      const isAlreadySelected = selectedModels.some(model => model.id === modelId);
+      if (!isAlreadySelected && selectedModels.length < 2) {
+        setSelectedModels(prev => [...prev, newSelectedModel]);
+      }
+    }
     setIsModelDetailOpen(false);
+  };
+
+  const handleRemoveModel = (modelId: string) => {
+    setSelectedModels(prev => prev.filter(model => model.id !== modelId));
   };
 
   const handleBackToModelSelection = () => {
@@ -279,6 +295,26 @@ Claude 4 모델 패밀리의 일원으로, 현재 Claude Opus 4와 Claude Sonnet
               <i className="bi bi-send"></i>
             </button>
           </div>
+
+          {/* 선택된 모델들 표시 */}
+          {selectedModels.length > 0 && (
+            <div className={styles.selectedModels}>
+              {selectedModels.map((model) => (
+                <div key={model.id} className={styles.selectedModelItem}>
+                  <div className={styles.modelInfo}>
+                    <img src={model.icon} alt={model.name} className={styles.selectedModelIcon} />
+                    <span className={styles.selectedModelName}>{model.name}</span>
+                  </div>
+                  <button 
+                    className={styles.removeModelButton}
+                    onClick={() => handleRemoveModel(model.id)}
+                  >
+                    <i className="bi bi-x-lg"></i>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* 모델 선택 모달 */}
