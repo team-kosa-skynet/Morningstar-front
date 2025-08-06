@@ -176,7 +176,7 @@ Claude 4 모델 패밀리의 일원으로, 현재 Claude Opus 4와 Claude Sonnet
   const updateChatInputHeight = () => {
     if (chatInputRef.current) {
       const height = chatInputRef.current.offsetHeight;
-      document.documentElement.style.setProperty('--chat-input-height', `${height + 20}px`); // 20px는 bottom 여백
+      document.documentElement.style.setProperty('--chat-input-height', `${height + 40}px`); // 20px(bottom 여백) + 20px(모달과의 간격)
     }
   };
 
