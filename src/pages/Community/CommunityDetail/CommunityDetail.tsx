@@ -4,7 +4,7 @@ import styles from './CommunityDetail.module.scss';
 import Pagination from '../../../components/Pagination/Pagination';
 import { getBoardDetail, createComment, deleteBoard, updateComment, deleteComment, toggleBoardLike } from '../../../services/apiService.ts';
 import { useAuthStore } from '../../../stores/authStore';
-import DropdownModal from '../../../components/DropdownModal/DropdownModal';
+import DropdownModal from '../../../components/Modal/DropdownModal.tsx';
 import { getLevelIcon } from '../../../utils/levelUtils';
 
 interface BoardDetail {
