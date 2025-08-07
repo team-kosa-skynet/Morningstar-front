@@ -14,12 +14,10 @@ const AIChatDetail: React.FC = () => {
     isOpen: boolean;
     selectedModel: { name: string; icon: string };
     unselectedModel: { name: string; icon: string };
-    isPositive: boolean;
   }>({
     isOpen: false,
     selectedModel: { name: '', icon: '' },
-    unselectedModel: { name: '', icon: '' },
-    isPositive: true
+    unselectedModel: { name: '', icon: '' }
   });
 
   const [selectedModels, setSelectedModels] = useState<Array<{id: string, name: string, icon: string, brand: string}>>([
@@ -93,8 +91,7 @@ const AIChatDetail: React.FC = () => {
       setFeedbackModal({
         isOpen: true,
         selectedModel: { name: selected.name, icon: selected.icon },
-        unselectedModel: { name: unselected.name, icon: unselected.icon },
-        isPositive: true
+        unselectedModel: { name: unselected.name, icon: unselected.icon }
       });
     }
   };
@@ -390,7 +387,6 @@ const AIChatDetail: React.FC = () => {
           onClose={closeFeedbackModal}
           selectedModel={feedbackModal.selectedModel}
           unselectedModel={feedbackModal.unselectedModel}
-          isPositive={feedbackModal.isPositive}
         />
       </div>
     </div>

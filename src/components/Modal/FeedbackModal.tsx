@@ -12,15 +12,13 @@ interface FeedbackModalProps {
     name: string;
     icon?: string;
   };
-  isPositive: boolean;
 }
 
 const FeedbackModal: React.FC<FeedbackModalProps> = ({ 
   isOpen, 
   onClose, 
   selectedModel,
-  unselectedModel,
-  isPositive 
+  unselectedModel
 }) => {
   const [selectedPositiveReasons, setSelectedPositiveReasons] = useState<string[]>([]);
   const [selectedNegativeReasons, setSelectedNegativeReasons] = useState<string[]>([]);
