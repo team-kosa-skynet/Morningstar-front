@@ -1,0 +1,48 @@
+@import '../../styles/variables';
+
+.searchBox {
+  position: relative;
+  width: 100%;
+}
+
+.searchInput {
+  width: 100%;
+  height: 44px;
+  padding: 12px 45px 12px 15px;
+  border: 1px solid #777777;
+  border-radius: 10px;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  color: $text-black;
+  background-color: $bg-white;
+  outline: none;
+
+  &::placeholder {
+    color: $text-gray;
+  }
+
+  &:focus {
+    border-color: $primary-color;
+  }
+}
+
+.searchButton {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: $text-black;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    color: $primary-color;
+  }
+}

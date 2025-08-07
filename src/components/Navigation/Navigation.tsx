@@ -31,6 +31,9 @@ const Navigation: React.FC = () => {
     if (item === '질문하기') {
       navigate('/ai-chat');
     }
+    if (item === 'AI 뉴스') {
+      navigate('/ai-news');
+    }
   };
 
   return (

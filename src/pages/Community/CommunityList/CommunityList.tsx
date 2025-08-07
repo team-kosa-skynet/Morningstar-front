@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './CommunityList.module.scss';
 import Pagination from '../../../components/Pagination/Pagination';
+import SearchBox from '../../../components/SearchBox/SearchBox';
 import { getBoards, searchBoards } from '../../../services/apiService.ts';
 import { useAuthStore } from '../../../stores/authStore';
 import { getLevelIcon } from '../../../utils/levelUtils';
@@ -104,16 +105,11 @@ const CommunityList = () => {
     }
   };
 
-  const handleSearchInputKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
 
-  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+  const handleSearchInputChange = (value: string) => {
+    setSearchQuery(value);
     // 검색어가 비어있으면 일반 목록으로 돌아가기
-    if (!e.target.value.trim() && isSearching) {
+    if (!value.trim() && isSearching) {
       setIsSearching(false);
       setCurrentPage(0);
     }
@@ -133,34 +129,12 @@ const CommunityList = () => {
               <h1 className={styles.title}>{isSearching ? `"${searchQuery}" 검색 결과` : '전체 글'}</h1>
               {token && <button className={styles.writeButton} onClick={handleWriteClick}>글쓰기</button>}
             </div>
-            <div className={styles.searchBox}>
-              <input
-                type="text"
-                placeholder="제목, 본문, 작성자를 검색해보세요!"
-                value={searchQuery}
-                onChange={handleSearchInputChange}
-                onKeyPress={handleSearchInputKeyPress}
-                className={styles.searchInput}
-              />
-              <button className={styles.searchButton} onClick={handleSearch}>
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path
-                    d="M9.16667 15.8333C12.8486 15.8333 15.8333 12.8486 15.8333 9.16667C15.8333 5.48477 12.8486 2.5 9.16667 2.5C5.48477 2.5 2.5 5.48477 2.5 9.16667C2.5 12.8486 5.48477 15.8333 9.16667 15.8333Z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M17.5 17.5L13.875 13.875"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            </div>
+            <SearchBox
+              value={searchQuery}
+              onChange={handleSearchInputChange}
+              onSearch={handleSearch}
+              placeholder="제목, 본문, 작성자를 검색해보세요!"
+            />
           </div>
 
           {/* 게시글 리스트 */}
