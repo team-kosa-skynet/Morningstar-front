@@ -243,6 +243,15 @@ interface UpdatePasswordResponse {
   data: any;
 }
 
+interface NewsDataResponseDTO {
+  newsId: number;
+  title: string;
+  originalLink: string;
+  link: string;
+  description: string;
+  pubDate: string;
+}
+
 interface CreateBoardRequest {
   title: string;
   content: string;
@@ -715,6 +724,20 @@ export const updatePassword = async (passwordData: UpdatePasswordRequest, token:
           'Authorization': `Bearer ${token}`
         }
       }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const getNews = async (): Promise<NewsDataResponseDTO[]> => {
+  try {
+    const response = await axios.get<NewsDataResponseDTO[]>(
+      `${API_BASE_URL}/news`
     );
     return response.data;
   } catch (error) {
