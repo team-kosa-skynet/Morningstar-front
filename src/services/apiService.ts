@@ -243,7 +243,7 @@ interface UpdatePasswordResponse {
   data: any;
 }
 
-interface NewsDataResponseDTO {
+export interface NewsItem {
   newsId: number;
   title: string;
   originalLink: string;
@@ -734,9 +734,9 @@ export const updatePassword = async (passwordData: UpdatePasswordRequest, token:
   }
 };
 
-export const getNews = async (): Promise<NewsDataResponseDTO[]> => {
+export const getNews = async (): Promise<NewsItem[]> => {
   try {
-    const response = await axios.get<NewsDataResponseDTO[]>(
+    const response = await axios.get<NewsItem[]>(
       `${API_BASE_URL}/news`
     );
     return response.data;

@@ -1,6 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './AIChat.module.scss';
+import openAILogo from '../../assets/images/openAI-Photoroom.png';
+import geminiLogo from '../../assets/images/gemini-1336519698502187930_128px.png';
+import claudeLogo from '../../assets/images/클로드-Photoroom.png';
 
 const AIChat: React.FC = () => {
   const navigate = useNavigate();
@@ -13,50 +16,50 @@ const AIChat: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const models = [
-    { id: 'gpt', name: 'GPT by OpenAI', icon: '/src/assets/images/openAI-Photoroom.png' },
-    { id: 'gemini', name: 'Gemini by Google', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
-    { id: 'claude', name: 'Claude by Anthropic', icon: '/src/assets/images/클로드-Photoroom.png' }
+    { id: 'gpt', name: 'GPT by OpenAI', icon: openAILogo },
+    { id: 'gemini', name: 'Gemini by Google', icon: geminiLogo },
+    { id: 'claude', name: 'Claude by Anthropic', icon: claudeLogo }
   ];
 
   // 더미 데이터 - 모델 세부 리스트
   const modelDetails: Record<string, Array<{id: string, name: string, icon: string}>> = {
     gpt: [
-      { id: 'gpt-4o', name: 'GPT-4o', icon: '/src/assets/images/openAI-Photoroom.png' },
-      { id: 'gpt-4o-mini', name: 'GPT-4o mini', icon: '/src/assets/images/openAI-Photoroom.png' },
-      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', icon: '/src/assets/images/openAI-Photoroom.png' },
-      { id: 'gpt-4', name: 'GPT-4', icon: '/src/assets/images/openAI-Photoroom.png' },
-      { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', icon: '/src/assets/images/openAI-Photoroom.png' },
-      { id: 'o1-preview', name: 'OpenAI o1-preview', icon: '/src/assets/images/openAI-Photoroom.png' },
-      { id: 'o1-mini', name: 'OpenAI o1-mini', icon: '/src/assets/images/openAI-Photoroom.png' },
-      { id: 'gpt-oss-120b', name: 'gpt-oss-120b', icon: '/src/assets/images/openAI-Photoroom.png' },
-      { id: 'o3-pro', name: 'OpenAI o3-pro', icon: '/src/assets/images/openAI-Photoroom.png' },
-      { id: 'gpt-4.1', name: 'GPT-4.1', icon: '/src/assets/images/openAI-Photoroom.png' },
-      { id: 'o1', name: 'OpenAI o1', icon: '/src/assets/images/openAI-Photoroom.png' },
-      { id: 'gpt-5', name: 'GPT-5', icon: '/src/assets/images/openAI-Photoroom.png' }
+      { id: 'gpt-4o', name: 'GPT-4o', icon: openAILogo },
+      { id: 'gpt-4o-mini', name: 'GPT-4o mini', icon: openAILogo },
+      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', icon: openAILogo },
+      { id: 'gpt-4', name: 'GPT-4', icon: openAILogo },
+      { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', icon: openAILogo },
+      { id: 'o1-preview', name: 'OpenAI o1-preview', icon: openAILogo },
+      { id: 'o1-mini', name: 'OpenAI o1-mini', icon: openAILogo },
+      { id: 'gpt-oss-120b', name: 'gpt-oss-120b', icon: openAILogo },
+      { id: 'o3-pro', name: 'OpenAI o3-pro', icon: openAILogo },
+      { id: 'gpt-4.1', name: 'GPT-4.1', icon: openAILogo },
+      { id: 'o1', name: 'OpenAI o1', icon: openAILogo },
+      { id: 'gpt-5', name: 'GPT-5', icon: openAILogo }
     ],
     gemini: [
-      { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
-      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
-      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
-      { id: 'gemini-pro', name: 'Gemini Pro', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
-      { id: 'gemini-ultra', name: 'Gemini Ultra', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
-      { id: 'gemini-nano', name: 'Gemini Nano', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
-      { id: 'gemini-experimental', name: 'Gemini Experimental', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
-      { id: 'gemini-code', name: 'Gemini Code', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
-      { id: 'gemini-vision', name: 'Gemini Vision', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' },
-      { id: 'gemini-thinking', name: 'Gemini Thinking', icon: '/src/assets/images/gemini-1336519698502187930_128px.png' }
+      { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', icon: geminiLogo },
+      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', icon: geminiLogo },
+      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', icon: geminiLogo },
+      { id: 'gemini-pro', name: 'Gemini Pro', icon: geminiLogo },
+      { id: 'gemini-ultra', name: 'Gemini Ultra', icon: geminiLogo },
+      { id: 'gemini-nano', name: 'Gemini Nano', icon: geminiLogo },
+      { id: 'gemini-experimental', name: 'Gemini Experimental', icon: geminiLogo },
+      { id: 'gemini-code', name: 'Gemini Code', icon: geminiLogo },
+      { id: 'gemini-vision', name: 'Gemini Vision', icon: geminiLogo },
+      { id: 'gemini-thinking', name: 'Gemini Thinking', icon: geminiLogo }
     ],
     claude: [
-      { id: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', icon: '/src/assets/images/클로드-Photoroom.png' },
-      { id: 'claude-3.5-haiku', name: 'Claude 3.5 Haiku', icon: '/src/assets/images/클로드-Photoroom.png' },
-      { id: 'claude-3-opus', name: 'Claude 3 Opus', icon: '/src/assets/images/클로드-Photoroom.png' },
-      { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', icon: '/src/assets/images/클로드-Photoroom.png' },
-      { id: 'claude-3-haiku', name: 'Claude 3 Haiku', icon: '/src/assets/images/클로드-Photoroom.png' },
-      { id: 'claude-2.1', name: 'Claude 2.1', icon: '/src/assets/images/클로드-Photoroom.png' },
-      { id: 'claude-2', name: 'Claude 2', icon: '/src/assets/images/클로드-Photoroom.png' },
-      { id: 'claude-instant', name: 'Claude Instant', icon: '/src/assets/images/클로드-Photoroom.png' },
-      { id: 'claude-4', name: 'Claude 4', icon: '/src/assets/images/클로드-Photoroom.png' },
-      { id: 'claude-computer-use', name: 'Claude Computer Use', icon: '/src/assets/images/클로드-Photoroom.png' }
+      { id: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', icon: claudeLogo },
+      { id: 'claude-3.5-haiku', name: 'Claude 3.5 Haiku', icon: claudeLogo },
+      { id: 'claude-3-opus', name: 'Claude 3 Opus', icon: claudeLogo },
+      { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', icon: claudeLogo },
+      { id: 'claude-3-haiku', name: 'Claude 3 Haiku', icon: claudeLogo },
+      { id: 'claude-2.1', name: 'Claude 2.1', icon: claudeLogo },
+      { id: 'claude-2', name: 'Claude 2', icon: claudeLogo },
+      { id: 'claude-instant', name: 'Claude Instant', icon: claudeLogo },
+      { id: 'claude-4', name: 'Claude 4', icon: claudeLogo },
+      { id: 'claude-computer-use', name: 'Claude Computer Use', icon: claudeLogo }
     ]
   };
 
