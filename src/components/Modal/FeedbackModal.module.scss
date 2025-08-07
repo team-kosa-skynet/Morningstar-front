@@ -39,11 +39,19 @@
   position: relative;
 }
 
+.section {
+  margin-bottom: 24px;
+
+  &:last-of-type {
+    margin-bottom: 16px;
+  }
+}
+
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .title {
@@ -81,7 +89,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 24px;
 }
 
 .reasonButton {
@@ -106,10 +113,24 @@
     border-color: #E5E5E5;
   }
 
-  &.selected {
-    background: #6B4BFF;
-    color: white;
-    border-color: #6B4BFF;
+  // 긍정적 피드백 버튼 스타일
+  &.positive {
+    &.selected {
+      background: #6B4BFF;
+      color: white;
+      border-color: #6B4BFF;
+    }
+  }
+
+  // 부정적 피드백 버튼 스타일  
+  &.negative {
+    background: rgba(255, 255, 255, 0.9);
+    
+    &.selected {
+      background: #FF6B6B;
+      color: white;
+      border-color: #FF6B6B;
+    }
   }
 }
 

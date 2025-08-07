@@ -4,17 +4,26 @@ import styles from './FeedbackModal.module.scss';
 interface FeedbackModalProps {
   isOpen: boolean;
   onClose: () => void;
-  modelName: string;
+  selectedModel: {
+    name: string;
+    icon?: string;
+  };
+  unselectedModel: {
+    name: string;
+    icon?: string;
+  };
   isPositive: boolean;
 }
 
 const FeedbackModal: React.FC<FeedbackModalProps> = ({ 
   isOpen, 
   onClose, 
-  modelName,
+  selectedModel,
+  unselectedModel,
   isPositive 
 }) => {
-  const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
+  const [selectedPositiveReasons, setSelectedPositiveReasons] = useState<string[]>([]);
+  const [selectedNegativeReasons, setSelectedNegativeReasons] = useState<string[]>([]);
   const [detailText, setDetailText] = useState('');
 
   const positiveReasons = [
@@ -33,21 +42,28 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
     '자세하지 않아요'
   ];
 
-  const reasons = isPositive ? positiveReasons : negativeReasons;
-
-  const handleReasonClick = (reason: string) => {
-    if (selectedReasons.includes(reason)) {
-      setSelectedReasons(selectedReasons.filter(r => r !== reason));
+  const handlePositiveReasonClick = (reason: string) => {
+    if (selectedPositiveReasons.includes(reason)) {
+      setSelectedPositiveReasons(selectedPositiveReasons.filter(r => r !== reason));
     } else {
-      setSelectedReasons([...selectedReasons, reason]);
+      setSelectedPositiveReasons([...selectedPositiveReasons, reason]);
+    }
+  };
+
+  const handleNegativeReasonClick = (reason: string) => {
+    if (selectedNegativeReasons.includes(reason)) {
+      setSelectedNegativeReasons(selectedNegativeReasons.filter(r => r !== reason));
+    } else {
+      setSelectedNegativeReasons([...selectedNegativeReasons, reason]);
     }
   };
 
   const handleSubmit = () => {
     console.log('제출된 피드백:', {
-      model: modelName,
-      isPositive,
-      reasons: selectedReasons,
+      selectedModel: selectedModel.name,
+      positiveReasons: selectedPositiveReasons,
+      unselectedModel: unselectedModel.name,
+      negativeReasons: selectedNegativeReasons,
       detail: detailText
     });
     onClose();
@@ -60,27 +76,53 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
       <div className={styles.overlay} onClick={onClose} />
       <div className={styles.modal}>
         <div className={styles.modalContent}>
-          <div className={styles.header}>
-            <h3 className={styles.title}>
-              {modelName} 모델이 {isPositive ? '마음에 드신' : '별로인'} 이유를 골라주세요
-            </h3>
-            <button className={styles.closeButton} onClick={onClose}>
-              <i className="bi bi-x-lg"></i>
-            </button>
+          {/* 선택한 모델 - 마음에 드는 이유 */}
+          <div className={styles.section}>
+            <div className={styles.header}>
+              <h3 className={styles.title}>
+                {selectedModel.name} 모델이 마음에 드신 이유를 골라주세요
+              </h3>
+              <button className={styles.closeButton} onClick={onClose}>
+                <i className="bi bi-x-lg"></i>
+              </button>
+            </div>
+
+            <div className={styles.reasonsContainer}>
+              {positiveReasons.map((reason) => (
+                <button
+                  key={reason}
+                  className={`${styles.reasonButton} ${styles.positive} ${
+                    selectedPositiveReasons.includes(reason) ? styles.selected : ''
+                  }`}
+                  onClick={() => handlePositiveReasonClick(reason)}
+                >
+                  {reason}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className={styles.reasonsContainer}>
-            {reasons.map((reason) => (
-              <button
-                key={reason}
-                className={`${styles.reasonButton} ${
-                  selectedReasons.includes(reason) ? styles.selected : ''
-                }`}
-                onClick={() => handleReasonClick(reason)}
-              >
-                {reason}
-              </button>
-            ))}
+          {/* 선택하지 않은 모델 - 별로인 이유 */}
+          <div className={styles.section}>
+            <div className={styles.header}>
+              <h3 className={styles.title}>
+                {unselectedModel.name} 모델이 별로인 이유를 골라주세요
+              </h3>
+            </div>
+
+            <div className={styles.reasonsContainer}>
+              {negativeReasons.map((reason) => (
+                <button
+                  key={reason}
+                  className={`${styles.reasonButton} ${styles.negative} ${
+                    selectedNegativeReasons.includes(reason) ? styles.selected : ''
+                  }`}
+                  onClick={() => handleNegativeReasonClick(reason)}
+                >
+                  {reason}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className={styles.detailContainer}>
@@ -96,7 +138,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
           <button 
             className={styles.submitButton}
             onClick={handleSubmit}
-            disabled={selectedReasons.length === 0}
+            disabled={selectedPositiveReasons.length === 0 && selectedNegativeReasons.length === 0}
           >
             답변 제출하기
           </button>

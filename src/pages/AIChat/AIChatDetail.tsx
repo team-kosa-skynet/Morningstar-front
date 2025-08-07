@@ -12,11 +12,13 @@ const AIChatDetail: React.FC = () => {
   const chatInputRef = useRef<HTMLDivElement>(null);
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean;
-    modelName: string;
+    selectedModel: { name: string; icon: string };
+    unselectedModel: { name: string; icon: string };
     isPositive: boolean;
   }>({
     isOpen: false,
-    modelName: '',
+    selectedModel: { name: '', icon: '' },
+    unselectedModel: { name: '', icon: '' },
     isPositive: true
   });
 
@@ -82,12 +84,19 @@ const AIChatDetail: React.FC = () => {
     ]
   };
 
-  const handleLike = (modelName: string) => {
-    setFeedbackModal({
-      isOpen: true,
-      modelName: modelName,
-      isPositive: true
-    });
+  const handleLike = (selectedModelName: string) => {
+    // 선택한 모델과 선택하지 않은 모델 찾기
+    const selected = selectedModels.find(m => m.name === selectedModelName);
+    const unselected = selectedModels.find(m => m.name !== selectedModelName);
+    
+    if (selected && unselected) {
+      setFeedbackModal({
+        isOpen: true,
+        selectedModel: { name: selected.name, icon: selected.icon },
+        unselectedModel: { name: unselected.name, icon: unselected.icon },
+        isPositive: true
+      });
+    }
   };
 
   const closeFeedbackModal = () => {
@@ -379,7 +388,8 @@ const AIChatDetail: React.FC = () => {
         <FeedbackModal
           isOpen={feedbackModal.isOpen}
           onClose={closeFeedbackModal}
-          modelName={feedbackModal.modelName}
+          selectedModel={feedbackModal.selectedModel}
+          unselectedModel={feedbackModal.unselectedModel}
           isPositive={feedbackModal.isPositive}
         />
       </div>
