@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './AIChatDetail.module.scss';
+import FeedbackModal from '../../components/Modal/FeedbackModal';
 
 interface Message {
   id: string;
@@ -20,6 +21,15 @@ const AIChatDetail: React.FC = () => {
   const [isImageMode, setIsImageMode] = useState(false);
   const [isChatInputFocused, setIsChatInputFocused] = useState(false);
   const chatInputRef = useRef<HTMLDivElement>(null);
+  const [feedbackModal, setFeedbackModal] = useState<{
+    isOpen: boolean;
+    modelName: string;
+    isPositive: boolean;
+  }>({
+    isOpen: false,
+    modelName: '',
+    isPositive: true
+  });
   const [messages] = useState<Message[]>([
     {
       id: '1',
@@ -123,8 +133,19 @@ Claude 4 모델 패밀리의 일원으로, 현재 Claude Opus 4와 Claude Sonnet
     ]
   };
 
-  const handleLike = (messageId: string) => {
-    console.log('좋아요 클릭:', messageId);
+  const handleLike = (messageId: string, modelName: string) => {
+    setFeedbackModal({
+      isOpen: true,
+      modelName: modelName,
+      isPositive: true
+    });
+  };
+
+  const closeFeedbackModal = () => {
+    setFeedbackModal({
+      ...feedbackModal,
+      isOpen: false
+    });
   };
 
   const handleModelSelect = (modelId: string) => {
@@ -231,7 +252,7 @@ Claude 4 모델 패밀리의 일원으로, 현재 Claude Opus 4와 Claude Sonnet
               <div className={styles.feedbackSection}>
                 <button 
                   className={styles.likeButton}
-                  onClick={() => handleLike('2')}
+                  onClick={() => handleLike('2', 'GPT-4o')}
                 >
                   <i className="bi bi-hand-thumbs-up"></i>
                   마음에 들어요
@@ -270,7 +291,7 @@ Claude 4 모델 패밀리의 일원으로, 현재 Claude Opus 4와 Claude Sonnet
               <div className={styles.feedbackSection}>
                 <button 
                   className={styles.likeButton}
-                  onClick={() => handleLike('3')}
+                  onClick={() => handleLike('3', 'Claude Sonnet 4')}
                 >
                   <i className="bi bi-hand-thumbs-up"></i>
                   마음에 들어요
@@ -404,6 +425,14 @@ Claude 4 모델 패밀리의 일원으로, 현재 Claude Opus 4와 Claude Sonnet
             </div>
           </div>
         )}
+
+        {/* 피드백 모달 */}
+        <FeedbackModal
+          isOpen={feedbackModal.isOpen}
+          onClose={closeFeedbackModal}
+          modelName={feedbackModal.modelName}
+          isPositive={feedbackModal.isPositive}
+        />
       </div>
     </div>
   );
