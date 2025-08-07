@@ -4,7 +4,6 @@
   align-items: flex-start;
   width: 100%;
   min-height: calc(100vh - 134px - 176px); // 헤더, 네비게이션, 푸터 높이 제외
-  padding: 40px 0;
   background: #ffffff;
 
   .innerBox {
@@ -20,14 +19,14 @@
       width: 100%;
       height: 96px;
       gap: 12px;
-      border-bottom: 1px solid #999999;
+      margin-bottom: 32px;
 
       .titleAndSearch {
         display: flex;
         align-items: center;
         justify-content: space-between;
         width: 100%;
-        height: 40px;
+        height: 32px;
 
         .pageTitle {
           font-family: 'Pretendard', sans-serif;
@@ -106,6 +105,7 @@
       width: 100%;
       min-height: 470px;
       gap: 0;
+      border-top: 1px solid #999999;
 
       .newsItem {
         display: flex;
