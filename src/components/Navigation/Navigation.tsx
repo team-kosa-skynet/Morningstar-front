@@ -28,6 +28,9 @@ const Navigation: React.FC = () => {
     if (item === '커뮤니티') {
       navigate('/community', { state: { resetSearch: true } });
     }
+    if (item === '질문하기') {
+      navigate('/ai-chat');
+    }
   };
 
   return (

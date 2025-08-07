@@ -18,6 +18,8 @@ import CommunityWrite from "./pages/Community/CommunityWrite/CommunityWrite.tsx"
 import CommunityEdit from "./pages/Community/CommunityEdit/CommunityEdit.tsx";
 import CommunityDetail from "./pages/Community/CommunityDetail/CommunityDetail.tsx";
 import MyPage from "./pages/MyPage/MyPage.tsx";
+import AIChat from "./pages/AIChat/AIChat.tsx";
+import AIChatDetail from "./pages/AIChat/AIChatDetail.tsx";
 import { useAuthStore } from './stores/authStore';
 
 function AppContent() {
@@ -43,6 +45,8 @@ function AppContent() {
                         <Route path="/community/edit/:boardId" element={<CommunityEdit />} />
                         <Route path="/community/detail/:boardId" element={<CommunityDetail />} />
                         <Route path="/mypage" element={<MyPage />} />
+                        <Route path="/ai-chat" element={<AIChat />} />
+                        <Route path="/ai-chat/detail" element={<AIChatDetail />} />
                     </Routes>
                 </main>
                 {!hideLayout && <Footer />}
