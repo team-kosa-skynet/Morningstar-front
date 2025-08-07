@@ -2,75 +2,24 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './ResetPassword.module.scss';
 import logo from '../../../assets/images/logo.png';
+import { useFormValidation } from '../../../hooks/useFormValidation';
 
-interface PasswordValidation {
-  hasValidChars: boolean;
-  hasValidLength: boolean;
-  hasNoConsecutive: boolean;
-}
-
-interface FormValidation {
-  password: {
-    isValid: boolean;
-    rules: PasswordValidation;
-  };
-  confirmPassword: {
-    isValid: boolean;
-    message: string;
-  };
-}
 
 const ResetPassword: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { email: userEmail } = location.state || {};
+  const {
+    validation,
+    updatePasswordValidation,
+    updateConfirmPasswordValidation
+  } = useFormValidation();
+  
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-
-  const validatePassword = (password: string): PasswordValidation => {
-    // 영문/숫자/특수문자 중 2가지 이상 포함
-    const hasLetter = /[a-zA-Z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    const validCharTypes = [hasLetter, hasNumber, hasSpecial].filter(Boolean).length;
-    
-    // 8자 이상 32자 이하 (공백 제외)
-    const trimmedPassword = password.replace(/\s/g, '');
-    const hasValidLength = trimmedPassword.length >= 8 && trimmedPassword.length <= 32;
-    
-    // 연속 3자 이상 동일한 문자/숫자 제외
-    let hasConsecutive = false;
-    for (let i = 0; i <= password.length - 3; i++) {
-      if (password[i] === password[i + 1] && password[i + 1] === password[i + 2]) {
-        hasConsecutive = true;
-        break;
-      }
-    }
-    
-    return {
-      hasValidChars: validCharTypes >= 2,
-      hasValidLength,
-      hasNoConsecutive: !hasConsecutive
-    };
-  };
-
-  const [validation, setValidation] = useState<FormValidation>({
-    password: {
-      isValid: false,
-      rules: {
-        hasValidChars: false,
-        hasValidLength: false,
-        hasNoConsecutive: false
-      }
-    },
-    confirmPassword: {
-      isValid: true,
-      message: ''
-    }
-  });
 
   const handleInputChange = (field: 'password' | 'confirmPassword', value: string) => {
     setFormData(prev => ({
@@ -79,35 +28,15 @@ const ResetPassword: React.FC = () => {
     }));
 
     if (field === 'password') {
-      const passwordRules = validatePassword(value);
-      const isPasswordValid = passwordRules.hasValidChars && 
-                             passwordRules.hasValidLength && 
-                             passwordRules.hasNoConsecutive;
-
-      setValidation(prev => ({
-        ...prev,
-        password: {
-          isValid: isPasswordValid,
-          rules: passwordRules
-        },
-        confirmPassword: {
-          isValid: value === formData.confirmPassword || formData.confirmPassword === '',
-          message: value !== formData.confirmPassword && formData.confirmPassword !== '' 
-                   ? '비밀번호가 일치하지 않습니다' 
-                   : ''
-        }
-      }));
+      updatePasswordValidation(value);
+      // 비밀번호 확인도 업데이트 (비밀번호가 변경되면)
+      if (formData.confirmPassword) {
+        updateConfirmPasswordValidation(value, formData.confirmPassword);
+      }
     }
 
     if (field === 'confirmPassword') {
-      const isConfirmValid = value === formData.password;
-      setValidation(prev => ({
-        ...prev,
-        confirmPassword: {
-          isValid: isConfirmValid,
-          message: !isConfirmValid && value !== '' ? '비밀번호가 일치하지 않습니다' : ''
-        }
-      }));
+      updateConfirmPasswordValidation(formData.password, value);
     }
   };
 

@@ -5,6 +5,8 @@ import logo from '../../../assets/images/logo2.png';
 import kakaoIcon from '../../../assets/icons/kakao.svg';
 import googleIcon from '../../../assets/icons/google.svg';
 import { sendEmailVerification } from '../../../services/apiService.ts';
+import { useSocialLogin } from '../../../hooks/useSocialLogin';
+import { useFormValidation } from '../../../hooks/useFormValidation';
 
 interface FormData {
   email: string;
@@ -12,73 +14,27 @@ interface FormData {
   confirmPassword: string;
 }
 
-interface ValidationState {
-  email: {
-    isValid: boolean;
-    message: string;
-  };
-  password: {
-    isValid: boolean;
-    rules: {
-      hasValidChars: boolean;
-      hasValidLength: boolean;
-      hasNoConsecutive: boolean;
-    };
-  };
-  confirmPassword: {
-    isValid: boolean;
-    message: string;
-  };
-}
 
 const SignUp: React.FC = () => {
   const navigate = useNavigate();
+  const { handleSocialLogin } = useSocialLogin();
+  const {
+    validation,
+    updateEmailValidation,
+    updatePasswordValidation,
+    updateConfirmPasswordValidation,
+    validateForm
+  } = useFormValidation();
+  
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
     confirmPassword: ''
   });
 
-  const [validation, setValidation] = useState<ValidationState>({
-    email: {
-      isValid: true,
-      message: ''
-    },
-    password: {
-      isValid: true,
-      rules: {
-        hasValidChars: false,
-        hasValidLength: false,
-        hasNoConsecutive: false
-      }
-    },
-    confirmPassword: {
-      isValid: true,
-      message: ''
-    }
-  });
-
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // 이메일 유효성 검사
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  // 비밀번호 유효성 검사
-  const validatePassword = (password: string) => {
-    const hasValidChars = password.length > 0 && /^(?=.*[a-zA-Z])(?=.*[0-9])|(?=.*[a-zA-Z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[!@#$%^&*])/.test(password);
-    const hasValidLength = password.length >= 8 && password.length <= 32 && !/\s/.test(password);
-    const hasNoConsecutive = password.length > 0 && !/(.)\1{2,}/.test(password);
-
-    return {
-      hasValidChars,
-      hasValidLength,
-      hasNoConsecutive
-    };
-  };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     const newFormData = { ...formData, [field]: value };
@@ -86,36 +42,19 @@ const SignUp: React.FC = () => {
 
     // 실시간 유효성 검사
     if (field === 'email') {
-      const isValid = validateEmail(value);
-      setValidation(prev => ({
-        ...prev,
-        email: {
-          isValid,
-          message: isValid ? '' : '이메일 형식이 올바르지 않습니다'
-        }
-      }));
+      updateEmailValidation(value);
     }
 
     if (field === 'password') {
-      const rules = validatePassword(value);
-      setValidation(prev => ({
-        ...prev,
-        password: {
-          isValid: Object.values(rules).every(Boolean),
-          rules
-        }
-      }));
+      updatePasswordValidation(value);
+      // 비밀번호 확인도 업데이트 (비밀번호가 변경되면)
+      if (formData.confirmPassword) {
+        updateConfirmPasswordValidation(value, formData.confirmPassword);
+      }
     }
 
     if (field === 'confirmPassword') {
-      const isValid = value === newFormData.password;
-      setValidation(prev => ({
-        ...prev,
-        confirmPassword: {
-          isValid,
-          message: isValid ? '' : '비밀번호가 일치하지 않습니다'
-        }
-      }));
+      updateConfirmPasswordValidation(formData.password, value);
     }
   };
 
@@ -123,11 +62,9 @@ const SignUp: React.FC = () => {
     e.preventDefault();
     
     // 최종 유효성 검사
-    const emailValid = validateEmail(formData.email);
-    const passwordRules = validatePassword(formData.password);
-    const confirmPasswordValid = formData.password === formData.confirmPassword;
-
-    if (emailValid && Object.values(passwordRules).every(Boolean) && confirmPasswordValid) {
+    const formValidation = validateForm(formData.email, formData.password, formData.confirmPassword);
+    
+    if (formValidation.isValid) {
       setIsLoading(true);
       setErrorMessage('');
 
@@ -155,15 +92,6 @@ const SignUp: React.FC = () => {
     }
   };
 
-  const handleSocialLogin = (provider: 'kakao' | 'google') => {
-    if (provider === 'google') {
-      // 로컬 개발: http://localhost:8080/oauth2/authorization/google
-      // 배포 환경: https://gaebang.site/oauth2/authorization/google
-      window.location.href = 'https://gaebang.site/oauth2/authorization/google';
-    } else if (provider === 'kakao') {
-      window.location.href = 'https://gaebang.site/oauth2/authorization/kakao';
-    }
-  };
 
   return (
     <div className={styles.signupPage}>
