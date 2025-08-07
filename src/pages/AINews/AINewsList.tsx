@@ -3,16 +3,8 @@ import styles from './AINewsList.module.scss';
 import SearchBox from '../../components/SearchBox/SearchBox';
 import Pagination from '../../components/Pagination/Pagination';
 import { getNews } from '../../services/apiService';
+import type { NewsItem } from '../../services/apiService';
 import newspaperImg from '../../assets/images/newspaper.png';
-
-interface NewsItem {
-  newsId: number;
-  title: string;
-  originalLink: string;
-  link: string;
-  description: string;
-  pubDate: string;
-}
 
 const AINewsList = () => {
   const [news, setNews] = useState<NewsItem[]>([]);
