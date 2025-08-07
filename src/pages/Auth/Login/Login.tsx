@@ -6,10 +6,12 @@ import googleIcon from '../../../assets/icons/google.svg';
 import kakaoIcon from '../../../assets/icons/kakao.svg';
 import { login, markAttendance } from '../../../services/apiService.ts';
 import { useAuthStore } from '../../../stores/authStore';
+import { useSocialLogin } from '../../../hooks/useSocialLogin';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login: loginStore } = useAuthStore();
+  const { handleSocialLogin } = useSocialLogin();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -72,16 +74,6 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleSocialLogin = (provider: 'kakao' | 'google') => {
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://www.gaebang.site/api';
-    
-    if (provider === 'google') {
-      // 백엔드 OAuth 엔드포인트로 리다이렉션
-      window.location.href = `${API_BASE_URL.replace('/api', '')}/oauth2/authorization/google`;
-    } else if (provider === 'kakao') {
-      window.location.href = 'https://gaebang.site/oauth2/authorization/kakao';
-    }
-  };
 
   return (
     <div className={styles.loginContainer}>
