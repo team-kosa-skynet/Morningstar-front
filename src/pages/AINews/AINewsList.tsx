@@ -13,7 +13,7 @@ const AINewsList = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 15;
 
   // API에서 뉴스 데이터 가져오기
   const fetchNews = async () => {
@@ -58,14 +58,14 @@ const AINewsList = () => {
   };
 
   // 날짜 포맷 함수
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear().toString().slice(2);
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${year}.${month}.${day} ${hours}:${minutes}`;
+  const formatDate = (dateArray: number[]) => {
+    const [year, month, day, hour, minute] = dateArray;
+    const yearStr = year.toString().slice(2);
+    const monthStr = month.toString().padStart(2, '0');
+    const dayStr = day.toString().padStart(2, '0');
+    const hourStr = hour.toString().padStart(2, '0');
+    const minuteStr = minute.toString().padStart(2, '0');
+    return `${yearStr}.${monthStr}.${dayStr} ${hourStr}:${minuteStr}`;
   };
 
   // 페이지네이션을 위한 데이터 계산
