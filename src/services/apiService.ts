@@ -249,7 +249,7 @@ export interface NewsItem {
   originalLink: string;
   link: string;
   description: string;
-  pubDate: string;
+  pubDate: number[];
 }
 
 interface CreateBoardRequest {
