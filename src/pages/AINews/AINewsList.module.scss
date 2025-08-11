@@ -9,7 +9,7 @@
   .innerBox {
     display: flex;
     flex-direction: column;
-    width: 930px;
+    width: 1160px;
     gap: 0;
 
     // 리스트 헤더
@@ -110,7 +110,7 @@
       .newsItem {
         display: flex;
         width: 100%;
-        height: 94px;
+        height: 108px;
         border-bottom: 1px solid #dddddd;
         cursor: pointer;
         transition: background-color 0.2s ease;
@@ -132,8 +132,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 94px;
-            height: 94px;
+            width: 108px;
+            height: 108px;
             flex-shrink: 0;
 
             img {
@@ -152,6 +152,7 @@
             height: 100%;
             padding: 20px 0;
             gap: 7px;
+            margin-left: 20px;
 
             .newsTitle {
               display: flex;
@@ -160,8 +161,8 @@
               h3 {
                 font-family: 'Pretendard', sans-serif;
                 font-weight: 500;
-                font-size: 16px;
-                line-height: 19px;
+                font-size: 18px;
+                line-height: 21px;
                 color: #333333;
                 margin: 0;
                 overflow: hidden;
@@ -178,8 +179,8 @@
               p {
                 font-family: 'Pretendard', sans-serif;
                 font-weight: 400;
-                font-size: 12px;
-                line-height: 14px;
+                font-size: 14px;
+                line-height: 16px;
                 color: #333333;
                 margin: 0;
                 overflow: hidden;
@@ -187,7 +188,7 @@
                 display: -webkit-box;
                 -webkit-line-clamp: 2;
                 -webkit-box-orient: vertical;
-                max-width: 600px;
+                max-width: 800px;
               }
             }
           }
@@ -199,14 +200,14 @@
             justify-content: flex-end;
             position: absolute;
             right: 20px;
-            bottom: 23px;
-            height: 14px;
+            bottom: 26px;
+            height: 16px;
 
             .pubDate {
               font-family: 'Pretendard', sans-serif;
               font-weight: 500;
-              font-size: 12px;
-              line-height: 14px;
+              font-size: 14px;
+              line-height: 16px;
               color: #999999;
             }
           }
