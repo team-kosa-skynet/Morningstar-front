@@ -161,7 +161,7 @@
 .jobsConditionItem {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 10px;
 }
 
 .jobsConditionItem i {
@@ -214,7 +214,7 @@
 .jobsMetaInfo {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-end;
   gap: 5px;
 }
 
@@ -236,6 +236,50 @@
   font-family: 'Pretendard', sans-serif;
   font-size: 16px;
   color: #777777;
+}
+
+/* 로딩 상태 */
+.jobsLoading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  height: 300px;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  color: #777777;
+
+  i {
+    font-size: 24px;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 에러 상태 */
+.jobsError {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  height: 300px;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  color: #ff4444;
+
+  i {
+    font-size: 24px;
+  }
 }
 
 /* 페이지네이션 */

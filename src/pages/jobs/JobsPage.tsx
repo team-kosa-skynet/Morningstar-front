@@ -1,45 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './Jobs.module.scss';
 import SearchBox from '../../components/SearchBox/SearchBox';
 import Pagination from '../../components/Pagination/Pagination';
-
-interface JobItem {
-  id: number;
-  company: string;
-  title: string;
-  location: string;
-  experience: string;
-  employment: string;
-  education: string;
-  skills: string[];
-  deadline: string;
-  registeredTime: string;
-  link: string;
-}
+import { jobsApi, transformJobData } from '../../api/jobsApi';
+import type { JobItem } from '../../types/jobs';
 
 const JobsPage = () => {
-  // 더미 데이터
-  const dummyJobs: JobItem[] = [
-    {
-      id: 1,
-      company: '(주) 블루비즈',
-      title: '[웹개발] MES 솔루션 개발 경력자 모집 (창원지점)',
-      location: '경남 창원시',
-      experience: '5 ~ 20년',
-      employment: '정규직',
-      education: '대학(2,3년)이상',
-      skills: ['웹개발', '백엔드', 'Java'],
-      deadline: '~09.30(화)',
-      registeredTime: '55분 전 등록',
-      link: '#'
-    }
-  ];
-
-  const [jobs] = useState<JobItem[]>(dummyJobs);
-  const [filteredJobs, setFilteredJobs] = useState<JobItem[]>(dummyJobs);
+  const [jobs, setJobs] = useState<JobItem[]>([]);
+  const [filteredJobs, setFilteredJobs] = useState<JobItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const itemsPerPage = 10;
+
+  // API에서 데이터 가져오기
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await jobsApi.getRecruitments();
+        
+        if (response.code === 200 && response.data) {
+          const transformedJobs = response.data.map(transformJobData);
+          setJobs(transformedJobs);
+          setFilteredJobs(transformedJobs);
+        } else {
+          setError('데이터를 불러오는데 실패했습니다.');
+        }
+      } catch (err) {
+        console.error('Failed to fetch jobs:', err);
+        setError('채용공고를 불러오는 중 오류가 발생했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
 
   // 검색 기능
   const handleSearch = () => {
@@ -103,7 +102,17 @@ const JobsPage = () => {
 
         {/* 아이템 리스트 */}
         <div className={styles.jobsItemList}>
-          {currentJobs.length === 0 ? (
+          {isLoading ? (
+            <div className={styles.jobsLoading}>
+              <i className="bi bi-arrow-clockwise"></i>
+              <span>채용공고를 불러오는 중...</span>
+            </div>
+          ) : error ? (
+            <div className={styles.jobsError}>
+              <i className="bi bi-exclamation-triangle"></i>
+              <span>{error}</span>
+            </div>
+          ) : currentJobs.length === 0 ? (
             <div className={styles.jobsEmpty}>
               {searchQuery ? 
                 `"${searchQuery}"에 대한 검색 결과가 없습니다.` : 
