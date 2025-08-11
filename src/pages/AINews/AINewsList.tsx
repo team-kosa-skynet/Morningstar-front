@@ -21,11 +21,15 @@ const AINewsList = () => {
     setError(null);
     try {
       const response = await getNews();
-      setNews(response);
-      setFilteredNews(response);
+      // response.data가 배열인지 확인
+      const newsData = response?.data && Array.isArray(response.data) ? response.data : [];
+      setNews(newsData);
+      setFilteredNews(newsData);
     } catch (error) {
       console.error('뉴스 조회 실패:', error);
       setError('뉴스를 불러오는데 실패했습니다.');
+      setNews([]);
+      setFilteredNews([]);
     } finally {
       setLoading(false);
     }
@@ -58,14 +62,29 @@ const AINewsList = () => {
   };
 
   // 날짜 포맷 함수
-  const formatDate = (dateArray: number[]) => {
-    const [year, month, day, hour, minute] = dateArray;
-    const yearStr = year.toString().slice(2);
-    const monthStr = month.toString().padStart(2, '0');
-    const dayStr = day.toString().padStart(2, '0');
-    const hourStr = hour.toString().padStart(2, '0');
-    const minuteStr = minute.toString().padStart(2, '0');
-    return `${yearStr}.${monthStr}.${dayStr} ${hourStr}:${minuteStr}`;
+  const formatDate = (dateString: string | number[]) => {
+    // 문자열 형식인 경우 (새로운 API 응답)
+    if (typeof dateString === 'string') {
+      // "2025-08-11 18:06:00" -> "25.08.11 18:06"
+      const date = new Date(dateString);
+      const year = date.getFullYear().toString().slice(2);
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      const hour = date.getHours().toString().padStart(2, '0');
+      const minute = date.getMinutes().toString().padStart(2, '0');
+      return `${year}.${month}.${day} ${hour}:${minute}`;
+    }
+    // 배열 형식인 경우 (이전 API 응답 - 호환성 유지)
+    if (Array.isArray(dateString)) {
+      const [year, month, day, hour, minute] = dateString;
+      const yearStr = year.toString().slice(2);
+      const monthStr = month.toString().padStart(2, '0');
+      const dayStr = day.toString().padStart(2, '0');
+      const hourStr = hour.toString().padStart(2, '0');
+      const minuteStr = minute.toString().padStart(2, '0');
+      return `${yearStr}.${monthStr}.${dayStr} ${hourStr}:${minuteStr}`;
+    }
+    return '';
   };
 
   // 페이지네이션을 위한 데이터 계산

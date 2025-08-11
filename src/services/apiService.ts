@@ -249,7 +249,13 @@ export interface NewsItem {
   originalLink: string;
   link: string;
   description: string;
-  pubDate: number[];
+  pubDate: string | number[];  // API 응답 형식 변경 대응
+}
+
+interface NewsResponse {
+  code: number;
+  message: string;
+  data: NewsItem[];
 }
 
 interface CreateBoardRequest {
@@ -734,9 +740,9 @@ export const updatePassword = async (passwordData: UpdatePasswordRequest, token:
   }
 };
 
-export const getNews = async (): Promise<NewsItem[]> => {
+export const getNews = async (): Promise<NewsResponse> => {
   try {
-    const response = await axios.get<NewsItem[]>(
+    const response = await axios.get<NewsResponse>(
       `${API_BASE_URL}/news`
     );
     return response.data;

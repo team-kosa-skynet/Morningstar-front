@@ -10,7 +10,7 @@ const Navigation: React.FC = () => {
     'AI 분석',
     'AI 추천',
     'divider',
-    'AI 뉴스',
+    'IT 뉴스',
     '채용공고',
     'divider',
     '질문하기',
@@ -31,8 +31,14 @@ const Navigation: React.FC = () => {
     if (item === '질문하기') {
       navigate('/ai-chat');
     }
-    if (item === 'AI 뉴스') {
+    if (item === 'IT 뉴스') {
       navigate('/ai-news');
+    }
+    if (item === '채용공고') {
+      navigate('/jobs');
+    }
+    if (item === '모의면접') {
+      navigate('/interview');
     }
   };
 

@@ -17,7 +17,9 @@
       "Bash(node:*)",
       "Bash(npm:*)",
       "Bash(npx:*)",
-      "mcp__figma__get_figma_data"
+      "mcp__figma__get_figma_data",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

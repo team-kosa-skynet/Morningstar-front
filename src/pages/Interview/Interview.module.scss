@@ -1,0 +1,264 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 310px); // 헤더와 푸터 높이를 뺀 값
+  background-color: #ffffff;
+}
+
+.innerBox {
+  display: flex;
+  justify-content: center;
+  width: 1160px;
+  height: 772px;
+}
+
+.contentWrapper {
+  display: flex;
+  gap: 20px;
+  width: 1095px;
+  height: 725px;
+}
+
+// 왼쪽 모니터 - 비디오 영역
+.leftMonitor {
+  display: flex;
+  width: 725px;
+  height: 725px;
+  background-color: #000D1C;
+  border-radius: 20px;
+}
+
+.videoArea {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+}
+
+.videoContent {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+// 오른쪽 모니터 - 설정 영역
+.rightMonitor {
+  display: flex;
+  flex-direction: column;
+  width: 350px;
+  height: 725px;
+  padding: 25px 30px;
+  background-color: #ffffff;
+  border: 1px solid #DDDDDD;
+  border-radius: 20px;
+  position: relative;
+}
+
+// 섹션 제목
+.sectionTitle {
+  display: flex;
+  margin: 0;
+  margin-bottom: 15px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 21px;
+  color: #333333;
+}
+
+// 직무 선택
+.jobSelection {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 40px;
+}
+
+.jobButtons {
+  display: flex;
+  gap: 10px;
+}
+
+.jobButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 10px;
+  background-color: transparent;
+  border: 1px solid #4E4EFF;
+  border-radius: 10px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 14px;
+  color: #333333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: rgba(78, 78, 255, 0.1);
+  }
+
+  &.selected {
+    background-color: #4E4EFF;
+    color: #ffffff;
+  }
+}
+
+// 자료 첨부
+.fileUpload {
+  display: flex;
+  flex-direction: column;
+}
+
+.uploadBox {
+  display: flex;
+  flex-direction: column;
+  width: 290px;
+  background-color: #ffffff;
+  margin-bottom: 40px;
+}
+
+.uploadArea {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 290px;
+  height: 180px;
+  border: 0.5px dashed #DDDDDD;
+  border-radius: 10px;
+  position: relative;
+}
+
+.uploadIcon {
+  display: flex;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 10px;
+}
+
+.uploadText {
+  display: flex;
+  margin-bottom: 15px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 14px;
+  color: #555555;
+}
+
+.uploadButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
+  height: 30px;
+  background-color: #000D1C;
+  border-radius: 5px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 14px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+
+  &:hover {
+    background-color: #1a2a3a;
+  }
+}
+
+.fileInput {
+  display: none;
+}
+
+.filePreview {
+  display: flex;
+  align-items: center;
+  width: 258px;
+  height: 50px;
+  margin-top: 10px;
+  padding: 0 10px;
+  border: 0.2px solid #DDDDDD;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  color: #333333;
+}
+
+.fileInfo {
+  display: flex;
+  margin: 0;
+  margin-top: 10px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 14px;
+  color: #999999;
+}
+
+// 유의사항
+.notice {
+  display: flex;
+  flex-direction: column;
+}
+
+.noticeList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    font-family: 'Pretendard', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+    color: #4E4EFF;
+    position: relative;
+    padding-left: 15px;
+
+    &::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+    }
+  }
+}
+
+// 시작 버튼
+.startButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 191px;
+  height: 40px;
+  margin: 0 auto;
+  background-color: transparent;
+  border: 1px solid #4E4EFF;
+  border-radius: 15px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 19px;
+  color: #333333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: absolute;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  &:hover {
+    background-color: #4E4EFF;
+    color: #ffffff;
+  }
+}

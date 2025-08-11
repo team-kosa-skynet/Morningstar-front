@@ -13,20 +13,23 @@
 }
 
 .inner {
-  max-width: 930px;
+  max-width: 1160px;
   margin: 0 auto;
 }
 
 // 리스트 헤더
 .listHeader {
   margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .titleSection {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  height: 40px;
 }
 
 .title {
@@ -61,7 +64,7 @@
 .postItem {
   display: flex;
   align-items: center;
-  padding: 20px 20px 20px 0;
+  padding: 18px 18px 18px 0;
   border-bottom: 1px solid $border-light;
   cursor: pointer;
   transition: $transition-base;
@@ -86,7 +89,7 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  margin-left: 10px;
+  margin-left: 16px;
 }
 
 .postTitle {
@@ -96,9 +99,9 @@
 
   h3 {
     margin: 0;
-    font-size: $font-size-base;
+    font-size: 16px;
     font-weight: $font-weight-medium;
-    color: $text-black;
+    color: #333333;
 
     &.notice {
       font-weight: $font-weight-bold;
@@ -106,8 +109,8 @@
   }
 
   .commentCount {
-    font-size: $font-size-xs;
-    font-weight: $font-weight-bold;
+    font-size: 14px;
+    font-weight: 500;
     color: $primary-color;
   }
 }
@@ -130,8 +133,8 @@
   }
 
   span {
-    font-size: $font-size-xs;
-    font-weight: $font-weight-bold;
+    font-size: 12px;
+    font-weight: 500;
   }
 }
 
@@ -159,7 +162,7 @@
 
 .authorName {
   font-size: 14px;
-  font-weight: $font-weight-bold;
+  font-weight: 600;
   color: #333333;
 }
 
