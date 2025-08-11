@@ -20,13 +20,16 @@
 // 리스트 헤더
 .listHeader {
   margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .titleSection {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  height: 40px;
 }
 
 .title {

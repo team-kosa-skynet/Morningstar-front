@@ -34,6 +34,9 @@ const Navigation: React.FC = () => {
     if (item === 'IT 뉴스') {
       navigate('/ai-news');
     }
+    if (item === '채용공고') {
+      navigate('/jobs');
+    }
   };
 
   return (

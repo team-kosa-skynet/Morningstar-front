@@ -1,0 +1,245 @@
+/* 메인 컨테이너 */
+.jobsContainer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: calc(100vh - 134px - 176px);
+  background-color: #ffffff;
+}
+
+/* 이너 박스 */
+.jobsInner {
+  display: flex;
+  flex-direction: column;
+  width: 1160px;
+}
+
+/* 리스트 헤더 */
+.jobsListHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+/* 타이틀 래퍼 */
+.jobsTitleWrapper {
+  display: flex;
+  align-items: center;
+  height: 40px;
+}
+
+/* 페이지 타이틀 */
+.jobsPageTitle {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.193;
+  color: #000000;
+  margin: 0;
+}
+
+/* 검색창 래퍼 */
+.jobsSearchWrapper {
+  display: flex;
+  width: 100%;
+  height: 44px;
+}
+
+/* 검색창 커스텀 스타일 */
+.jobsSearchBox {
+  width: 100%;
+}
+
+/* 아이템 리스트 */
+.jobsItemList {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  border-top: 1px solid #999999;
+}
+
+/* 리스트 아이템 */
+.jobsListItem {
+  display: flex;
+  align-items: center;
+  height: 118px;
+  padding: 22px 26px;
+  border-bottom: 1px solid #dddddd;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.jobsListItem:hover {
+  opacity: 0.8;
+}
+
+/* 회사 이름 섹션 */
+.jobsCompany {
+  display: flex;
+  align-items: center;
+  width: 153px;
+  height: 74px;
+  margin-right: 33px;
+}
+
+.jobsCompanyName {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.193;
+  color: #333333;
+}
+
+/* 타이틀과 기술스택 섹션 */
+.jobsTitleSkills {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 13px;
+  flex: 1;
+  height: 74px;
+  margin-right: 52px;
+}
+
+.jobsTitle {
+  display: flex;
+  align-items: center;
+}
+
+.jobsTitle h3 {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.193;
+  color: #333333;
+  margin: 0;
+}
+
+/* 기술스택 */
+.jobsSkills {
+  display: flex;
+}
+
+.jobsSkillsWrapper {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.jobsSkillItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.jobsSkillItem span {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.193;
+  color: #777777;
+}
+
+.jobsSkillSeparator {
+  color: #777777;
+  font-size: 12px;
+}
+
+/* 지원조건 섹션 */
+.jobsConditions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  width: 214px;
+  height: 74px;
+  margin-right: 22px;
+}
+
+.jobsConditionItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.jobsConditionItem i {
+  font-size: 16px;
+  color: #777777;
+}
+
+.jobsConditionItem span {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.193;
+  color: #777777;
+}
+
+/* 버튼과 메타 정보 */
+.jobsButtonMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 96px;
+  height: 74px;
+}
+
+/* 보러가기 버튼 */
+.jobsViewButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 96px;
+  height: 25px;
+  background-color: #ffffff;
+  border: 1px solid #4e4eff;
+  border-radius: 10px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.193;
+  color: #4e4eff;
+  cursor: pointer;
+}
+
+.jobsViewButton:hover {
+  background-color: #4e4eff;
+  color: #ffffff;
+}
+
+/* 메타 정보 */
+.jobsMetaInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.jobsDeadline,
+.jobsRegistered {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.193;
+  color: #777777;
+}
+
+/* 빈 상태 */
+.jobsEmpty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  color: #777777;
+}
+
+/* 페이지네이션 */
+.jobsFooter {
+  display: flex;
+  justify-content: center;
+  margin-top: 33px;
+}
