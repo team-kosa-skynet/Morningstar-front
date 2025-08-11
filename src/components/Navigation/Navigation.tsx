@@ -37,6 +37,9 @@ const Navigation: React.FC = () => {
     if (item === '채용공고') {
       navigate('/jobs');
     }
+    if (item === '모의면접') {
+      navigate('/interview');
+    }
   };
 
   return (

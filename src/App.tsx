@@ -22,6 +22,7 @@ import AIChat from "./pages/AIChat/AIChat.tsx";
 import AIChatDetail from "./pages/AIChat/AIChatDetail.tsx";
 import AINewsList from "./pages/AINews/AINewsList.tsx";
 import JobsPage from "./pages/jobs/JobsPage.tsx";
+import Interview from "./pages/Interview/Interview.tsx";
 import { useAuthStore } from './stores/authStore';
 
 function AppContent() {
@@ -51,6 +52,7 @@ function AppContent() {
                         <Route path="/ai-chat/detail" element={<AIChatDetail />} />
                         <Route path="/ai-news" element={<AINewsList />} />
                         <Route path="/jobs" element={<JobsPage />} />
+                        <Route path="/interview" element={<Interview />} />
                     </Routes>
                 </main>
                 {!hideLayout && <Footer />}
