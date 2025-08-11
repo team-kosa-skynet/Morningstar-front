@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { JobApiResponse, JobApiItem, JobItem } from '../types/jobs';
+import type { JobApiResponse, JobApiItem, JobItem } from '../types/jobs.ts';
 
 const API_BASE_URL = 'https://gaebang.site/api';
 
@@ -89,11 +89,31 @@ export const transformJobData = (apiItem: JobApiItem): JobItem => {
     return careerLevel;
   };
 
+  const formatLocation = (workLocation: string): string => {
+    const formatted = workLocation.split('>').map(loc => loc.trim()).join(' ');
+    // 공백 포함 10글자가 넘으면 줄임 처리
+    if (formatted.length > 10) {
+      // 첫 번째 지역만 표시 (예: "서울 강남구" -> "서울")
+      const firstPart = workLocation.split('>')[0].trim();
+      const secondPart = workLocation.split('>')[1]?.trim();
+      
+      if (secondPart) {
+        // 두 번째 파트가 있으면 간략하게 표시
+        const shortSecond = secondPart.split(' ')[0]; // "강남구" -> "강남구"
+        if (`${firstPart} ${shortSecond}`.length <= 10) {
+          return `${firstPart} ${shortSecond}`;
+        }
+      }
+      return firstPart;
+    }
+    return formatted;
+  };
+
   return {
     id: apiItem.recruitmentId,
     company: apiItem.companyName,
     title: apiItem.title,
-    location: apiItem.workLocation.split('>').map(loc => loc.trim()).join(' '),
+    location: formatLocation(apiItem.workLocation),
     experience: formatExperience(apiItem.careerLevel),
     employment: formatEmployment(apiItem.workType),
     education: formatEducation(apiItem.educationLevel),

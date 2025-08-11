@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import styles from './Jobs.module.scss';
 import SearchBox from '../../components/SearchBox/SearchBox';
 import Pagination from '../../components/Pagination/Pagination';
-import { jobsApi, transformJobData } from '../../api/jobsApi';
+import { jobsApi, transformJobData } from '../../services/jobsApi.ts';
 import type { JobItem } from '../../types/jobs';
 
 const JobsPage = () => {
