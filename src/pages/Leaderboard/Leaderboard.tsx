@@ -187,8 +187,15 @@ const Leaderboard: React.FC = () => {
                   return name;
                 };
 
+                // 모델명이 줄바꿈되는지 확인
+                const hasLineBreak = item.modelName.length > 20 && item.modelName.includes('(');
+
                 return (
-                  <div key={item.modelId} className={styles.tableRow}>
+                  <div 
+                    key={item.modelId} 
+                    className={styles.tableRow}
+                    style={{ height: hasLineBreak ? '60px' : '50px' }}
+                  >
                     <div 
                       className={styles.rowCell}
                       style={{ borderLeft: `10px solid ${companyColors[item.creatorName] || '#000D1C'}` }}
