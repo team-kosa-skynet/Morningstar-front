@@ -95,6 +95,8 @@ const AINewsList = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    // 페이지 변경 시 스크롤을 최상단으로 이동
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // 뉴스 링크 클릭 핸들러

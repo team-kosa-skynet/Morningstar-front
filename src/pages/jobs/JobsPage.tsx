@@ -185,6 +185,8 @@ const JobsPage = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    // 페이지 변경 시 스크롤을 최상단으로 이동
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // 채용공고 상세 페이지 이동
