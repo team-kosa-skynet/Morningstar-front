@@ -84,8 +84,7 @@ const ResetPassword: React.FC = () => {
       });
 
       if (response.ok) {
-        const message = await response.text();
-        alert(message);
+        alert('비밀번호 재설정이 완료되었습니다.');
         navigate('/login');
       } else {
         const errorData = await response.json();
