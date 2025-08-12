@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import styles from './Interview.module.scss';
+import interviewGif from '../../assets/images/면접임시.gif';
+import fileUploadIcon from '../../assets/images/file-upload.png';
 
 const Interview: React.FC = () => {
   const [selectedJob, setSelectedJob] = useState<string>('');
@@ -28,7 +30,7 @@ const Interview: React.FC = () => {
           {/* 왼쪽 모니터 - 비디오 영역 */}
           <div className={styles.leftMonitor}>
             <div className={styles.videoArea}>
-              <img src="/src/assets/images/면접임시.gif" alt="면접 화면" className={styles.videoContent} />
+              <img src={interviewGif} alt="면접 화면" className={styles.videoContent} />
             </div>
           </div>
 
@@ -64,7 +66,7 @@ const Interview: React.FC = () => {
               <h3 className={styles.sectionTitle}>자료 첨부 (선택)</h3>
               <div className={styles.uploadBox}>
                 <div className={styles.uploadArea}>
-                  <img src="/src/assets/images/file-upload.png" alt="파일 업로드" className={styles.uploadIcon} />
+                  <img src={fileUploadIcon} alt="파일 업로드" className={styles.uploadIcon} />
                   <p className={styles.uploadText}>자기소개서가 있다면 첨부해주세요!</p>
                   <label htmlFor="file-upload" className={styles.uploadButton}>
                     첨부하기
