@@ -16,6 +16,14 @@ interface ModelData {
 const Leaderboard: React.FC = () => {
   const [activeChart, setActiveChart] = useState('종합 지능 지수');
   
+  const companyColors: { [key: string]: string } = {
+    'OpenAI': '#74AA9C',
+    'Anthropic': '#D97757',
+    'Google': '#4285F4',
+    'DeepSeek': '#6B46C1',
+    'Meta': '#0668E1'
+  };
+  
   const dummyData: ModelData[] = [
     {
       model: 'GPT-5 (high)',
@@ -173,7 +181,10 @@ const Leaderboard: React.FC = () => {
 
             {dummyData.map((item, index) => (
               <div key={index} className={styles.tableRow}>
-                <div className={styles.rowCell}>
+                <div 
+                  className={styles.rowCell}
+                  style={{ borderLeft: `10px solid ${companyColors[item.company] || '#000D1C'}` }}
+                >
                   <span>{item.model}</span>
                 </div>
                 <div className={styles.rowCell}>
