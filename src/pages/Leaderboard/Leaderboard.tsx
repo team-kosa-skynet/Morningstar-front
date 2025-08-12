@@ -171,14 +171,30 @@ const Leaderboard: React.FC = () => {
             ) : error ? (
               <div className={styles.errorMessage}>{error}</div>
             ) : (
-              modelData.map((item) => (
-                <div key={item.modelId} className={styles.tableRow}>
-                  <div 
-                    className={styles.rowCell}
-                    style={{ borderLeft: `10px solid ${companyColors[item.creatorName] || '#000D1C'}` }}
-                  >
-                    <span>{item.modelName}</span>
-                  </div>
+              modelData.map((item) => {
+                // 모델명이 20자를 넘고 괄호가 있으면 줄바꿈 처리
+                const formatModelName = (name: string) => {
+                  if (name.length > 20 && name.includes('(')) {
+                    const parts = name.split('(');
+                    return (
+                      <>
+                        {parts[0].trim()}
+                        <br />
+                        ({parts.slice(1).join('(')}
+                      </>
+                    );
+                  }
+                  return name;
+                };
+
+                return (
+                  <div key={item.modelId} className={styles.tableRow}>
+                    <div 
+                      className={styles.rowCell}
+                      style={{ borderLeft: `10px solid ${companyColors[item.creatorName] || '#000D1C'}` }}
+                    >
+                      <span className={styles.modelName}>{formatModelName(item.modelName)}</span>
+                    </div>
                   <div className={styles.rowCell}>
                     <span>{item.creatorName}</span>
                   </div>
@@ -204,8 +220,9 @@ const Leaderboard: React.FC = () => {
                       {item.medianTimeToFirstTokenSeconds?.toFixed(2) || '-'}
                     </span>
                   </div>
-                </div>
-              ))
+                  </div>
+                );
+              })
             )}
           </div>
         </div>
