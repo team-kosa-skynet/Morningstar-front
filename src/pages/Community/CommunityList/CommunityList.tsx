@@ -96,6 +96,8 @@ const CommunityList = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page - 1); // Pagination 컴포넌트는 1부터 시작하지만 API는 0부터 시작
+    // 페이지 변경 시 스크롤을 최상단으로 이동
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSearch = () => {
