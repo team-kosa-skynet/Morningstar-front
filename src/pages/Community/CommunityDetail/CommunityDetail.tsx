@@ -263,6 +263,11 @@ const CommunityDetail = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    // 댓글 섹션으로 스크롤 이동 (댓글 페이지네이션이므로 최상단이 아닌 댓글 섹션으로)
+    const commentSection = document.querySelector(`.${styles.commentSection}`);
+    if (commentSection) {
+      commentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   const handleLikeClick = async () => {
