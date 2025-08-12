@@ -287,3 +287,23 @@
 .speedValue {
   color: #000000;
 }
+
+.loadingMessage,
+.errorMessage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 40px;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.loadingMessage {
+  color: #4e4eff;
+}
+
+.errorMessage {
+  color: #ff4444;
+}

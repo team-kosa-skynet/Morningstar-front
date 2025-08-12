@@ -1,81 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import styles from './Leaderboard.module.scss';
 
 interface ModelData {
-  model: string;
-  company: string;
-  companyLogo?: string;
-  price: string;
-  intelligence: number;
-  coding: number;
-  math: number;
-  tokensPerSecond: number;
-  firstTokenTime: number;
+  modelId: string;
+  modelName: string;
+  creatorName: string;
+  creatorSlug: string;
+  price1mBlended: number;
+  artificialAnalysisIntelligenceIndex: number;
+  artificialAnalysisCodingIndex?: number;
+  artificialAnalysisMathIndex?: number;
+  medianOutputTokensPerSecond?: number;
+  medianTimeToFirstTokenSeconds?: number;
 }
 
 const Leaderboard: React.FC = () => {
   const [activeChart, setActiveChart] = useState('종합 지능 지수');
+  const [modelData, setModelData] = useState<ModelData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   const companyColors: { [key: string]: string } = {
     'OpenAI': '#74AA9C',
     'Anthropic': '#D97757',
     'Google': '#4285F4',
     'DeepSeek': '#6B46C1',
-    'Meta': '#0668E1'
+    'Meta': '#0668E1',
+    'xAI': '#1DA1F2',
+    'Alibaba': '#FF6A00',
+    'NVIDIA': '#76B900',
+    'Z AI': '#00A4E4',
+    'MiniMax': '#FF4500',
+    'Perplexity': '#7C3AED',
+    'Cohere': '#00BFA5',
+    'Mistral': '#FF7043',
+    'Amazon': '#FF9900',
+    'Reka AI': '#EC407A',
+    'Upstage': '#3F51B5',
+    'LG AI Research': '#E91E63',
+    'Moonshot AI': '#9C27B0'
   };
   
-  const dummyData: ModelData[] = [
-    {
-      model: 'GPT-5 (high)',
-      company: 'OpenAI',
-      price: '$3.44',
-      intelligence: 69,
-      coding: 63,
-      math: 68,
-      tokensPerSecond: 156.3,
-      firstTokenTime: 71.42
-    },
-    {
-      model: 'Claude 3.5 Sonnet',
-      company: 'Anthropic',
-      price: '$2.75',
-      intelligence: 67,
-      coding: 65,
-      math: 66,
-      tokensPerSecond: 142.8,
-      firstTokenTime: 68.23
-    },
-    {
-      model: 'Gemini Ultra',
-      company: 'Google',
-      price: '$4.12',
-      intelligence: 68,
-      coding: 61,
-      math: 69,
-      tokensPerSecond: 165.2,
-      firstTokenTime: 72.56
-    },
-    {
-      model: 'DeepSeek V3',
-      company: 'DeepSeek',
-      price: '$1.89',
-      intelligence: 65,
-      coding: 67,
-      math: 64,
-      tokensPerSecond: 138.4,
-      firstTokenTime: 65.78
-    },
-    {
-      model: 'LLaMA 3.1 405B',
-      company: 'Meta',
-      price: '$2.34',
-      intelligence: 66,
-      coding: 62,
-      math: 65,
-      tokensPerSecond: 145.6,
-      firstTokenTime: 69.45
-    },
-  ];
+  useEffect(() => {
+    const fetchModelData = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get('https://gaebang.site/api/analysis/by-intelligence');
+        
+        if (response.data.code === 200 && response.data.data?.models) {
+          setModelData(response.data.data.models);
+        } else {
+          setError('데이터를 불러오는데 실패했습니다.');
+        }
+      } catch (err) {
+        console.error('API 호출 오류:', err);
+        setError('서버와 연결할 수 없습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchModelData();
+  }, []);
 
   const chartTabs = ['종합 지능 지수', '코딩 능력 지수', '수학 능력 지수'];
 
@@ -179,38 +166,47 @@ const Leaderboard: React.FC = () => {
               </div>
             </div>
 
-            {dummyData.map((item, index) => (
-              <div key={index} className={styles.tableRow}>
-                <div 
-                  className={styles.rowCell}
-                  style={{ borderLeft: `10px solid ${companyColors[item.company] || '#000D1C'}` }}
-                >
-                  <span>{item.model}</span>
+            {loading ? (
+              <div className={styles.loadingMessage}>데이터를 불러오는 중...</div>
+            ) : error ? (
+              <div className={styles.errorMessage}>{error}</div>
+            ) : (
+              modelData.map((item) => (
+                <div key={item.modelId} className={styles.tableRow}>
+                  <div 
+                    className={styles.rowCell}
+                    style={{ borderLeft: `10px solid ${companyColors[item.creatorName] || '#000D1C'}` }}
+                  >
+                    <span>{item.modelName}</span>
+                  </div>
+                  <div className={styles.rowCell}>
+                    <span>{item.creatorName}</span>
+                  </div>
+                  <div className={styles.rowCell}>
+                    <span>${item.price1mBlended.toFixed(2)}</span>
+                  </div>
+                  <div className={styles.rowCell}>
+                    <span>{item.artificialAnalysisIntelligenceIndex}</span>
+                  </div>
+                  <div className={styles.rowCell}>
+                    <span>{item.artificialAnalysisCodingIndex?.toFixed(1) || '-'}</span>
+                  </div>
+                  <div className={styles.rowCell}>
+                    <span>{item.artificialAnalysisMathIndex?.toFixed(1) || '-'}</span>
+                  </div>
+                  <div className={styles.rowCell}>
+                    <span className={styles.speedValue}>
+                      {item.medianOutputTokensPerSecond?.toFixed(1) || '-'}
+                    </span>
+                  </div>
+                  <div className={styles.rowCell}>
+                    <span className={styles.speedValue}>
+                      {item.medianTimeToFirstTokenSeconds?.toFixed(2) || '-'}
+                    </span>
+                  </div>
                 </div>
-                <div className={styles.rowCell}>
-                  {item.companyLogo && <img src={item.companyLogo} alt={item.company} />}
-                  <span>{item.company}</span>
-                </div>
-                <div className={styles.rowCell}>
-                  <span>{item.price}</span>
-                </div>
-                <div className={styles.rowCell}>
-                  <span>{item.intelligence}</span>
-                </div>
-                <div className={styles.rowCell}>
-                  <span>{item.coding}</span>
-                </div>
-                <div className={styles.rowCell}>
-                  <span>{item.math}</span>
-                </div>
-                <div className={styles.rowCell}>
-                  <span className={styles.speedValue}>{item.tokensPerSecond}</span>
-                </div>
-                <div className={styles.rowCell}>
-                  <span className={styles.speedValue}>{item.firstTokenTime}</span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
