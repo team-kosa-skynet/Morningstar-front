@@ -14,6 +14,73 @@ const JobsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const itemsPerPage = 10;
 
+  // 한글-영문 기술 스택 매핑
+  const techKeywordMap: { [key: string]: string[] } = {
+    '리액트': ['react', 'reactjs', 'react.js'],
+    '자바': ['java'],
+    '자바스크립트': ['javascript', 'js'],
+    '타입스크립트': ['typescript', 'ts'],
+    '파이썬': ['python'],
+    '스프링': ['spring', 'springboot', 'spring boot'],
+    '노드': ['node', 'nodejs', 'node.js'],
+    '뷰': ['vue', 'vuejs', 'vue.js'],
+    '앵귤러': ['angular', 'angularjs'],
+    '도커': ['docker'],
+    '쿠버네티스': ['kubernetes', 'k8s'],
+    '몽고': ['mongo', 'mongodb'],
+    '레디스': ['redis'],
+    '포스트그레': ['postgresql', 'postgres'],
+    '마이에스큐엘': ['mysql'],
+    '오라클': ['oracle'],
+    '깃': ['git'],
+    '젠킨스': ['jenkins'],
+    '아마존': ['aws', 'amazon'],
+    '구글클라우드': ['gcp', 'google cloud'],
+    '애저': ['azure'],
+    '플러터': ['flutter'],
+    '코틀린': ['kotlin'],
+    '스위프트': ['swift'],
+    '고': ['go', 'golang'],
+    '러스트': ['rust'],
+    '장고': ['django'],
+    '플라스크': ['flask'],
+    '넥스트': ['next', 'nextjs', 'next.js'],
+    '익스프레스': ['express', 'expressjs'],
+    '그래프큐엘': ['graphql'],
+    '레스트': ['rest', 'restful', 'rest api'],
+    '씨플플': ['c++', 'cpp'],
+    '씨샵': ['c#', 'csharp'],
+    '닷넷': ['.net', 'dotnet'],
+    '피그마': ['figma'],
+    '스케치': ['sketch'],
+    '어도비': ['adobe'],
+    '피에이치피': ['php'],
+    '루비': ['ruby'],
+    '레일즈': ['rails', 'ruby on rails'],
+    '스칼라': ['scala'],
+    '하둡': ['hadoop'],
+    '스파크': ['spark', 'apache spark'],
+    '카프카': ['kafka', 'apache kafka'],
+    '엘라스틱서치': ['elasticsearch', 'elastic'],
+    '텐서플로우': ['tensorflow'],
+    '파이토치': ['pytorch'],
+    '머신러닝': ['ml', 'machine learning'],
+    '딥러닝': ['deep learning', 'dl'],
+    '인공지능': ['ai', 'artificial intelligence'],
+    '데이터베이스': ['database', 'db'],
+    '프론트엔드': ['frontend', 'front-end', 'fe'],
+    '백엔드': ['backend', 'back-end', 'be'],
+    '풀스택': ['fullstack', 'full-stack'],
+    '웹': ['web'],
+    '모바일': ['mobile'],
+    '안드로이드': ['android'],
+    '아이오에스': ['ios'],
+    '리눅스': ['linux'],
+    '유닉스': ['unix'],
+    '윈도우': ['windows'],
+    '맥': ['mac', 'macos', 'osx']
+  };
+
   // API에서 데이터 가져오기
   useEffect(() => {
     const fetchJobs = async () => {
@@ -43,14 +110,60 @@ const JobsPage = () => {
   // 검색 기능
   const handleSearch = () => {
     if (searchQuery.trim()) {
-      const filtered = jobs.filter(item => 
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
-      setFilteredJobs(filtered);
-      setCurrentPage(1);
+      // 띄어쓰기와 콤마로 검색어를 분리
+      const keywords = searchQuery
+        .split(/[\s,]+/)
+        .map(keyword => keyword.trim().toLowerCase())
+        .filter(keyword => keyword.length > 0);
+      
+      if (keywords.length > 0) {
+        const filtered = jobs.filter(item => {
+          // 각 채용공고의 모든 텍스트를 하나로 합침
+          const jobText = [
+            item.title,
+            item.company,
+            item.location,
+            item.experience,
+            item.employment,
+            item.education,
+            ...item.skills
+          ].join(' ').toLowerCase();
+          
+          // 모든 검색어가 포함되어 있는지 확인
+          return keywords.every(keyword => {
+            // 파이프(|)로 OR 조건 처리
+            if (keyword.includes('|')) {
+              const orKeywords = keyword.split('|').map(k => k.trim()).filter(k => k.length > 0);
+              // OR 조건: 하나라도 매칭되면 true
+              return orKeywords.some(orKeyword => {
+                // 한글 기술 키워드인 경우 영문 변환
+                if (techKeywordMap[orKeyword]) {
+                  return techKeywordMap[orKeyword].some(engKeyword => 
+                    jobText.includes(engKeyword.toLowerCase())
+                  );
+                }
+                // 일반 키워드는 그대로 검색
+                return jobText.includes(orKeyword);
+              });
+            }
+            
+            // 한글 기술 키워드인 경우 영문 변환
+            if (techKeywordMap[keyword]) {
+              // 한글 키워드에 매핑된 영문 키워드 중 하나라도 포함되면 true
+              return techKeywordMap[keyword].some(engKeyword => 
+                jobText.includes(engKeyword.toLowerCase())
+              );
+            }
+            // 일반 키워드는 그대로 검색
+            return jobText.includes(keyword);
+          });
+        });
+        
+        setFilteredJobs(filtered);
+        setCurrentPage(1);
+      } else {
+        setFilteredJobs(jobs);
+      }
     } else {
       setFilteredJobs(jobs);
     }
@@ -94,7 +207,7 @@ const JobsPage = () => {
               value={searchQuery}
               onChange={handleSearchInputChange}
               onSearch={handleSearch}
-              placeholder="관심있는 회사, 지역, 기술을 검색해보세요! (ex 서울 리액트)"
+              placeholder="관심있는 회사, 지역, 기술을 검색해보세요! (ex 서울 학력무관 리액트|자바스크립트)"
               className={styles.jobsSearchBox}
             />
           </div>
@@ -121,7 +234,12 @@ const JobsPage = () => {
             </div>
           ) : (
             currentJobs.map((job) => (
-              <div key={job.id} className={styles.jobsListItem}>
+              <div 
+                key={job.id} 
+                className={styles.jobsListItem}
+                onClick={() => handleJobClick(job.link)}
+                style={{ cursor: 'pointer' }}
+              >
                 {/* 회사 이름 */}
                 <div className={styles.jobsCompany}>
                   <div className={styles.jobsCompanyName}>{job.company}</div>
@@ -166,7 +284,10 @@ const JobsPage = () => {
                 <div className={styles.jobsButtonMeta}>
                   <button 
                     className={styles.jobsViewButton}
-                    onClick={() => handleJobClick(job.link)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleJobClick(job.link);
+                    }}
                   >
                     보러가기
                   </button>
