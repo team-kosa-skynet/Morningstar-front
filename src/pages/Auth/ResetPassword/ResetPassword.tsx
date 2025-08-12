@@ -73,7 +73,7 @@ const ResetPassword: React.FC = () => {
       const userId = userIdData.data.userId;
 
       // 2. userId로 비밀번호 변경
-      const response = await fetch(`/api/member/password/user/${userId}`, {
+      const response = await fetch(`https://gaebang.site/api/member/password/user/${userId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
