@@ -99,20 +99,53 @@ const Leaderboard: React.FC = () => {
             <div className={styles.chartGraph}>
               <div className={styles.chartGraphTitle}>{activeChart}</div>
               <div className={styles.chartGraphDescription}>
-                종합 지능 지수는 8개의 평가를 통해 점수가 부여됩니다 :<br />
-                MMLU-Pro, GPQA Diamond, Humanity's Last Exam, LiveCodeBench, SciCode, AIME, IFBench, AA-LCR
+                {activeChart === '종합 지능 지수' && (
+                  <>
+                    종합 지능 지수는 8개의 평가를 통해 점수가 부여됩니다 :<br />
+                    MMLU-Pro, GPQA Diamond, Humanity's Last Exam, LiveCodeBench, SciCode, AIME, IFBench, AA-LCR
+                  </>
+                )}
+                {activeChart === '코딩 능력 지수' && (
+                  <>
+                    코딩 능력 지수는 다양한 프로그래밍 문제 해결 능력을 평가합니다 :<br />
+                    HumanEval, CodeContests, SWE-bench 등의 벤치마크 기반
+                  </>
+                )}
+                {activeChart === '수학 능력 지수' && (
+                  <>
+                    수학 능력 지수는 수학적 추론과 문제 해결 능력을 평가합니다 :<br />
+                    MATH, GSM8K, AIME 등의 수학 벤치마크 기반
+                  </>
+                )}
               </div>
               <div className={styles.chartPlaceholder}>
-                {!loading && modelData.length > 0 && activeChart === '종합 지능 지수' && (
+                {!loading && modelData.length > 0 && (activeChart === '종합 지능 지수' || activeChart === '코딩 능력 지수' || activeChart === '수학 능력 지수') && (
                   <ResponsiveBar
                     data={modelData
-                      .sort((a, b) => b.artificialAnalysisIntelligenceIndex - a.artificialAnalysisIntelligenceIndex)
+                      .filter(model => {
+                        if (activeChart === '코딩 능력 지수') return model.artificialAnalysisCodingIndex !== undefined;
+                        if (activeChart === '수학 능력 지수') return model.artificialAnalysisMathIndex !== undefined;
+                        return true;
+                      })
+                      .sort((a, b) => {
+                        if (activeChart === '코딩 능력 지수') {
+                          return (b.artificialAnalysisCodingIndex || 0) - (a.artificialAnalysisCodingIndex || 0);
+                        }
+                        if (activeChart === '수학 능력 지수') {
+                          return (b.artificialAnalysisMathIndex || 0) - (a.artificialAnalysisMathIndex || 0);
+                        }
+                        return b.artificialAnalysisIntelligenceIndex - a.artificialAnalysisIntelligenceIndex;
+                      })
                       .slice(0, 15)
                       .map(model => ({
                         model: model.modelName.length > 15 ? model.modelName.substring(0, 15) + '...' : model.modelName,
                         fullName: model.modelName,
                         creator: model.creatorName,
-                        score: model.artificialAnalysisIntelligenceIndex,
+                        score: activeChart === '코딩 능력 지수' 
+                          ? model.artificialAnalysisCodingIndex || 0
+                          : activeChart === '수학 능력 지수'
+                          ? model.artificialAnalysisMathIndex || 0
+                          : model.artificialAnalysisIntelligenceIndex,
                         color: companyColors[model.creatorName] || '#000D1C'
                       }))}
                     keys={['score']}
@@ -160,7 +193,7 @@ const Leaderboard: React.FC = () => {
                       tickSize: 5,
                       tickPadding: 5,
                       tickRotation: 0,
-                      legend: '지능 지수',
+                      legend: activeChart === '코딩 능력 지수' ? '코딩 지수' : activeChart === '수학 능력 지수' ? '수학 지수' : '지능 지수',
                       legendPosition: 'middle',
                       legendOffset: -40
                     }}
