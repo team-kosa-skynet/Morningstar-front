@@ -6,9 +6,8 @@ const Navigation: React.FC = () => {
   const [activeItem, setActiveItem] = useState('프롬프트 가이드');
 
   const navItems = [
-    '프롬프트 가이드',
+    'AI 업데이트 소식',
     '리더보드',
-    'AI 추천',
     'divider',
     'IT 뉴스',
     '채용공고',
