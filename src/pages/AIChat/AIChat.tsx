@@ -124,8 +124,8 @@ const AIChat: React.FC = () => {
       <div className={styles.content}>
         <div className={styles.titleSection}>
           <h1 className={styles.title}>
-            모델을 선택하고<br />
-            채팅을 시작해보세요!
+            모델을 선택하고
+            채팅을 시작해보세요.
           </h1>
         </div>
 
