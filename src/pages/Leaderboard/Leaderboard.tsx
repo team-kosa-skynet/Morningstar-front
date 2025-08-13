@@ -40,11 +40,22 @@ interface ModelData {
   medianTimeToFirstTokenSeconds?: number;
 }
 
+interface SortConfig {
+  key: keyof ModelData | null;
+  direction: 'asc' | 'desc';
+  clickCount: number;
+}
+
 const Leaderboard: React.FC = () => {
   const [activeChart, setActiveChart] = useState('종합 지능 지수');
   const [modelData, setModelData] = useState<ModelData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortConfig, setSortConfig] = useState<SortConfig>({
+    key: null,
+    direction: 'asc',
+    clickCount: 0
+  });
   
   const companyColors: { [key: string]: string } = {
     'OpenAI': '#000000',
@@ -115,6 +126,112 @@ const Leaderboard: React.FC = () => {
   }, []);
 
   const chartTabs = ['종합 지능 지수', '코딩 능력 지수', '수학 능력 지수'];
+
+  // 정렬 함수
+  const handleSort = (key: keyof ModelData) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    let clickCount = 0;
+
+    if (sortConfig.key === key) {
+      clickCount = sortConfig.clickCount + 1;
+      if (clickCount % 2 === 1) {
+        // 첫 번째 클릭
+        switch (key) {
+          case 'modelName':
+          case 'creatorName':
+            direction = 'asc'; // 알파벳 빠른순
+            break;
+          case 'price1mBlended':
+            direction = 'asc'; // 저렴한 순
+            break;
+          case 'artificialAnalysisIntelligenceIndex':
+          case 'artificialAnalysisCodingIndex':
+          case 'artificialAnalysisMathIndex':
+          case 'medianOutputTokensPerSecond':
+            direction = 'desc'; // 높은 순
+            break;
+          case 'medianTimeToFirstTokenSeconds':
+            direction = 'asc'; // 빠른 순 (작은 값이 빠름)
+            break;
+        }
+      } else {
+        // 두 번째 클릭
+        switch (key) {
+          case 'modelName':
+          case 'creatorName':
+            direction = 'desc'; // 알파벳 느린순
+            break;
+          case 'price1mBlended':
+            direction = 'desc'; // 비싼 순
+            break;
+          case 'artificialAnalysisIntelligenceIndex':
+          case 'artificialAnalysisCodingIndex':
+          case 'artificialAnalysisMathIndex':
+          case 'medianOutputTokensPerSecond':
+            direction = 'asc'; // 낮은 순
+            break;
+          case 'medianTimeToFirstTokenSeconds':
+            direction = 'desc'; // 느린 순 (큰 값이 느림)
+            break;
+        }
+      }
+    } else {
+      // 새로운 컬럼 첫 클릭
+      clickCount = 1;
+      switch (key) {
+        case 'modelName':
+        case 'creatorName':
+          direction = 'asc'; // 알파벳 빠른순
+          break;
+        case 'price1mBlended':
+          direction = 'asc'; // 저렴한 순
+          break;
+        case 'artificialAnalysisIntelligenceIndex':
+        case 'artificialAnalysisCodingIndex':
+        case 'artificialAnalysisMathIndex':
+        case 'medianOutputTokensPerSecond':
+          direction = 'desc'; // 높은 순
+          break;
+        case 'medianTimeToFirstTokenSeconds':
+          direction = 'asc'; // 빠른 순
+          break;
+      }
+    }
+
+    setSortConfig({ key, direction, clickCount });
+  };
+
+  // 정렬된 데이터 가져오기
+  const getSortedData = () => {
+    if (!sortConfig.key) return modelData;
+
+    const sorted = [...modelData].sort((a, b) => {
+      const aValue = a[sortConfig.key!];
+      const bValue = b[sortConfig.key!];
+
+      // null 또는 undefined 처리
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+
+      // 문자열 비교
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortConfig.direction === 'asc' 
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+
+      // 숫자 비교
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortConfig.direction === 'asc' 
+          ? aValue - bValue
+          : bValue - aValue;
+      }
+
+      return 0;
+    });
+
+    return sorted;
+  };
 
   return (
     <div className={styles.leaderboardContainer}>
@@ -288,46 +405,94 @@ const Leaderboard: React.FC = () => {
 
           <div className={styles.leaderboardContent}>
             <div className={styles.tableHeader}>
-              <div className={styles.headerCell}>
+              <div 
+                className={`${styles.headerCell} ${sortConfig.key === 'modelName' ? styles.sorting : ''}`}
+                onClick={() => handleSort('modelName')}
+                style={{ cursor: 'pointer' }}
+              >
                 <span>LLM 모델</span>
-                <i className="bi bi-arrow-down-up"></i>
+                <i className={`bi ${sortConfig.key === 'modelName' 
+                  ? (sortConfig.direction === 'asc' ? 'bi-arrow-up' : 'bi-arrow-down')
+                  : 'bi-arrow-down-up'}`}></i>
               </div>
-              <div className={styles.headerCell}>
+              <div 
+                className={`${styles.headerCell} ${sortConfig.key === 'creatorName' ? styles.sorting : ''}`}
+                onClick={() => handleSort('creatorName')}
+                style={{ cursor: 'pointer' }}
+              >
                 <span>제작사</span>
-                <i className="bi bi-arrow-down-up"></i>
+                <i className={`bi ${sortConfig.key === 'creatorName' 
+                  ? (sortConfig.direction === 'asc' ? 'bi-arrow-up' : 'bi-arrow-down')
+                  : 'bi-arrow-down-up'}`}></i>
               </div>
-              <div className={styles.headerCell}>
+              <div 
+                className={`${styles.headerCell} ${sortConfig.key === 'price1mBlended' ? styles.sorting : ''}`}
+                onClick={() => handleSort('price1mBlended')}
+                style={{ cursor: 'pointer' }}
+              >
                 <span>가격</span>
-                <i className="bi bi-arrow-down-up"></i>
+                <i className={`bi ${sortConfig.key === 'price1mBlended' 
+                  ? (sortConfig.direction === 'asc' ? 'bi-arrow-up' : 'bi-arrow-down')
+                  : 'bi-arrow-down-up'}`}></i>
               </div>
-              <div className={styles.headerCell}>
+              <div 
+                className={`${styles.headerCell} ${sortConfig.key === 'artificialAnalysisIntelligenceIndex' ? styles.sorting : ''}`}
+                onClick={() => handleSort('artificialAnalysisIntelligenceIndex')}
+                style={{ cursor: 'pointer' }}
+              >
                 <span>종합 지능 지수</span>
-                <i className="bi bi-arrow-down-up"></i>
+                <i className={`bi ${sortConfig.key === 'artificialAnalysisIntelligenceIndex' 
+                  ? (sortConfig.direction === 'asc' ? 'bi-arrow-up' : 'bi-arrow-down')
+                  : 'bi-arrow-down-up'}`}></i>
               </div>
-              <div className={styles.headerCell}>
+              <div 
+                className={`${styles.headerCell} ${sortConfig.key === 'artificialAnalysisCodingIndex' ? styles.sorting : ''}`}
+                onClick={() => handleSort('artificialAnalysisCodingIndex')}
+                style={{ cursor: 'pointer' }}
+              >
                 <span>코딩 능력 지수</span>
-                <i className="bi bi-arrow-down-up"></i>
+                <i className={`bi ${sortConfig.key === 'artificialAnalysisCodingIndex' 
+                  ? (sortConfig.direction === 'asc' ? 'bi-arrow-up' : 'bi-arrow-down')
+                  : 'bi-arrow-down-up'}`}></i>
               </div>
-              <div className={styles.headerCell}>
+              <div 
+                className={`${styles.headerCell} ${sortConfig.key === 'artificialAnalysisMathIndex' ? styles.sorting : ''}`}
+                onClick={() => handleSort('artificialAnalysisMathIndex')}
+                style={{ cursor: 'pointer' }}
+              >
                 <span>수학 능력 지수</span>
-                <i className="bi bi-arrow-down-up"></i>
+                <i className={`bi ${sortConfig.key === 'artificialAnalysisMathIndex' 
+                  ? (sortConfig.direction === 'asc' ? 'bi-arrow-up' : 'bi-arrow-down')
+                  : 'bi-arrow-down-up'}`}></i>
               </div>
-              <div className={styles.headerCell}>
+              <div 
+                className={`${styles.headerCell} ${sortConfig.key === 'medianOutputTokensPerSecond' ? styles.sorting : ''}`}
+                onClick={() => handleSort('medianOutputTokensPerSecond')}
+                style={{ cursor: 'pointer' }}
+              >
                 <div className={styles.speedHeader}>
                   <div className={styles.speedText}>
                     <span>속도</span>
                     <span className={styles.speedSubtext}>초당 토큰 생성</span>
                   </div>
-                  <i className="bi bi-arrow-down-up"></i>
+                  <i className={`bi ${sortConfig.key === 'medianOutputTokensPerSecond' 
+                    ? (sortConfig.direction === 'asc' ? 'bi-arrow-up' : 'bi-arrow-down')
+                    : 'bi-arrow-down-up'}`}></i>
                 </div>
               </div>
-              <div className={styles.headerCell}>
+              <div 
+                className={`${styles.headerCell} ${sortConfig.key === 'medianTimeToFirstTokenSeconds' ? styles.sorting : ''}`}
+                onClick={() => handleSort('medianTimeToFirstTokenSeconds')}
+                style={{ cursor: 'pointer' }}
+              >
                 <div className={styles.speedHeader}>
                   <div className={styles.speedText}>
                     <span>속도</span>
                     <span className={styles.speedSubtext}>첫 토큰 생성</span>
                   </div>
-                  <i className="bi bi-arrow-down-up"></i>
+                  <i className={`bi ${sortConfig.key === 'medianTimeToFirstTokenSeconds' 
+                    ? (sortConfig.direction === 'asc' ? 'bi-arrow-up' : 'bi-arrow-down')
+                    : 'bi-arrow-down-up'}`}></i>
                 </div>
               </div>
             </div>
@@ -337,7 +502,7 @@ const Leaderboard: React.FC = () => {
             ) : error ? (
               <div className={styles.errorMessage}>{error}</div>
             ) : (
-              modelData.map((item) => {
+              getSortedData().map((item) => {
                 // 모델명이 20자를 넘고 괄호가 있으면 줄바꿈 처리
                 const formatModelName = (name: string) => {
                   if (name.length > 20 && name.includes('(')) {
