@@ -374,8 +374,8 @@ const Leaderboard: React.FC = () => {
                         src={companyLogos[item.creatorName]} 
                         alt={item.creatorName} 
                         style={{ 
-                          width: '100%',
-                          height: '100%',
+                          width: '90%',
+                          height: '90%',
                           objectFit: 'contain'
                         }}
                       />
