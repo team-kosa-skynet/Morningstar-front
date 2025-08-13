@@ -1,9 +1,26 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { Chart, registerables } from 'chart.js';
 import styles from './AIChat.module.scss';
 import openAILogo from '../../assets/images/openAI-Photoroom.png';
 import geminiLogo from '../../assets/images/gemini-1336519698502187930_128px.png';
 import claudeLogo from '../../assets/images/클로드-Photoroom.png';
+
+Chart.register(...registerables);
+
+interface ModelData {
+  modelId: string;
+  modelName: string;
+  creatorName: string;
+  creatorSlug: string;
+  price1mBlended: number;
+  artificialAnalysisIntelligenceIndex: number;
+  artificialAnalysisCodingIndex?: number;
+  artificialAnalysisMathIndex?: number;
+  medianOutputTokensPerSecond?: number;
+  medianTimeToFirstTokenSeconds?: number;
+}
 
 const AIChat: React.FC = () => {
   const navigate = useNavigate();
@@ -14,12 +31,39 @@ const AIChat: React.FC = () => {
   const [isImageMode, setIsImageMode] = useState(false);
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  // 차트 관련 상태
+  const [modelData, setModelData] = useState<ModelData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const chartRef = useRef<Chart | null>(null);
 
   const models = [
     { id: 'gpt', name: 'GPT by OpenAI', icon: openAILogo },
     { id: 'gemini', name: 'Gemini by Google', icon: geminiLogo },
     { id: 'claude', name: 'Claude by Anthropic', icon: claudeLogo }
   ];
+
+  // 회사 색상 매핑
+  const companyColors: { [key: string]: string } = {
+    'OpenAI': '#000000',
+    'Anthropic': '#D97757',
+    'Google': '#4285F4',
+    'DeepSeek': '#6B46C1',
+    'Meta': '#0668E1',
+    'xAI': '#1DA1F2',
+    'Alibaba': '#FF6A00',
+    'NVIDIA': '#76B900',
+    'Z AI': '#00A4E4',
+    'MiniMax': '#FF4500',
+    'Perplexity': '#7C3AED',
+    'Cohere': '#00BFA5',
+    'Mistral': '#FF7043',
+    'Amazon': '#FF9900',
+    'Reka AI': '#EC407A',
+    'Upstage': '#3F51B5',
+    'LG AI Research': '#E91E63',
+    'Moonshot AI': '#9C27B0'
+  };
 
   // 더미 데이터 - 모델 세부 리스트
   const modelDetails: Record<string, Array<{id: string, name: string, icon: string}>> = {
@@ -62,6 +106,107 @@ const AIChat: React.FC = () => {
       { id: 'claude-computer-use', name: 'Claude Computer Use', icon: claudeLogo }
     ]
   };
+
+  // 데이터 로딩
+  useEffect(() => {
+    const fetchModelData = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get('https://gaebang.site/api/analysis/by-intelligence');
+        
+        if (response.data.code === 200 && response.data.data?.models) {
+          setModelData(response.data.data.models);
+        }
+      } catch (err) {
+        console.error('API 호출 오류:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchModelData();
+  }, []);
+
+  // 차트 생성
+  useEffect(() => {
+    if (!loading && modelData.length > 0) {
+      const canvas = document.getElementById('intelligenceChart') as HTMLCanvasElement;
+      if (!canvas) return;
+
+      // 이전 차트가 있으면 삭제
+      if (chartRef.current) {
+        chartRef.current.destroy();
+      }
+
+      // 상위 20개 데이터 준비
+      const filteredData = modelData
+        .sort((a, b) => b.artificialAnalysisIntelligenceIndex - a.artificialAnalysisIntelligenceIndex)
+        .slice(0, 20);
+
+      const chartData = {
+        labels: filteredData.map(model => 
+          model.modelName.length > 15 ? model.modelName.substring(0, 15) + '...' : model.modelName
+        ),
+        datasets: [{
+          label: '종합 지능 지수',
+          data: filteredData.map(model => model.artificialAnalysisIntelligenceIndex),
+          backgroundColor: filteredData.map(model => companyColors[model.creatorName] || '#000D1C'),
+          borderColor: filteredData.map(model => companyColors[model.creatorName] || '#000D1C'),
+          borderWidth: 1
+        }]
+      };
+
+      // 차트 생성
+      chartRef.current = new Chart(canvas, {
+        type: 'bar',
+        data: chartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                title: (context) => {
+                  const index = context[0].dataIndex;
+                  return filteredData[index].modelName;
+                },
+                label: (context) => {
+                  return `종합 지능 지수: ${context.parsed.y}`;
+                }
+              }
+            }
+          },
+          layout: {
+            padding: {
+              top: 10,
+              right: 10,
+              bottom: 10,
+              left: 10
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                autoSkip: false,
+                maxRotation: 45,
+                minRotation: 45
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: '지능 지수'
+              }
+            }
+          }
+        }
+      });
+    }
+  }, [loading, modelData]);
 
   const handleModelSelect = (modelId: string) => {
     setSelectedModelBrand(modelId);
@@ -124,8 +269,8 @@ const AIChat: React.FC = () => {
       <div className={styles.content}>
         <div className={styles.titleSection}>
           <h1 className={styles.title}>
-            모델을 선택하고<br />
-            채팅을 시작해보세요!
+            모델을 선택하고
+            채팅을 시작해보세요.
           </h1>
         </div>
 
@@ -136,7 +281,7 @@ const AIChat: React.FC = () => {
                 ref={textareaRef}
                 value={message}
                 onChange={handleTextareaResize}
-                placeholder="질문을 입력해주세요."
+                placeholder="질문 한번당 10p 차감됩니다."
                 className={styles.messageInput}
                 onKeyDown={handleKeyPress}
                 rows={1}
@@ -238,6 +383,29 @@ const AIChat: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* 리더보드 섹션 */}
+        <div className={styles.leaderboardSection}>
+          <div className={styles.leaderboardHeader}>
+            <div className={styles.leaderboardTitle}>
+              <i className="bi bi-mortarboard-fill"></i>
+              <span>지능 지수 TOP 20</span>
+            </div>
+            <div className={styles.leaderboardSubtitle}>
+              종합 지능 지수 기준 실시간 LLM 모델 상위 20개
+            </div>
+          </div>
+
+          <div className={styles.chartContent}>
+            <div className={styles.chartPlaceholder}>
+              {loading ? (
+                <div className={styles.loadingMessage}>차트를 불러오는 중...</div>
+              ) : (
+                <canvas id="intelligenceChart" style={{ maxHeight: '300px' }}></canvas>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
