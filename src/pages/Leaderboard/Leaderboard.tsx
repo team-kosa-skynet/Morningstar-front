@@ -110,6 +110,7 @@ const Leaderboard: React.FC = () => {
                       .slice(0, 15)
                       .map(model => ({
                         model: model.modelName.length > 15 ? model.modelName.substring(0, 15) + '...' : model.modelName,
+                        fullName: model.modelName,
                         creator: model.creatorName,
                         score: model.artificialAnalysisIntelligenceIndex,
                         color: companyColors[model.creatorName] || '#000D1C'
@@ -170,7 +171,7 @@ const Leaderboard: React.FC = () => {
                     role="application"
                     ariaLabel="Nivo bar chart demo"
                     barAriaLabel={function(e){return e.id+": "+e.formattedValue+" in model: "+e.indexValue}}
-                    tooltip={({ indexValue }) => (
+                    tooltip={({ data }) => (
                       <div
                         style={{
                           padding: '8px 12px',
@@ -181,7 +182,7 @@ const Leaderboard: React.FC = () => {
                           whiteSpace: 'nowrap'
                         }}
                       >
-                        {indexValue}
+                        {data.fullName}
                       </div>
                     )}
                   />
