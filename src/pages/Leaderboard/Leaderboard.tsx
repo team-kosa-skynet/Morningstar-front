@@ -3,6 +3,30 @@ import axios from 'axios';
 import { ResponsiveBar } from '@nivo/bar';
 import styles from './Leaderboard.module.scss';
 
+// AI Creator Logos
+import ai21Logo from '../../assets/ai creator logo/ai21.svg';
+import alibabaLogo from '../../assets/ai creator logo/alibaba.svg';
+import anthropicLogo from '../../assets/ai creator logo/anthropic.svg';
+import awsLogo from '../../assets/ai creator logo/aws.svg';
+import cohereLogo from '../../assets/ai creator logo/cohere.svg';
+import deepseekLogo from '../../assets/ai creator logo/deepseek.svg';
+import googleLogo from '../../assets/ai creator logo/google.svg';
+import ibmLogo from '../../assets/ai creator logo/ibm.svg';
+import lgLogo from '../../assets/ai creator logo/lg.svg';
+import metaLogo from '../../assets/ai creator logo/meta.svg';
+import microsoftLogo from '../../assets/ai creator logo/microsoft.svg';
+import minimaxLogo from '../../assets/ai creator logo/minimax.svg';
+import mistralLogo from '../../assets/ai creator logo/mistral.svg';
+import moonshotLogo from '../../assets/ai creator logo/moonshot.svg';
+import nousLogo from '../../assets/ai creator logo/nous-research.svg';
+import nvidiaLogo from '../../assets/ai creator logo/nvidia.svg';
+import openaiLogo from '../../assets/ai creator logo/openai.svg';
+import perplexityLogo from '../../assets/ai creator logo/perplexity.svg';
+import rekaLogo from '../../assets/ai creator logo/reka.svg';
+import upstageLogo from '../../assets/ai creator logo/upstage.svg';
+import xaiLogo from '../../assets/ai creator logo/xai.svg';
+import zaiLogo from '../../assets/ai creator logo/zai_small.svg';
+
 interface ModelData {
   modelId: string;
   modelName: string;
@@ -41,6 +65,31 @@ const Leaderboard: React.FC = () => {
     'Upstage': '#3F51B5',
     'LG AI Research': '#E91E63',
     'Moonshot AI': '#9C27B0'
+  };
+
+  const companyLogos: { [key: string]: string } = {
+    'OpenAI': openaiLogo,
+    'Anthropic': anthropicLogo,
+    'Google': googleLogo,
+    'DeepSeek': deepseekLogo,
+    'Meta': metaLogo,
+    'xAI': xaiLogo,
+    'Alibaba': alibabaLogo,
+    'NVIDIA': nvidiaLogo,
+    'Z AI': zaiLogo,
+    'MiniMax': minimaxLogo,
+    'Perplexity': perplexityLogo,
+    'Cohere': cohereLogo,
+    'Mistral': mistralLogo,
+    'Amazon': awsLogo,
+    'Reka AI': rekaLogo,
+    'Upstage': upstageLogo,
+    'LG AI Research': lgLogo,
+    'Moonshot AI': moonshotLogo,
+    'AI21 Labs': ai21Logo,
+    'IBM': ibmLogo,
+    'Microsoft': microsoftLogo,
+    'Nous Research': nousLogo
   };
   
   useEffect(() => {
@@ -320,7 +369,19 @@ const Leaderboard: React.FC = () => {
                       <span className={styles.modelName}>{formatModelName(item.modelName)}</span>
                     </div>
                   <div className={styles.rowCell}>
-                    <span>{item.creatorName}</span>
+                    {companyLogos[item.creatorName] ? (
+                      <img 
+                        src={companyLogos[item.creatorName]} 
+                        alt={item.creatorName} 
+                        style={{ 
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'contain'
+                        }}
+                      />
+                    ) : (
+                      <span>{item.creatorName}</span>
+                    )}
                   </div>
                   <div className={styles.rowCell}>
                     <span>${item.price1mBlended.toFixed(2)}</span>
