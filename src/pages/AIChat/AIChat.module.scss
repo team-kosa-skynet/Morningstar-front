@@ -13,8 +13,7 @@
   flex-direction: column;
   width: 100%;
   max-width: 1360px;
-  padding-bottom: 40px;
-  padding-top: 40px;
+  padding-top: 120px;
   gap: 30px;
 }
 
@@ -457,5 +456,126 @@
     i {
       font-size: 10px;
     }
+  }
+}
+
+// 리더보드 섹션 스타일
+.leaderboardSection {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 811px;
+  margin: 280px auto 0;
+  gap: 24px;
+}
+
+.leaderboardHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.leaderboardTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  
+  i {
+    color: #4E4EFF;
+    font-size: 20px;
+  }
+  
+  span {
+    font-family: 'Pretendard', sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    color: #4E4EFF;
+  }
+}
+
+.leaderboardSubtitle {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: #777777;
+}
+
+.chartContent {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.chartGraphTitle {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  color: #333333;
+  text-align: center;
+}
+
+.chartGraphDescription {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: #777777;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.chartPlaceholder {
+  width: 100%;
+  height: 300px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+.loadingMessage {
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  color: #777777;
+}
+
+// 모바일 반응형
+@media (max-width: 768px) {
+  .leaderboardSection {
+    margin: 30px auto 0;
+  }
+  
+  .leaderboardTitle {
+    gap: 8px;
+    
+    i {
+      font-size: 18px;
+    }
+    
+    span {
+      font-size: 20px;
+    }
+  }
+  
+  .leaderboardSubtitle {
+    font-size: 14px;
+  }
+  
+  .chartGraphTitle {
+    font-size: 18px;
+  }
+  
+  .chartGraphDescription {
+    font-size: 13px;
+  }
+  
+  .chartPlaceholder {
+    height: 250px;
   }
 }
