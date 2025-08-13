@@ -314,20 +314,20 @@ const Leaderboard: React.FC = () => {
               </div>
               <div className={styles.headerCell}>
                 <div className={styles.speedHeader}>
-                  <i className="bi bi-anthropic"></i>
                   <div className={styles.speedText}>
                     <span>속도</span>
                     <span className={styles.speedSubtext}>초당 토큰 생성</span>
                   </div>
+                  <i className="bi bi-arrow-down-up"></i>
                 </div>
               </div>
               <div className={styles.headerCell}>
                 <div className={styles.speedHeader}>
-                  <i className="bi bi-anthropic"></i>
                   <div className={styles.speedText}>
                     <span>속도</span>
                     <span className={styles.speedSubtext}>첫 토큰 생성</span>
                   </div>
+                  <i className="bi bi-arrow-down-up"></i>
                 </div>
               </div>
             </div>
