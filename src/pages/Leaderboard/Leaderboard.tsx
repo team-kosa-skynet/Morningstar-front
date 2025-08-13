@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { ResponsiveBar } from '@nivo/bar';
+import { Chart, registerables } from 'chart.js';
 import styles from './Leaderboard.module.scss';
+
+Chart.register(...registerables);
 
 // AI Creator Logos
 import ai21Logo from '../../assets/ai creator logo/ai21.svg';
@@ -56,6 +58,7 @@ const Leaderboard: React.FC = () => {
     direction: 'asc',
     clickCount: 0
   });
+  const chartRef = useRef<Chart | null>(null);
   
   const companyColors: { [key: string]: string } = {
     'OpenAI': '#000000',
@@ -124,6 +127,104 @@ const Leaderboard: React.FC = () => {
 
     fetchModelData();
   }, []);
+
+  useEffect(() => {
+    if (!loading && modelData.length > 0) {
+      const canvas = document.getElementById('intelligenceChart') as HTMLCanvasElement;
+      if (!canvas) return;
+
+      // 이전 차트가 있으면 삭제
+      if (chartRef.current) {
+        chartRef.current.destroy();
+      }
+
+      // 데이터 준비
+      const filteredData = modelData
+        .filter(model => {
+          if (activeChart === '코딩 능력 지수') return model.artificialAnalysisCodingIndex !== undefined;
+          if (activeChart === '수학 능력 지수') return model.artificialAnalysisMathIndex !== undefined;
+          return true;
+        })
+        .sort((a, b) => {
+          if (activeChart === '코딩 능력 지수') {
+            return (b.artificialAnalysisCodingIndex || 0) - (a.artificialAnalysisCodingIndex || 0);
+          }
+          if (activeChart === '수학 능력 지수') {
+            return (b.artificialAnalysisMathIndex || 0) - (a.artificialAnalysisMathIndex || 0);
+          }
+          return b.artificialAnalysisIntelligenceIndex - a.artificialAnalysisIntelligenceIndex;
+        })
+        .slice(0, 20);
+
+      const chartData = {
+        labels: filteredData.map(model => 
+          model.modelName.length > 15 ? model.modelName.substring(0, 15) + '...' : model.modelName
+        ),
+        datasets: [{
+          label: activeChart,
+          data: filteredData.map(model => {
+            if (activeChart === '코딩 능력 지수') return model.artificialAnalysisCodingIndex || 0;
+            if (activeChart === '수학 능력 지수') return model.artificialAnalysisMathIndex || 0;
+            return model.artificialAnalysisIntelligenceIndex;
+          }),
+          backgroundColor: filteredData.map(model => companyColors[model.creatorName] || '#000D1C'),
+          borderColor: filteredData.map(model => companyColors[model.creatorName] || '#000D1C'),
+          borderWidth: 1
+        }]
+      };
+
+      // 차트 생성
+      chartRef.current = new Chart(canvas, {
+        type: 'bar',
+        data: chartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                title: (context) => {
+                  const index = context[0].dataIndex;
+                  return filteredData[index].modelName;
+                },
+                label: (context) => {
+                  return `${activeChart}: ${context.parsed.y}`;
+                }
+              }
+            }
+          },
+          layout: {
+            padding: {
+              top: 10,
+              right: 10,
+              bottom: 10,
+              left: 10
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                autoSkip: false,
+                maxRotation: 45,
+                minRotation: 45
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: activeChart === '코딩 능력 지수' ? '코딩 지수' : 
+                       activeChart === '수학 능력 지수' ? '수학 지수' : '지능 지수'
+              }
+            }
+          }
+        }
+      });
+    }
+  }, [loading, modelData, activeChart]);
 
   const chartTabs = ['종합 지능 지수', '코딩 능력 지수', '수학 능력 지수'];
 
@@ -285,107 +386,7 @@ const Leaderboard: React.FC = () => {
                 )}
               </div>
               <div className={styles.chartPlaceholder}>
-                {!loading && modelData.length > 0 && (activeChart === '종합 지능 지수' || activeChart === '코딩 능력 지수' || activeChart === '수학 능력 지수') && (
-                  <ResponsiveBar
-                    data={modelData
-                      .filter(model => {
-                        if (activeChart === '코딩 능력 지수') return model.artificialAnalysisCodingIndex !== undefined;
-                        if (activeChart === '수학 능력 지수') return model.artificialAnalysisMathIndex !== undefined;
-                        return true;
-                      })
-                      .sort((a, b) => {
-                        if (activeChart === '코딩 능력 지수') {
-                          return (b.artificialAnalysisCodingIndex || 0) - (a.artificialAnalysisCodingIndex || 0);
-                        }
-                        if (activeChart === '수학 능력 지수') {
-                          return (b.artificialAnalysisMathIndex || 0) - (a.artificialAnalysisMathIndex || 0);
-                        }
-                        return b.artificialAnalysisIntelligenceIndex - a.artificialAnalysisIntelligenceIndex;
-                      })
-                      .slice(0, 15)
-                      .map(model => ({
-                        model: model.modelName.length > 15 ? model.modelName.substring(0, 15) + '...' : model.modelName,
-                        fullName: model.modelName,
-                        creator: model.creatorName,
-                        score: activeChart === '코딩 능력 지수' 
-                          ? model.artificialAnalysisCodingIndex || 0
-                          : activeChart === '수학 능력 지수'
-                          ? model.artificialAnalysisMathIndex || 0
-                          : model.artificialAnalysisIntelligenceIndex,
-                        color: companyColors[model.creatorName] || '#000D1C'
-                      }))}
-                    keys={['score']}
-                    indexBy="model"
-                    margin={{ top: 30, right: 30, bottom: 100, left: 60 }}
-                    padding={0.3}
-                    valueScale={{ type: 'linear' }}
-                    indexScale={{ type: 'band', round: true }}
-                    colors={(bar) => bar.data.color}
-                    borderColor={{
-                      from: 'color',
-                      modifiers: [['darker', 1.6]]
-                    }}
-                    theme={{
-                      background: '#ffffff',
-                      axis: {
-                        ticks: {
-                          text: {
-                            fill: '#333333'
-                          }
-                        },
-                        legend: {
-                          text: {
-                            fill: '#333333'
-                          }
-                        }
-                      },
-                      grid: {
-                        line: {
-                          stroke: '#e0e0e0'
-                        }
-                      }
-                    }}
-                    axisTop={null}
-                    axisRight={null}
-                    axisBottom={{
-                      tickSize: 5,
-                      tickPadding: 5,
-                      tickRotation: -45,
-                      legend: '',
-                      legendPosition: 'middle',
-                      legendOffset: 80
-                    }}
-                    axisLeft={{
-                      tickSize: 5,
-                      tickPadding: 5,
-                      tickRotation: 0,
-                      legend: activeChart === '코딩 능력 지수' ? '코딩 지수' : activeChart === '수학 능력 지수' ? '수학 지수' : '지능 지수',
-                      legendPosition: 'middle',
-                      legendOffset: -40
-                    }}
-                    labelSkipWidth={12}
-                    labelSkipHeight={12}
-                    labelTextColor="#ffffff"
-                    legends={[]}
-                    role="application"
-                    ariaLabel="Nivo bar chart demo"
-                    barAriaLabel={function(e){return e.id+": "+e.formattedValue+" in model: "+e.indexValue}}
-                    tooltip={({ data }) => (
-                      <div
-                        style={{
-                          padding: '8px 12px',
-                          color: '#333333',
-                          background: '#ffffff',
-                          border: '1px solid #ccc',
-                          borderRadius: '4px',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        {data.fullName}
-                      </div>
-                    )}
-                  />
-                )}
+                <canvas id="intelligenceChart" style={{ maxHeight: '400px' }}></canvas>
               </div>
             </div>
           </div>
