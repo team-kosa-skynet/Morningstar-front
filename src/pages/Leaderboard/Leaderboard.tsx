@@ -107,7 +107,7 @@ const Leaderboard: React.FC = () => {
                   <ResponsiveBar
                     data={modelData
                       .sort((a, b) => b.artificialAnalysisIntelligenceIndex - a.artificialAnalysisIntelligenceIndex)
-                      .slice(0, 18)
+                      .slice(0, 15)
                       .map(model => ({
                         model: model.modelName.length > 15 ? model.modelName.substring(0, 15) + '...' : model.modelName,
                         creator: model.creatorName,
@@ -170,19 +170,18 @@ const Leaderboard: React.FC = () => {
                     role="application"
                     ariaLabel="Nivo bar chart demo"
                     barAriaLabel={function(e){return e.id+": "+e.formattedValue+" in model: "+e.indexValue}}
-                    tooltip={({value, color, indexValue, data }) => (
+                    tooltip={({ indexValue }) => (
                       <div
                         style={{
-                          padding: 12,
-                          color,
+                          padding: '8px 12px',
+                          color: '#333333',
                           background: '#ffffff',
                           border: '1px solid #ccc',
-                          borderRadius: '4px'
+                          borderRadius: '4px',
+                          whiteSpace: 'nowrap'
                         }}
                       >
-                        <strong>{indexValue}</strong><br/>
-                        제작사: {data.creator}<br/>
-                        점수: {value}
+                        {indexValue}
                       </div>
                     )}
                   />
