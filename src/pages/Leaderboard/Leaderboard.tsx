@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { ResponsiveBar } from '@nivo/bar';
 import styles from './Leaderboard.module.scss';
 
 interface ModelData {
@@ -22,7 +23,7 @@ const Leaderboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   
   const companyColors: { [key: string]: string } = {
-    'OpenAI': '#74AA9C',
+    'OpenAI': '#000000',
     'Anthropic': '#D97757',
     'Google': '#4285F4',
     'DeepSeek': '#6B46C1',
@@ -102,7 +103,113 @@ const Leaderboard: React.FC = () => {
                 MMLU-Pro, GPQA Diamond, Humanity's Last Exam, LiveCodeBench, SciCode, AIME, IFBench, AA-LCR
               </div>
               <div className={styles.chartPlaceholder}>
-                {/* 차트 플레이스홀더 - 하늘색 배경 */}
+                {!loading && modelData.length > 0 && activeChart === '종합 지능 지수' && (
+                  <ResponsiveBar
+                    data={modelData
+                      .sort((a, b) => b.artificialAnalysisIntelligenceIndex - a.artificialAnalysisIntelligenceIndex)
+                      .slice(0, 18)
+                      .map(model => ({
+                        model: model.modelName.length > 15 ? model.modelName.substring(0, 15) + '...' : model.modelName,
+                        creator: model.creatorName,
+                        score: model.artificialAnalysisIntelligenceIndex,
+                        color: companyColors[model.creatorName] || '#000D1C'
+                      }))}
+                    keys={['score']}
+                    indexBy="model"
+                    margin={{ top: 50, right: 130, bottom: 100, left: 60 }}
+                    padding={0.3}
+                    valueScale={{ type: 'linear' }}
+                    indexScale={{ type: 'band', round: true }}
+                    colors={(bar) => bar.data.color}
+                    borderColor={{
+                      from: 'color',
+                      modifiers: [['darker', 1.6]]
+                    }}
+                    theme={{
+                      background: '#ffffff',
+                      axis: {
+                        ticks: {
+                          text: {
+                            fill: '#333333'
+                          }
+                        },
+                        legend: {
+                          text: {
+                            fill: '#333333'
+                          }
+                        }
+                      },
+                      grid: {
+                        line: {
+                          stroke: '#e0e0e0'
+                        }
+                      }
+                    }}
+                    axisTop={null}
+                    axisRight={null}
+                    axisBottom={{
+                      tickSize: 5,
+                      tickPadding: 5,
+                      tickRotation: -45,
+                      legend: '',
+                      legendPosition: 'middle',
+                      legendOffset: 80
+                    }}
+                    axisLeft={{
+                      tickSize: 5,
+                      tickPadding: 5,
+                      tickRotation: 0,
+                      legend: '지능 지수',
+                      legendPosition: 'middle',
+                      legendOffset: -40
+                    }}
+                    labelSkipWidth={12}
+                    labelSkipHeight={12}
+                    labelTextColor="#ffffff"
+                    legends={[
+                      {
+                        dataFrom: 'indexes',
+                        anchor: 'bottom-right',
+                        direction: 'column',
+                        justify: false,
+                        translateX: 120,
+                        translateY: 0,
+                        itemsSpacing: 2,
+                        itemWidth: 100,
+                        itemHeight: 20,
+                        itemDirection: 'left-to-right',
+                        itemOpacity: 0.85,
+                        symbolSize: 20,
+                        effects: [
+                          {
+                            on: 'hover',
+                            style: {
+                              itemOpacity: 1
+                            }
+                          }
+                        ]
+                      }
+                    ]}
+                    role="application"
+                    ariaLabel="Nivo bar chart demo"
+                    barAriaLabel={function(e){return e.id+": "+e.formattedValue+" in model: "+e.indexValue}}
+                    tooltip={({value, color, indexValue, data }) => (
+                      <div
+                        style={{
+                          padding: 12,
+                          color,
+                          background: '#ffffff',
+                          border: '1px solid #ccc',
+                          borderRadius: '4px'
+                        }}
+                      >
+                        <strong>{indexValue}</strong><br/>
+                        제작사: {data.creator}<br/>
+                        점수: {value}
+                      </div>
+                    )}
+                  />
+                )}
               </div>
             </div>
           </div>
