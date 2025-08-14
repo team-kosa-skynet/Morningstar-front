@@ -84,8 +84,6 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
   const chartRef = useRef<Chart | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  if (!isOpen) return null;
-
   // 차트 생성 함수
   const createRadarChart = (modelData: AIRecommendedModel) => {
     if (!canvasRef.current) return;
@@ -221,6 +219,26 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
     };
   };
 
+  // 더미 데이터
+  const getDummyResult = (): AIRecommendedModel => {
+    return {
+      name: "Grok 4",
+      creator: "xAI",
+      openSource: false,
+      releaseDate: "2025-07-10",
+      scores: {
+        cost: 0.4,
+        speed: 0.53996,
+        math: 0.3287766666666666,
+        code: 0.21691999999999997,
+        knowledge: 0.006606666666666666,
+        reasoning: 0.22872,
+        recency: 0.9534246575342465,
+        finalScore: 0.4039961643835616
+      }
+    };
+  };
+
   // AI 모델 추천 API 호출
   const getAIRecommendation = async (): Promise<void> => {
     try {
@@ -242,7 +260,11 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
       }
     } catch (err) {
       console.error('AI 추천 API 오류:', err);
-      setError('서버와 연결할 수 없습니다. 다시 시도해주세요.');
+      console.log('API 통신 실패, 더미 데이터 사용');
+      
+      // API 통신 실패 시 더미 데이터 사용
+      setResult(getDummyResult());
+      setCurrentStep(3);
     } finally {
       setLoading(false);
     }
@@ -278,6 +300,8 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
     setLoading(false);
     onClose();
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -511,56 +535,44 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
         {/* Result */}
         {currentStep === 3 && (
           <div className={styles.modalFrame}>
-            <div className={styles.modalHeader}>
-              <div className={styles.resultContainer}>
-                {error ? (
-                  <div className={styles.errorContent}>
-                    <div className={styles.errorTitle}>오류가 발생했습니다</div>
-                    <div className={styles.errorMessage}>{error}</div>
-                    <button 
-                      className={styles.backButton}
-                      onClick={() => setCurrentStep(2)}
-                    >
-                      다시 시도
-                    </button>
-                  </div>
-                ) : result ? (
-                  <>
-                    <div className={styles.chartContainer}>
-                      <canvas ref={canvasRef} className={styles.radarChart}></canvas>
-                    </div>
-                    <div className={styles.resultInfo}>
-                      <div className={styles.resultTitle}>최종 추천 모델</div>
-                      <div className={styles.modelName}>{result.name}</div>
-                      <div className={styles.modelDetails}>
-                        <div className={styles.detailItem}>
-                          <span className={styles.detailLabel}>제작사:</span>
-                          <span className={styles.detailValue}>{result.creator}</span>
-                        </div>
-                        <div className={styles.detailItem}>
-                          <span className={styles.detailLabel}>출시일:</span>
-                          <span className={styles.detailValue}>{result.releaseDate}</span>
-                        </div>
-                        <div className={styles.detailItem}>
-                          <span className={styles.detailLabel}>오픈소스:</span>
-                          <span className={styles.detailValue}>{result.openSource ? '예' : '아니오'}</span>
-                        </div>
-                        <div className={styles.finalScore}>
-                          최종 점수: {(result.scores.finalScore * 100).toFixed(1)}점
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className={styles.loadingContent}>
-                    <div className={styles.loadingMessage}>결과를 불러오는 중...</div>
-                  </div>
-                )}
+            {error ? (
+              <div className={styles.errorContent}>
+                <div className={styles.errorTitle}>오류가 발생했습니다</div>
+                <div className={styles.errorMessage}>{error}</div>
+                <button 
+                  className={styles.backButton}
+                  onClick={() => setCurrentStep(2)}
+                >
+                  다시 시도
+                </button>
               </div>
-              <button className={styles.closeButton} onClick={onClose}>
-                <i className="bi bi-x"></i>
-              </button>
-            </div>
+            ) : result ? (
+              <>
+                {/* 차트 그룹 - 흰색 박스에 차트 */}
+                <div className={styles.chartSection}>
+                  <canvas ref={canvasRef} className={styles.radarChart}></canvas>
+                </div>
+
+                {/* 텍스트 그룹 - 모델 정보 */}
+                <div className={styles.textSection}>
+                  <div className={styles.resultTitle}>최종 추천 모델 : {result.name}</div>
+                  <div className={styles.resultInfo}>제작사 : {result.creator}</div>
+                  <div className={styles.resultInfo}>출시일 : {result.releaseDate}</div>
+                </div>
+
+                {/* 닫기 버튼 */}
+                <button 
+                  className={styles.submitButton}
+                  onClick={onClose}
+                >
+                  닫기
+                </button>
+              </>
+            ) : (
+              <div className={styles.loadingContent}>
+                <div className={styles.loadingMessage}>결과를 불러오는 중...</div>
+              </div>
+            )}
           </div>
         )}
       </div>
