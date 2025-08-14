@@ -32,7 +32,7 @@ interface AIRecommendRequest {
   monthlyTokens: number;
   costPriority: string;
   needLowLatency: boolean;
-  allowOpenSource: boolean;
+  allowOpenSource: boolean | null;
   creativityVsFact: string;
   recentnessMatters: boolean;
   topK: number;
