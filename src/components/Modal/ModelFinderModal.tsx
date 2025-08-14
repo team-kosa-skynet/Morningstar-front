@@ -148,7 +148,7 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
             pointLabels: {
               font: {
                 size: 14,
-                weight: '500' as const
+                weight: 500
               },
               color: '#333333'
             }
@@ -250,13 +250,14 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
     await getAIRecommendation();
   };
 
-  const handleReset = () => {
+  const handleClose = () => {
     // 차트 정리
     if (chartRef.current) {
       chartRef.current.destroy();
       chartRef.current = null;
     }
     
+    // 상태 초기화
     setCurrentStep(1);
     setStep1Data({
       purpose: '',
@@ -274,13 +275,15 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
     setResult(null);
     setError('');
     setLoading(false);
+    
     onClose();
   };
+
 
   if (!isOpen) return null;
 
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
+    <div className={styles.modalOverlay} onClick={handleClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         
         {/* Step 1 */}
@@ -310,7 +313,7 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
                   </button>
                 </div>
               </div>
-              <button className={styles.closeButton} onClick={onClose}>
+              <button className={styles.closeButton} onClick={handleClose}>
                 <i className="bi bi-x"></i>
               </button>
             </div>
@@ -407,7 +410,7 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
                   </button>
                 </div>
               </div>
-              <button className={styles.closeButton} onClick={onClose}>
+              <button className={styles.closeButton} onClick={handleClose}>
                 <i className="bi bi-x"></i>
               </button>
             </div>
@@ -539,7 +542,7 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
                 {/* 닫기 버튼 */}
                 <button 
                   className={styles.submitButton}
-                  onClick={onClose}
+                  onClick={handleClose}
                 >
                   닫기
                 </button>
