@@ -258,6 +258,21 @@ interface NewsResponse {
   data: NewsItem[];
 }
 
+interface StartInterviewRequest {
+  job: string;
+  audioText: string;
+  resumeFile?: File;
+}
+
+interface StartInterviewResponse {
+  code: number;
+  message: string;
+  data: {
+    interviewId: number;
+    status: string;
+  } | null;
+}
+
 interface CreateBoardRequest {
   title: string;
   content: string;
@@ -744,6 +759,35 @@ export const getNews = async (): Promise<NewsResponse> => {
   try {
     const response = await axios.get<NewsResponse>(
       `${API_BASE_URL}/news`
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const startInterview = async (interviewData: StartInterviewRequest, token: string): Promise<StartInterviewResponse> => {
+  try {
+    const formData = new FormData();
+    formData.append('job', interviewData.job);
+    formData.append('audioText', interviewData.audioText);
+    
+    if (interviewData.resumeFile) {
+      formData.append('resumeFile', interviewData.resumeFile);
+    }
+
+    const response = await axios.post<StartInterviewResponse>(
+      `${API_BASE_URL}/interview/start`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      }
     );
     return response.data;
   } catch (error) {
