@@ -5,10 +5,13 @@ import Pagination from '../../components/Pagination/Pagination';
 import { getNews } from '../../services/apiService';
 import type { NewsItem } from '../../services/apiService';
 import newspaperImg from '../../assets/images/newspaper.png';
+import avatarImg from '../../assets/images/avatar.png';
+import bannerImg from '../../assets/images/배너.svg';
 
 const AINewsList = () => {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [filteredNews, setFilteredNews] = useState<NewsItem[]>([]);
+  const [popularNews, setPopularNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,11 +28,14 @@ const AINewsList = () => {
       const newsData = response?.data && Array.isArray(response.data) ? response.data : [];
       setNews(newsData);
       setFilteredNews(newsData);
+      // 인기글은 첫 4개를 사용
+      setPopularNews(newsData.slice(0, 4));
     } catch (error) {
       console.error('뉴스 조회 실패:', error);
       setError('뉴스를 불러오는데 실패했습니다.');
       setNews([]);
       setFilteredNews([]);
+      setPopularNews([]);
     } finally {
       setLoading(false);
     }
@@ -107,6 +113,54 @@ const AINewsList = () => {
   return (
     <div className={styles.newsContainer}>
       <div className={styles.innerBox}>
+        {/* 인기 기사들 */}
+        <div className={styles.popularArticles}>
+          {popularNews.length > 0 && (
+            <>
+              {/* 메인 기사 */}
+              <div 
+                className={styles.mainArticle}
+                onClick={() => handleNewsClick(popularNews[0].link)}
+              >
+                <div className={styles.mainArticleImage}>
+                  <img src={avatarImg} alt="메인 기사" />
+                </div>
+                <div className={styles.titleAndContent}>
+                  <h2 className={styles.mainTitle}>{popularNews[0].title}</h2>
+                  <p className={styles.mainDescription}>{popularNews[0].description}</p>
+                  <div className={styles.mainBackground}></div>
+                </div>
+              </div>
+
+              {/* 사이드 기사들 */}
+              <div className={styles.sideArticles}>
+                {popularNews.slice(1, 4).map((article) => (
+                  <div 
+                    key={article.newsId} 
+                    className={styles.sideArticle}
+                    onClick={() => handleNewsClick(article.link)}
+                  >
+                    <div className={styles.titleAndContent}>
+                      <h3 className={styles.sideTitle}>{article.title}</h3>
+                      <p className={styles.sideDescription}>{article.description}</p>
+                    </div>
+                    <div className={styles.sideImage}>
+                      <img src={avatarImg} alt="사이드 기사" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* 배너 섹션 */}
+        <div className={styles.bannerSection}>
+          <div className={styles.banner}>
+            <img src={bannerImg} alt="배너" />
+          </div>
+        </div>
+
         {/* 리스트 헤더 */}
         <div className={styles.listHeader}>
           <div className={styles.titleAndSearch}>
