@@ -382,3 +382,217 @@
     cursor: not-allowed;
   }
 }
+
+// 질문 화면 스타일
+.questionArea {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+}
+
+.questionBox {
+  display: flex;
+  flex-direction: column;
+  width: 705px;
+  height: 200px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  position: relative;
+}
+
+.questionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.questionNumber {
+  display: flex;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 19px;
+  color: #555555;
+}
+
+.questionProgress {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 15px;
+  border: 1px solid #DDDDDD;
+  border-radius: 20px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 17px;
+  color: #999999;
+}
+
+.questionContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  margin-bottom: 20px;
+}
+
+.questionText {
+  display: flex;
+  margin: 0;
+  text-align: center;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 21px;
+  color: #333333;
+}
+
+.micButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 15px;
+  width: fit-content;
+  margin: 0 auto;
+  background-color: #4E4EFF;
+  border: none;
+  border-radius: 20px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 19px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  i {
+    font-size: 16px;
+  }
+
+  &:hover:not(:disabled) {
+    background-color: #3d3dff;
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// 답변 가이드 스타일
+.guideHeader {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 25px;
+}
+
+.guideIcon {
+  display: flex;
+  width: 21px;
+  height: 21px;
+}
+
+.guideTitle {
+  display: flex;
+  margin: 0;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 21px;
+  color: #333333;
+}
+
+.intentSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  margin-bottom: 30px;
+  background-color: #F5F5FF;
+  border-radius: 10px;
+}
+
+.intentHeader {
+  display: flex;
+  gap: 5px;
+}
+
+.intentIcon {
+  display: flex;
+  width: 17px;
+  height: 17px;
+}
+
+.intentTitle {
+  display: flex;
+  margin: 0;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 17px;
+  color: #555555;
+}
+
+.intentText {
+  display: flex;
+  margin: 0;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 19px;
+  color: #555555;
+}
+
+.guidelinesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.guidelinesHeader {
+  display: flex;
+  gap: 5px;
+}
+
+.guidelineIcon {
+  display: flex;
+  width: 17px;
+  height: 17px;
+}
+
+.guidelinesTitle {
+  display: flex;
+  margin: 0;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 17px;
+  color: #555555;
+}
+
+.guidelinesList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.guidelineItem {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid #DDDDDD;
+  border-radius: 10px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 19px;
+  color: #555555;
+}
