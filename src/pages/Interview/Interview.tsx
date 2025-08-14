@@ -293,7 +293,6 @@ const Interview: React.FC = () => {
                 <button 
                   className={styles.startButton} 
                   onClick={handleStart}
-                  disabled={isLoading || !selectedJob}
                 >
                   시작하기
                 </button>

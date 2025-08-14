@@ -376,8 +376,13 @@
     color: #ffffff;
   }
 
-  &:active {
+  &:active:not(:disabled) {
     transform: translateX(-50%) scale(0.98);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 }
 
@@ -477,7 +482,7 @@
   &:hover:not(:disabled) {
     background-color: #3d3dff;
   }
-
+  
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
