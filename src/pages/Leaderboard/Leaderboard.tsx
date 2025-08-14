@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Chart, registerables } from 'chart.js';
 import styles from './Leaderboard.module.scss';
+import ModelFinderModal from '../../components/Modal/ModelFinderModal.tsx';
 
 Chart.register(...registerables);
 
@@ -58,6 +59,7 @@ const Leaderboard: React.FC = () => {
     direction: 'asc',
     clickCount: 0
   });
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const chartRef = useRef<Chart | null>(null);
   
   const companyColors: { [key: string]: string } = {
@@ -395,13 +397,18 @@ const Leaderboard: React.FC = () => {
         {/* 리더보드 테이블 섹션 */}
         <div className={styles.leaderboardSection}>
           <div className={styles.leaderboardHeader}>
-            <div className={styles.leaderboardTitle}>
-              <i className="bi bi-bar-chart-fill"></i>
-              <span>LLM 리더보드</span>
+            <div className={styles.titleGroup}>
+              <div className={styles.leaderboardTitle}>
+                <i className="bi bi-bar-chart-fill"></i>
+                <span>LLM 리더보드</span>
+              </div>
+              <div className={styles.leaderboardSubtitle}>
+                OpenAI, Google, DeepSeek 등 100개 이상의 AI 모델 비교
+              </div>
             </div>
-            <div className={styles.leaderboardSubtitle}>
-              OpenAI, Google, DeepSeek 등 100개 이상의 AI 모델 비교
-            </div>
+            <button className={styles.findModelButton} onClick={() => setIsModalOpen(true)}>
+              내게 맞는 모델 찾기
+            </button>
           </div>
 
           <div className={styles.leaderboardContent}>
@@ -578,6 +585,11 @@ const Leaderboard: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      <ModelFinderModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </div>
   );
 };

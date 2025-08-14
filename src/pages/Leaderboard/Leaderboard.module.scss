@@ -121,7 +121,8 @@
 
 .leaderboardHeader {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
   padding: 15px;
   gap: 15px;
 }
@@ -144,11 +145,37 @@
   }
 }
 
+.titleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
 .leaderboardSubtitle {
   font-family: 'Pretendard', sans-serif;
   font-size: 16px;
   font-weight: 500;
   color: #777777;
+}
+
+.findModelButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: #4e4eff;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  
+  &:hover {
+    background-color: #3d3dcc;
+  }
 }
 
 .leaderboardContent {
