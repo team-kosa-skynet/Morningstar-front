@@ -194,8 +194,8 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
 
     // costPriority 매핑
     const costPriorityMapping: { [key: string]: string } = {
-      '성능': 'PERFORMANCE',
-      '가격': 'COST',
+      '성능': 'EXPENSIVE',
+      '가격': 'CHEAP',
       '밸런스': 'BALANCED'
     };
 
@@ -212,7 +212,7 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
       monthlyTokens: step1Data.monthlyUsage ? parseFloat(step1Data.monthlyUsage) : 1.0,
       costPriority: costPriorityMapping[step2Data.performanceVsPrice] || 'BALANCED',
       needLowLatency: step2Data.needsFastResponse === '네',
-      allowOpenSource: step2Data.openSourceOk === '네' || step2Data.openSourceOk === '모름',
+      allowOpenSource: step2Data.openSourceOk === '네' ? true : step2Data.openSourceOk === '아니요' ? false : null,
       creativityVsFact: creativityFactMapping[step2Data.creativityVsFact] || 'FACTUAL',
       recentnessMatters: step2Data.recentnessMatters === '네',
       topK: 1
