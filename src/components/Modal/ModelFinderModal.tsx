@@ -15,7 +15,6 @@ interface ModelFinderStep1Data {
 interface ModelFinderStep2Data {
   performanceVsPrice: string;
   needsFastResponse: string;
-  openSourceOk: string;
   creativityVsFact: string;
   recentnessMatters: string;
 }
@@ -29,10 +28,8 @@ interface AIRecommendRequest {
   purpose: string;
   accuracyVsSpeed: string;
   longReasoning: boolean;
-  monthlyTokens: number;
   costPriority: string;
   needLowLatency: boolean;
-  allowOpenSource: boolean | null;
   creativityVsFact: string;
   recentnessMatters: boolean;
   topK: number;
@@ -74,7 +71,6 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
   const [step2Data, setStep2Data] = useState<ModelFinderStep2Data>({
     performanceVsPrice: '',
     needsFastResponse: '',
-    openSourceOk: '',
     creativityVsFact: '',
     recentnessMatters: ''
   });
@@ -95,13 +91,13 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
 
     const labels = ['비용', '속도', '수학', '코딩', '지식', '추론', '최신성'];
     const data = [
-      modelData.scores.cost * 100,
-      modelData.scores.speed * 100,
-      modelData.scores.math * 100,
-      modelData.scores.code * 100,
-      modelData.scores.knowledge * 100,
-      modelData.scores.reasoning * 100,
-      modelData.scores.recency * 100
+      modelData.scores.cost,
+      modelData.scores.speed,
+      modelData.scores.math,
+      modelData.scores.code,
+      modelData.scores.knowledge,
+      modelData.scores.reasoning,
+      modelData.scores.recency
     ];
 
     const config = {
@@ -207,12 +203,10 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
 
     return {
       purpose: purposeMapping[step1Data.purpose] || 'KNOWLEDGE',
-      accuracyVsSpeed: accuracySpeedMapping[step1Data.speedVsAccuracy] || 'BALANCED',
+      accuracyVsSpeed: accuracySpeedMapping[step1Data.speedVsAccuracy] || 'ACCURACY',
       longReasoning: step1Data.needsAnalysis === '네',
-      monthlyTokens: step1Data.monthlyUsage ? parseFloat(step1Data.monthlyUsage) : 1.0,
-      costPriority: costPriorityMapping[step2Data.performanceVsPrice] || 'BALANCED',
+      costPriority: costPriorityMapping[step2Data.performanceVsPrice] || 'CHEAP',
       needLowLatency: step2Data.needsFastResponse === '네',
-      allowOpenSource: step2Data.openSourceOk === '네' ? true : step2Data.openSourceOk === '아니요' ? false : null,
       creativityVsFact: creativityFactMapping[step2Data.creativityVsFact] || 'FACTUAL',
       recentnessMatters: step2Data.recentnessMatters === '네',
       topK: 1
@@ -268,7 +262,6 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
     setStep2Data({
       performanceVsPrice: '',
       needsFastResponse: '',
-      openSourceOk: '',
       creativityVsFact: '',
       recentnessMatters: ''
     });
@@ -434,30 +427,6 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
             </div>
 
             <div className={styles.question3}>
-              <div className={styles.questionTitle}>오픈소스 모델이여도 상관없나요?</div>
-              <div className={styles.optionGroup}>
-                <button 
-                  className={`${styles.optionButton} ${step2Data.openSourceOk === '네' ? styles.selectedGray : ''}`}
-                  onClick={() => setStep2Data({...step2Data, openSourceOk: '네'})}
-                >
-                  네
-                </button>
-                <button 
-                  className={`${styles.optionButton} ${step2Data.openSourceOk === '아니요' ? styles.selectedGray : ''}`}
-                  onClick={() => setStep2Data({...step2Data, openSourceOk: '아니요'})}
-                >
-                  아니요
-                </button>
-                <button 
-                  className={`${styles.optionButton} ${step2Data.openSourceOk === '모름' ? styles.selectedGray : ''}`}
-                  onClick={() => setStep2Data({...step2Data, openSourceOk: '모름'})}
-                >
-                  모름
-                </button>
-              </div>
-            </div>
-
-            <div className={styles.question4}>
               <div className={styles.questionTitle}>사실과 창의성 중 어떤 것이 더 중요한가요?</div>
               <div className={styles.optionGroup}>
                 <button 
@@ -475,7 +444,7 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
               </div>
             </div>
 
-            <div className={styles.question5}>
+            <div className={styles.question4}>
               <div className={styles.questionTitle}>최신 정보 학습 여부가 중요한가요?</div>
               <div className={styles.optionGroup}>
                 <button 
