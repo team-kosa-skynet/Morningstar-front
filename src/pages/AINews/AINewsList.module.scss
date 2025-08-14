@@ -178,10 +178,15 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 100%;
+      width: 100vw;
       height: 160px;
       background: #000D1C;
       margin-bottom: 70px;
+      position: relative;
+      left: 50%;
+      right: 50%;
+      margin-left: -50vw;
+      margin-right: -50vw;
 
       .banner {
         display: flex;
