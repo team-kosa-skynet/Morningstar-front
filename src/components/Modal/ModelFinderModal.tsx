@@ -219,26 +219,6 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
     };
   };
 
-  // 더미 데이터
-  const getDummyResult = (): AIRecommendedModel => {
-    return {
-      name: "Grok 4",
-      creator: "xAI",
-      openSource: false,
-      releaseDate: "2025-07-10",
-      scores: {
-        cost: 0.4,
-        speed: 0.53996,
-        math: 0.3287766666666666,
-        code: 0.21691999999999997,
-        knowledge: 0.006606666666666666,
-        reasoning: 0.22872,
-        recency: 0.9534246575342465,
-        finalScore: 0.4039961643835616
-      }
-    };
-  };
-
   // AI 모델 추천 API 호출
   const getAIRecommendation = async (): Promise<void> => {
     try {
@@ -260,11 +240,7 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
       }
     } catch (err) {
       console.error('AI 추천 API 오류:', err);
-      console.log('API 통신 실패, 더미 데이터 사용');
-      
-      // API 통신 실패 시 더미 데이터 사용
-      setResult(getDummyResult());
-      setCurrentStep(3);
+      setError('서버와 연결할 수 없습니다. 다시 시도해주세요.');
     } finally {
       setLoading(false);
     }
