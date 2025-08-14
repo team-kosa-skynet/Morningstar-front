@@ -1,11 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './Interview.module.scss';
 import interviewGif from '../../assets/images/면접임시.gif';
 import fileUploadIcon from '../../assets/images/file-upload.png';
+import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
+import { startInterview } from '../../services/apiService';
 
 const Interview: React.FC = () => {
   const [selectedJob, setSelectedJob] = useState<string>('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [microphonePermission, setMicrophonePermission] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown');
+  
+  const {
+    transcript,
+    isListening,
+    isSupported,
+    startListening,
+    stopListening,
+    resetTranscript,
+    error: speechError
+  } = useSpeechRecognition();
+
+  useEffect(() => {
+    checkMicrophonePermission();
+  }, []);
+
+  const checkMicrophonePermission = async () => {
+    try {
+      if (navigator.permissions) {
+        const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+        setMicrophonePermission(permission.state);
+        
+        permission.onchange = () => {
+          setMicrophonePermission(permission.state);
+        };
+      }
+    } catch (error) {
+      console.log('마이크 권한 확인 실패:', error);
+      setMicrophonePermission('unknown');
+    }
+  };
+
+  const requestMicrophonePermission = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop());
+      setMicrophonePermission('granted');
+      return true;
+    } catch (error) {
+      console.error('마이크 권한 요청 실패:', error);
+      setMicrophonePermission('denied');
+      return false;
+    }
+  };
 
   const handleJobSelect = (job: string) => {
     setSelectedJob(job);
@@ -18,9 +65,81 @@ const Interview: React.FC = () => {
     }
   };
 
-  const handleStart = () => {
-    // TODO: API 연동
-    console.log('시작하기');
+  const handleStart = async () => {
+    if (!selectedJob) {
+      alert('직무를 선택해주세요.');
+      return;
+    }
+
+    if (!isSupported) {
+      alert('음성 인식이 지원되지 않는 브라우저입니다. Chrome, Edge, Safari 브라우저를 사용해주세요.');
+      return;
+    }
+
+    if (microphonePermission === 'denied') {
+      alert('마이크 권한이 거부되었습니다. 브라우저 설정에서 마이크 권한을 허용해주세요.');
+      return;
+    }
+
+    if (!isListening && !transcript) {
+      if (microphonePermission !== 'granted') {
+        const permissionGranted = await requestMicrophonePermission();
+        if (!permissionGranted) {
+          alert('마이크 권한이 필요합니다. 브라우저에서 마이크 사용을 허용해주세요.');
+          return;
+        }
+      }
+      
+      startListening();
+      return;
+    }
+
+    if (isListening) {
+      stopListening();
+      return;
+    }
+
+    if (transcript && !isLoading) {
+      if (transcript.trim().length < 10) {
+        alert('최소 10자 이상의 음성 입력이 필요합니다.');
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          alert('로그인이 필요합니다.');
+          return;
+        }
+
+        const interviewData = {
+          job: selectedJob,
+          audioText: transcript.trim(),
+          resumeFile: uploadedFile || undefined
+        };
+
+        const response = await startInterview(interviewData, token);
+        
+        if (response.code === 200) {
+          alert('인터뷰가 시작되었습니다!');
+          resetTranscript();
+        } else {
+          alert(response.message || '인터뷰 시작에 실패했습니다.');
+        }
+      } catch (error: any) {
+        console.error('인터뷰 시작 오류:', error);
+        if (error.response?.status === 401) {
+          alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+        } else if (error.response?.status === 403) {
+          alert('포인트가 부족합니다. 포인트를 충전해주세요.');
+        } else {
+          alert(error.message || '인터뷰 시작 중 오류가 발생했습니다.');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
   return (
@@ -99,9 +218,47 @@ const Interview: React.FC = () => {
               </ul>
             </div>
 
+            {/* 음성 인식 상태 */}
+            {(isListening || transcript || speechError) && (
+              <div className={styles.speechStatus}>
+                {speechError && (
+                  <div className={styles.errorMessage}>
+                    <p>❌ {speechError}</p>
+                  </div>
+                )}
+                
+                {isListening && (
+                  <div className={styles.listeningIndicator}>
+                    <div className={styles.recordingIcon}>🎤</div>
+                    <p>음성을 인식하고 있습니다...</p>
+                  </div>
+                )}
+                
+                {transcript && (
+                  <div className={styles.transcriptArea}>
+                    <h4>인식된 음성:</h4>
+                    <p>{transcript}</p>
+                    <button 
+                      className={styles.resetButton} 
+                      onClick={resetTranscript}
+                      type="button"
+                    >
+                      다시 녹음
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* 시작 버튼 */}
-            <button className={styles.startButton} onClick={handleStart}>
-              시작하기
+            <button 
+              className={styles.startButton} 
+              onClick={handleStart}
+              disabled={isLoading || !selectedJob}
+            >
+              {isLoading ? '처리 중...' : 
+               isListening ? '녹음 중지' : 
+               transcript ? '인터뷰 시작' : '음성 녹음 시작'}
             </button>
           </div>
         </div>
