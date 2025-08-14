@@ -12,6 +12,197 @@
     width: 1160px;
     gap: 0;
 
+    // 인기 기사들
+    .popularArticles {
+      display: flex;
+      width: 100%;
+      height: 511px;
+      gap: 52px;
+      margin-bottom: 70px;
+
+      // 메인 기사
+      .mainArticle {
+        display: flex;
+        flex-direction: column;
+        width: 500px;
+        height: 511px;
+        position: relative;
+        cursor: pointer;
+        gap: 20px;
+        
+        &:hover {
+          opacity: 0.8;
+        }
+
+        .mainArticleImage {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 500px;
+          height: 324px;
+          border: 1px solid #DDDDDD;
+          background: #f9f9f9;
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+          }
+        }
+
+        .titleAndContent {
+          display: flex;
+          flex-direction: column;
+          width: 500px;
+          height: 157px;
+          position: relative;
+
+          .mainTitle {
+            font-family: 'Pretendard', sans-serif;
+            font-weight: 700;
+            font-size: 28px;
+            line-height: 33px;
+            color: #333333;
+            margin: 0;
+            margin-bottom: 13px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+          }
+
+          .mainDescription {
+            font-family: 'Pretendard', sans-serif;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 19px;
+            color: #333333;
+            margin: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+          }
+
+          .mainBackground {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 500px;
+            height: 157px;
+            background: transparent;
+            z-index: 0;
+          }
+        }
+      }
+
+      // 사이드 기사들
+      .sideArticles {
+        display: flex;
+        flex-direction: column;
+        width: 608px;
+        height: 511px;
+        gap: 30px;
+
+        .sideArticle {
+          display: flex;
+          width: 608px;
+          height: 150px;
+          cursor: pointer;
+          justify-content: space-between;
+          
+          &:hover {
+            opacity: 0.8;
+          }
+
+          .titleAndContent {
+            display: flex;
+            flex-direction: column;
+            width: 350px;
+            height: 135px;
+
+            .sideTitle {
+              font-family: 'Pretendard', sans-serif;
+              font-weight: 700;
+              font-size: 22px;
+              line-height: 26px;
+              color: #333333;
+              margin: 0;
+              margin-bottom: 15px;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+            }
+
+            .sideDescription {
+              font-family: 'Pretendard', sans-serif;
+              font-weight: 400;
+              font-size: 14px;
+              line-height: 17px;
+              color: #333333;
+              margin: 0;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              display: -webkit-box;
+              -webkit-line-clamp: 4;
+              -webkit-box-orient: vertical;
+            }
+          }
+
+          .sideImage {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 230px;
+            height: 150px;
+            margin-left: 4px;
+            border: 1px solid #DDDDDD;
+            background: #f9f9f9;
+
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: contain;
+            }
+          }
+        }
+      }
+    }
+
+    // 배너 섹션
+    .bannerSection {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100vw;
+      height: 160px;
+      background: #000D1C;
+      margin-bottom: 70px;
+      position: relative;
+      left: 50%;
+      right: 50%;
+      margin-left: -50vw;
+      margin-right: -50vw;
+
+      .banner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 800px;
+        height: 120px;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+      }
+    }
+
     // 리스트 헤더
     .listHeader {
       display: flex;
