@@ -1,5 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import { Chart, registerables } from 'chart.js';
 import styles from './ModelFinderModal.module.scss';
+
+Chart.register(...registerables);
 
 interface ModelFinderStep1Data {
   purpose: string;
@@ -21,6 +25,44 @@ interface ModelFinderModalProps {
   onClose: () => void;
 }
 
+interface AIRecommendRequest {
+  purpose: string;
+  accuracyVsSpeed: string;
+  longReasoning: boolean;
+  monthlyTokens: number;
+  costPriority: string;
+  needLowLatency: boolean;
+  allowOpenSource: boolean;
+  creativityVsFact: string;
+  recentnessMatters: boolean;
+  topK: number;
+}
+
+interface AIModelScores {
+  cost: number;
+  speed: number;
+  math: number;
+  code: number;
+  knowledge: number;
+  reasoning: number;
+  recency: number;
+  finalScore: number;
+}
+
+interface AIRecommendedModel {
+  name: string;
+  creator: string;
+  openSource: boolean;
+  releaseDate: string;
+  scores: AIModelScores;
+}
+
+interface AIRecommendResponse {
+  code: number;
+  message: string;
+  data: AIRecommendedModel[];
+}
+
 const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [step1Data, setStep1Data] = useState<ModelFinderStep1Data>({
@@ -36,21 +78,187 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
     creativityVsFact: '',
     recentnessMatters: ''
   });
-  const [result, setResult] = useState<string>('');
+  const [result, setResult] = useState<AIRecommendedModel | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>('');
+  const chartRef = useRef<Chart | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   if (!isOpen) return null;
+
+  // 차트 생성 함수
+  const createRadarChart = (modelData: AIRecommendedModel) => {
+    if (!canvasRef.current) return;
+
+    // 기존 차트가 있으면 삭제
+    if (chartRef.current) {
+      chartRef.current.destroy();
+    }
+
+    const labels = ['비용', '속도', '수학', '코딩', '지식', '추론', '최신성'];
+    const data = [
+      modelData.scores.cost * 100,
+      modelData.scores.speed * 100,
+      modelData.scores.math * 100,
+      modelData.scores.code * 100,
+      modelData.scores.knowledge * 100,
+      modelData.scores.reasoning * 100,
+      modelData.scores.recency * 100
+    ];
+
+    const config = {
+      type: 'radar' as const,
+      data: {
+        labels: labels,
+        datasets: [{
+          label: modelData.name,
+          data: data,
+          borderColor: '#6B4BFF',
+          backgroundColor: 'rgba(107, 75, 255, 0.2)',
+          borderWidth: 2,
+          pointBackgroundColor: '#6B4BFF',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          filler: {
+            propagate: false
+          }
+        },
+        scales: {
+          r: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              stepSize: 20,
+              font: {
+                size: 12
+              },
+              color: '#666666'
+            },
+            grid: {
+              color: '#E5E5E5'
+            },
+            pointLabels: {
+              font: {
+                size: 14,
+                weight: '500' as const
+              },
+              color: '#333333'
+            }
+          }
+        },
+        interaction: {
+          intersect: false
+        }
+      }
+    };
+
+    chartRef.current = new Chart(canvasRef.current, config);
+  };
+
+  // 결과 설정 시 차트 생성
+  useEffect(() => {
+    if (result && currentStep === 3) {
+      setTimeout(() => {
+        createRadarChart(result);
+      }, 100);
+    }
+  }, [result, currentStep]);
 
   const handleStep1Submit = () => {
     setCurrentStep(2);
   };
 
-  const handleStep2Submit = () => {
-    // 여기서 추천 로직 구현
-    setResult('Grok 4');
-    setCurrentStep(3);
+  // 폼 데이터를 API 요청 형식으로 변환
+  const mapFormDataToRequest = (): AIRecommendRequest => {
+    // purpose 매핑
+    const purposeMapping: { [key: string]: string } = {
+      '코딩': 'CODING',
+      '수학': 'MATH',
+      '지식': 'KNOWLEDGE'
+    };
+
+    // accuracyVsSpeed 매핑
+    const accuracySpeedMapping: { [key: string]: string } = {
+      '응답 속도': 'SPEED',
+      '정확도': 'ACCURACY',
+      '적절한 밸런스': 'BALANCED'
+    };
+
+    // costPriority 매핑
+    const costPriorityMapping: { [key: string]: string } = {
+      '성능': 'PERFORMANCE',
+      '가격': 'COST',
+      '밸런스': 'BALANCED'
+    };
+
+    // creativityVsFact 매핑
+    const creativityFactMapping: { [key: string]: string } = {
+      '사실': 'FACTUAL',
+      '창의성': 'CREATIVE'
+    };
+
+    return {
+      purpose: purposeMapping[step1Data.purpose] || 'KNOWLEDGE',
+      accuracyVsSpeed: accuracySpeedMapping[step1Data.speedVsAccuracy] || 'BALANCED',
+      longReasoning: step1Data.needsAnalysis === '네',
+      monthlyTokens: step1Data.monthlyUsage ? parseFloat(step1Data.monthlyUsage) : 1.0,
+      costPriority: costPriorityMapping[step2Data.performanceVsPrice] || 'BALANCED',
+      needLowLatency: step2Data.needsFastResponse === '네',
+      allowOpenSource: step2Data.openSourceOk === '네' || step2Data.openSourceOk === '모름',
+      creativityVsFact: creativityFactMapping[step2Data.creativityVsFact] || 'FACTUAL',
+      recentnessMatters: step2Data.recentnessMatters === '네',
+      topK: 1
+    };
+  };
+
+  // AI 모델 추천 API 호출
+  const getAIRecommendation = async (): Promise<void> => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const requestData = mapFormDataToRequest();
+      
+      const response = await axios.post<AIRecommendResponse>(
+        'https://gaebang.site/api/ai-recommend',
+        requestData
+      );
+
+      if (response.data.code === 200 && response.data.data.length > 0) {
+        setResult(response.data.data[0]); // 첫 번째 추천 모델만 사용
+        setCurrentStep(3);
+      } else {
+        setError('추천 결과를 찾을 수 없습니다.');
+      }
+    } catch (err) {
+      console.error('AI 추천 API 오류:', err);
+      setError('서버와 연결할 수 없습니다. 다시 시도해주세요.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStep2Submit = async () => {
+    await getAIRecommendation();
   };
 
   const handleReset = () => {
+    // 차트 정리
+    if (chartRef.current) {
+      chartRef.current.destroy();
+      chartRef.current = null;
+    }
+    
     setCurrentStep(1);
     setStep1Data({
       purpose: '',
@@ -65,7 +273,9 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
       creativityVsFact: '',
       recentnessMatters: ''
     });
-    setResult('');
+    setResult(null);
+    setError('');
+    setLoading(false);
     onClose();
   };
 
@@ -290,8 +500,9 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
               <button 
                 className={styles.submitButton}
                 onClick={handleStep2Submit}
+                disabled={loading}
               >
-                제출
+                {loading ? '분석 중...' : '제출'}
               </button>
             </div>
           </div>
@@ -301,16 +512,54 @@ const ModelFinderModal: React.FC<ModelFinderModalProps> = ({ isOpen, onClose }) 
         {currentStep === 3 && (
           <div className={styles.modalFrame}>
             <div className={styles.modalHeader}>
-              <div className={styles.resultPlaceholder}></div>
+              <div className={styles.resultContainer}>
+                {error ? (
+                  <div className={styles.errorContent}>
+                    <div className={styles.errorTitle}>오류가 발생했습니다</div>
+                    <div className={styles.errorMessage}>{error}</div>
+                    <button 
+                      className={styles.backButton}
+                      onClick={() => setCurrentStep(2)}
+                    >
+                      다시 시도
+                    </button>
+                  </div>
+                ) : result ? (
+                  <>
+                    <div className={styles.chartContainer}>
+                      <canvas ref={canvasRef} className={styles.radarChart}></canvas>
+                    </div>
+                    <div className={styles.resultInfo}>
+                      <div className={styles.resultTitle}>최종 추천 모델</div>
+                      <div className={styles.modelName}>{result.name}</div>
+                      <div className={styles.modelDetails}>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>제작사:</span>
+                          <span className={styles.detailValue}>{result.creator}</span>
+                        </div>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>출시일:</span>
+                          <span className={styles.detailValue}>{result.releaseDate}</span>
+                        </div>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>오픈소스:</span>
+                          <span className={styles.detailValue}>{result.openSource ? '예' : '아니오'}</span>
+                        </div>
+                        <div className={styles.finalScore}>
+                          최종 점수: {(result.scores.finalScore * 100).toFixed(1)}점
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className={styles.loadingContent}>
+                    <div className={styles.loadingMessage}>결과를 불러오는 중...</div>
+                  </div>
+                )}
+              </div>
               <button className={styles.closeButton} onClick={onClose}>
                 <i className="bi bi-x"></i>
               </button>
-            </div>
-
-            <div className={styles.resultContent}>
-              <div className={styles.resultTitle}>최종 추천 모델 : {result}</div>
-              <div className={styles.resultInfo}>제작사 : xAI</div>
-              <div className={styles.resultInfo}>출시일 : 2025-07-10</div>
             </div>
           </div>
         )}
