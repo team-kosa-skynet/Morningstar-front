@@ -111,6 +111,7 @@
           width: 608px;
           height: 150px;
           cursor: pointer;
+          justify-content: space-between;
           
           &:hover {
             opacity: 0.8;
@@ -119,7 +120,7 @@
           .titleAndContent {
             display: flex;
             flex-direction: column;
-            width: 374px;
+            width: 350px;
             height: 135px;
 
             .sideTitle {
