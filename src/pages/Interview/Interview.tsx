@@ -10,6 +10,7 @@ import {
   submitInterviewTurn, 
   finalizeInterviewReport 
 } from '../../services/apiService';
+import { playTtsAudio, stopCurrentAudio, isAudioPlaying } from '../../utils/audioUtils';
 
 const Interview: React.FC = () => {
   const [selectedJob, setSelectedJob] = useState<string>('');
@@ -27,6 +28,12 @@ const Interview: React.FC = () => {
   const [answerGuides, setAnswerGuides] = useState<string[]>([]);
   const [totalQuestions, setTotalQuestions] = useState<number>(0);
   const [isUploadingDocument, setIsUploadingDocument] = useState<boolean>(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
+  
+  // 새로운 API 응답 필드들
+  const [coachingTips, setCoachingTips] = useState<string>('');
+  const [scoreDelta, setScoreDelta] = useState<Record<string, number>>({});
+  const [isDone, setIsDone] = useState<boolean>(false);
   
   const {
     transcript,
@@ -143,6 +150,18 @@ const Interview: React.FC = () => {
         setTotalQuestions(response.data.totalQuestions);
         setCurrentQuestionIndex(0);
         setInterviewStarted(true);
+        
+        // 첫 번째 질문 오디오 재생 (인사말 + 첫 번째 질문)
+        if (response.data.tts) {
+          try {
+            setIsPlayingAudio(true);
+            await playTtsAudio(response.data.tts);
+          } catch (error) {
+            console.error('오디오 재생 실패:', error);
+          } finally {
+            setIsPlayingAudio(false);
+          }
+        }
       } else {
         alert(response.message || '인터뷰 세션 생성에 실패했습니다.');
       }
@@ -214,8 +233,16 @@ const Interview: React.FC = () => {
         if (response.code === 200) {
           resetTranscript();
           
-          // Check if this was the last question
-          if (currentQuestionIndex >= totalQuestions - 1) {
+          // 응답 데이터로 상태 업데이트
+          setQuestionIntent(response.data.questionIntent);
+          setAnswerGuides(response.data.answerGuides);
+          setCoachingTips(response.data.coachingTips);
+          setScoreDelta(response.data.scoreDelta);
+          setCurrentQuestionIndex(response.data.currentIndex);
+          setIsDone(response.data.done);
+          
+          // Check if interview is done
+          if (response.data.done) {
             // Interview finished, finalize report
             try {
               const reportResponse = await finalizeInterviewReport({ sessionId }, token);
@@ -231,9 +258,18 @@ const Interview: React.FC = () => {
           } else {
             // Move to next question
             setCurrentQuestion(response.data.nextQuestion);
-            setQuestionIntent(response.data.questionIntent);
-            setAnswerGuides(response.data.answerGuides);
-            setCurrentQuestionIndex(prev => prev + 1);
+            
+            // 다음 질문 오디오 재생
+            if (response.data.tts) {
+              try {
+                setIsPlayingAudio(true);
+                await playTtsAudio(response.data.tts);
+              } catch (error) {
+                console.error('오디오 재생 실패:', error);
+              } finally {
+                setIsPlayingAudio(false);
+              }
+            }
           }
         } else {
           alert(response.message || '인터뷰 처리에 실패했습니다.');
@@ -273,22 +309,50 @@ const Interview: React.FC = () => {
                     <div className={styles.questionProgress}>
                       {currentQuestionIndex + 1} / {totalQuestions}
                     </div>
+                    {Object.keys(scoreDelta).length > 0 && (
+                      <div className={styles.scoreUpdate}>
+                        점수 변화: {Object.entries(scoreDelta).map(([key, value]) => 
+                          `${key}: ${value > 0 ? '+' : ''}${value}`
+                        ).join(', ')}
+                      </div>
+                    )}
                   </div>
                   <div className={styles.questionContent}>
                     <p className={styles.questionText}>{currentQuestion}</p>
+                    {isPlayingAudio && (
+                      <div className={styles.audioPlaying}>
+                        <i className="bi bi-volume-up-fill"></i>
+                        <span>질문 재생 중...</span>
+                      </div>
+                    )}
                   </div>
-                  <button 
-                    className={styles.micButton} 
-                    onClick={handleMicStart}
-                    disabled={isLoading}
-                  >
-                    <i className="bi bi-mic-fill"></i>
-                    <span>
-                      {isLoading ? '처리 중...' : 
-                       isListening ? '녹음 중지' : 
-                       transcript ? '답변 제출' : '시작'}
-                    </span>
-                  </button>
+                  <div className={styles.buttonGroup}>
+                    <button 
+                      className={styles.micButton} 
+                      onClick={handleMicStart}
+                      disabled={isLoading || isPlayingAudio}
+                    >
+                      <i className="bi bi-mic-fill"></i>
+                      <span>
+                        {isLoading ? '처리 중...' : 
+                         isPlayingAudio ? '재생 중...' :
+                         isListening ? '녹음 중지' : 
+                         transcript ? '답변 제출' : '시작'}
+                      </span>
+                    </button>
+                    {isPlayingAudio && (
+                      <button 
+                        className={styles.stopButton} 
+                        onClick={() => {
+                          stopCurrentAudio();
+                          setIsPlayingAudio(false);
+                        }}
+                      >
+                        <i className="bi bi-stop-fill"></i>
+                        <span>음성 정지</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -403,6 +467,18 @@ const Interview: React.FC = () => {
                           {guideline}
                         </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {coachingTips && (
+                  <div className={styles.coachingSection}>
+                    <div className={styles.coachingHeader}>
+                      <img src={anthropicIcon} alt="anthropic" className={styles.coachingIcon} />
+                      <h4 className={styles.coachingTitle}>코칭 팁</h4>
+                    </div>
+                    <div className={styles.coachingContent}>
+                      {coachingTips}
                     </div>
                   </div>
                 )}
