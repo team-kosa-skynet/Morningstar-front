@@ -147,6 +147,8 @@ const Interview: React.FC = () => {
       if (response.code === 200) {
         setSessionId(response.data.sessionId);
         setCurrentQuestion(response.data.firstQuestion);
+        setQuestionIntent(response.data.questionIntent || '');
+        setAnswerGuides(response.data.answerGuides || []);
         setTotalQuestions(response.data.totalQuestions);
         setCurrentQuestionIndex(0);
         setInterviewStarted(true);
