@@ -41,6 +41,8 @@ const Interview: React.FC = () => {
   const [pendingTtsData, setPendingTtsData] = useState<any>(null);
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
   const [reportData, setReportData] = useState<any>(null);
+  const [isTextInputMode, setIsTextInputMode] = useState<boolean>(false);
+  const [textAnswer, setTextAnswer] = useState<string>('');
   
   const {
     transcript,
@@ -335,6 +337,97 @@ const Interview: React.FC = () => {
     // 리포트 모달이 닫힌 후 필요한 추가 동작이 있다면 여기에 추가
   };
 
+  const handleKeyboardToggle = () => {
+    setIsTextInputMode(!isTextInputMode);
+    setTextAnswer('');
+  };
+
+  const handleTextSubmit = async () => {
+    if (!textAnswer.trim() || !sessionId) return;
+    
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+
+      const turnData = {
+        sessionId,
+        questionIndex: currentQuestionIndex,
+        transcript: textAnswer.trim()
+      };
+
+      const response = await submitInterviewTurn(turnData, token);
+      
+      if (response.code === 200) {
+        setTextAnswer('');
+        setIsTextInputMode(false);
+        
+        // 응답 데이터로 상태 업데이트
+        setQuestionIntent(response.data.questionIntent);
+        setAnswerGuides(response.data.answerGuides);
+        setScoreDelta(response.data.scoreDelta);
+        setCurrentQuestionIndex(response.data.currentIndex);
+        setIsDone(response.data.done);
+        
+        // Check if interview is done
+        if (response.data.done) {
+          // Interview finished, finalize report
+          try {
+            const reportResponse = await finalizeInterviewReport({ sessionId }, token);
+            if (reportResponse.code === 200) {
+              setReportData(reportResponse.data);
+              setShowReportModal(true);
+            } else {
+              alert('리포트 생성에 실패했습니다: ' + reportResponse.message);
+            }
+          } catch (error) {
+            console.error('Report finalization error:', error);
+            alert('인터뷰는 완료되었지만 리포트 생성에 실패했습니다.');
+          }
+        } else {
+          // 코칭 팁이 있으면 모달 표시, 없으면 바로 다음 질문 진행
+          if (response.data.coachingTips) {
+            setCoachingTips(response.data.coachingTips);
+            setPendingNextQuestion(response.data.nextQuestion);
+            setPendingTtsData(response.data.tts);
+            setShowCoachingModal(true);
+          } else {
+            // 바로 다음 질문 진행
+            setCurrentQuestion(response.data.nextQuestion);
+            
+            // 다음 질문 오디오 재생
+            if (response.data.tts) {
+              try {
+                setIsPlayingAudio(true);
+                await playTtsAudio(response.data.tts);
+              } catch (error) {
+                console.error('오디오 재생 실패:', error);
+              } finally {
+                setIsPlayingAudio(false);
+              }
+            }
+          }
+        }
+      } else {
+        alert(response.message || '인터뷰 처리에 실패했습니다.');
+      }
+    } catch (error: any) {
+      console.error('인터뷰 처리 오류:', error);
+      if (error.response?.status === 401) {
+        alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+      } else if (error.response?.status === 403) {
+        alert('포인트가 부족합니다. 포인트를 충전해주세요.');
+      } else {
+        alert(error.message || '인터뷰 처리 중 오류가 발생했습니다.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
   return (
     <div className={styles.container}>
@@ -355,29 +448,65 @@ const Interview: React.FC = () => {
                     <div className={styles.questionProgress}>
                       {currentQuestionIndex + 1} / {totalQuestions}
                     </div>
-                    {Object.keys(scoreDelta).length > 0 && (
-                      <div className={styles.scoreUpdate}>
-                        점수 변화: {Object.entries(scoreDelta).map(([key, value]) => 
-                          `${key}: ${value > 0 ? '+' : ''}${value}`
-                        ).join(', ')}
-                      </div>
-                    )}
                   </div>
                   <div className={styles.questionContent}>
                     <p className={styles.questionText}>{currentQuestion}</p>
                   </div>
-                  <button 
-                    className={styles.micButton} 
-                    onClick={handleMicStart}
-                    disabled={isLoading || isPlayingAudio}
-                  >
-                    <i className="bi bi-mic-fill"></i>
-                    <span>
-                      {isLoading ? '처리 중...' : 
-                       isPlayingAudio ? '재생 중...' :
-                       isListening ? '녹음 중지' : '시작'}
-                    </span>
-                  </button>
+                  {!isTextInputMode ? (
+                    // 음성 입력 모드 - 마이크 + 키보드 버튼
+                    <div className={styles.inputButtons}>
+                      <button 
+                        className={styles.micButton} 
+                        onClick={handleMicStart}
+                        disabled={isLoading || isPlayingAudio}
+                      >
+                        <i className="bi bi-mic-fill"></i>
+                        <span>
+                          {isPlayingAudio ? '재생 중...' :
+                           isLoading ? '처리 중...' : 
+                           isListening ? '녹음 중지' : '시작'}
+                        </span>
+                      </button>
+                      <button 
+                        className={styles.keyboardButton} 
+                        onClick={handleKeyboardToggle}
+                        disabled={isLoading || isPlayingAudio}
+                      >
+                        <i className="bi bi-keyboard"></i>
+                      </button>
+                    </div>
+                  ) : (
+                    // 텍스트 입력 모드 - 입력창 + X 버튼 + 제출 버튼
+                    <div className={styles.textInputContainer}>
+                      <input
+                        type="text"
+                        value={textAnswer}
+                        onChange={(e) => setTextAnswer(e.target.value)}
+                        className={styles.textInput}
+                        placeholder="답변을 입력하세요..."
+                        disabled={isLoading}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && !isLoading && textAnswer.trim()) {
+                            handleTextSubmit();
+                          }
+                        }}
+                      />
+                      <button 
+                        className={styles.closeButton} 
+                        onClick={handleKeyboardToggle}
+                        disabled={isLoading}
+                      >
+                        <i className="bi bi-x-lg"></i>
+                      </button>
+                      <button 
+                        className={styles.submitButton} 
+                        onClick={handleTextSubmit}
+                        disabled={isLoading || !textAnswer.trim()}
+                      >
+                        {isLoading ? '처리 중...' : '제출'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -496,17 +625,6 @@ const Interview: React.FC = () => {
                   </div>
                 )}
 
-                {coachingTips && (
-                  <div className={styles.coachingSection}>
-                    <div className={styles.coachingHeader}>
-                      <img src={anthropicIcon} alt="anthropic" className={styles.coachingIcon} />
-                      <h4 className={styles.coachingTitle}>코칭 팁</h4>
-                    </div>
-                    <div className={styles.coachingContent}>
-                      {coachingTips}
-                    </div>
-                  </div>
-                )}
 
               </>
             )}
