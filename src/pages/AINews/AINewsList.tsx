@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styles from './AINewsList.module.scss';
 import SearchBox from '../../components/SearchBox/SearchBox';
 import Pagination from '../../components/Pagination/Pagination';
@@ -15,6 +15,7 @@ const AINewsList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
+  const newsListRef = useRef<HTMLDivElement>(null);
 
   // API에서 뉴스 데이터 가져오기
   const fetchNews = async () => {
@@ -115,8 +116,10 @@ const AINewsList = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    // 페이지 변경 시 스크롤을 최상단으로 이동
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // 페이지 변경 시 뉴스 리스트 헤더로 스크롤 이동
+    if (newsListRef.current) {
+      newsListRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   // 뉴스 링크 클릭 핸들러
@@ -172,7 +175,7 @@ const AINewsList = () => {
         <Banner />
 
         {/* 리스트 헤더 */}
-        <div className={styles.listHeader}>
+        <div ref={newsListRef} className={styles.listHeader}>
           <div className={styles.titleAndSearch}>
             <h1 className={styles.pageTitle}>NEWS</h1>
           </div>
