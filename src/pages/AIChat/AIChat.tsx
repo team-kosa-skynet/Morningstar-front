@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Chart, registerables } from 'chart.js';
 import styles from './AIChat.module.scss';
+import Banner from '../../components/Banner/Banner';
 import openAILogo from '../../assets/images/openAI-Photoroom.png';
 import geminiLogo from '../../assets/images/gemini-1336519698502187930_128px.png';
 import claudeLogo from '../../assets/images/클로드-Photoroom.png';
@@ -383,6 +384,11 @@ const AIChat: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* 배너 섹션 */}
+        <div className={styles.bannerWrapper}>
+          <Banner />
+        </div>
 
         {/* 리더보드 섹션 */}
         <div className={styles.leaderboardSection}>

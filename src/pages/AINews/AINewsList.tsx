@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import styles from './AINewsList.module.scss';
 import SearchBox from '../../components/SearchBox/SearchBox';
 import Pagination from '../../components/Pagination/Pagination';
+import Banner from '../../components/Banner/Banner';
 import { getNews } from '../../services/apiService';
 import type { NewsItem } from '../../services/apiService';
 import newspaperImg from '../../assets/images/newspaper.png';
 import avatarImg from '../../assets/images/avatar.png';
-import bannerImg from '../../assets/images/배너.svg';
 
 const AINewsList = () => {
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -155,11 +155,7 @@ const AINewsList = () => {
         </div>
 
         {/* 배너 섹션 */}
-        <div className={styles.bannerSection}>
-          <div className={styles.banner}>
-            <img src={bannerImg} alt="배너" />
-          </div>
-        </div>
+        <Banner />
 
         {/* 리스트 헤더 */}
         <div className={styles.listHeader}>
