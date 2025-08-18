@@ -292,11 +292,6 @@ interface CreateSessionRequest {
   documentId: string | null;
 }
 
-interface TtsPayload {
-  format: string;  // "mp3", "wav", "ogg" 등
-  base64: string;  // Base64 인코딩된 오디오 데이터
-}
-
 interface CreateSessionResponse {
   code: number;
   message: string;

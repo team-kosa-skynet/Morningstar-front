@@ -1,4 +1,7 @@
-import { TtsPayload } from '../services/apiService';
+interface TtsPayload {
+  format: string;
+  base64: string;
+}
 
 let currentAudio: HTMLAudioElement | null = null;
 
