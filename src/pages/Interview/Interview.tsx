@@ -11,6 +11,8 @@ import {
   finalizeInterviewReport 
 } from '../../services/apiService';
 import { playTtsAudio, stopCurrentAudio, isAudioPlaying } from '../../utils/audioUtils';
+import CoachingModal from '../../components/CoachingModal/CoachingModal';
+import InterviewReport from '../../components/InterviewReport/InterviewReport';
 
 const Interview: React.FC = () => {
   const [selectedJob, setSelectedJob] = useState<string>('');
@@ -34,6 +36,11 @@ const Interview: React.FC = () => {
   const [coachingTips, setCoachingTips] = useState<string>('');
   const [scoreDelta, setScoreDelta] = useState<Record<string, number>>({});
   const [isDone, setIsDone] = useState<boolean>(false);
+  const [showCoachingModal, setShowCoachingModal] = useState<boolean>(false);
+  const [pendingNextQuestion, setPendingNextQuestion] = useState<string>('');
+  const [pendingTtsData, setPendingTtsData] = useState<any>(null);
+  const [showReportModal, setShowReportModal] = useState<boolean>(false);
+  const [reportData, setReportData] = useState<any>(null);
   
   const {
     transcript,
@@ -235,7 +242,6 @@ const Interview: React.FC = () => {
               // 응답 데이터로 상태 업데이트
               setQuestionIntent(response.data.questionIntent);
               setAnswerGuides(response.data.answerGuides);
-              setCoachingTips(response.data.coachingTips);
               setScoreDelta(response.data.scoreDelta);
               setCurrentQuestionIndex(response.data.currentIndex);
               setIsDone(response.data.done);
@@ -246,27 +252,36 @@ const Interview: React.FC = () => {
                 try {
                   const reportResponse = await finalizeInterviewReport({ sessionId }, token);
                   if (reportResponse.code === 200) {
-                    alert('인터뷰가 완료되었습니다! 결과를 확인해보세요.');
-                    // TODO: Navigate to results page or show results
-                    console.log('Interview report:', reportResponse.data);
+                    setReportData(reportResponse.data);
+                    setShowReportModal(true);
+                  } else {
+                    alert('리포트 생성에 실패했습니다: ' + reportResponse.message);
                   }
                 } catch (error) {
                   console.error('Report finalization error:', error);
                   alert('인터뷰는 완료되었지만 리포트 생성에 실패했습니다.');
                 }
               } else {
-                // Move to next question
-                setCurrentQuestion(response.data.nextQuestion);
-                
-                // 다음 질문 오디오 재생
-                if (response.data.tts) {
-                  try {
-                    setIsPlayingAudio(true);
-                    await playTtsAudio(response.data.tts);
-                  } catch (error) {
-                    console.error('오디오 재생 실패:', error);
-                  } finally {
-                    setIsPlayingAudio(false);
+                // 코칭 팁이 있으면 모달 표시, 없으면 바로 다음 질문 진행
+                if (response.data.coachingTips) {
+                  setCoachingTips(response.data.coachingTips);
+                  setPendingNextQuestion(response.data.nextQuestion);
+                  setPendingTtsData(response.data.tts);
+                  setShowCoachingModal(true);
+                } else {
+                  // 바로 다음 질문 진행
+                  setCurrentQuestion(response.data.nextQuestion);
+                  
+                  // 다음 질문 오디오 재생
+                  if (response.data.tts) {
+                    try {
+                      setIsPlayingAudio(true);
+                      await playTtsAudio(response.data.tts);
+                    } catch (error) {
+                      console.error('오디오 재생 실패:', error);
+                    } finally {
+                      setIsPlayingAudio(false);
+                    }
                   }
                 }
               }
@@ -289,6 +304,35 @@ const Interview: React.FC = () => {
       }, 500); // 0.5초 지연
       return;
     }
+  };
+
+  const handleCoachingModalClose = async () => {
+    setShowCoachingModal(false);
+    
+    // 모달이 닫힌 후 다음 질문 진행
+    if (pendingNextQuestion) {
+      setCurrentQuestion(pendingNextQuestion);
+      setPendingNextQuestion('');
+      
+      // 다음 질문 오디오 재생
+      if (pendingTtsData) {
+        try {
+          setIsPlayingAudio(true);
+          await playTtsAudio(pendingTtsData);
+        } catch (error) {
+          console.error('오디오 재생 실패:', error);
+        } finally {
+          setIsPlayingAudio(false);
+        }
+        setPendingTtsData(null);
+      }
+    }
+  };
+
+  const handleReportModalClose = () => {
+    setShowReportModal(false);
+    setReportData(null);
+    // 리포트 모달이 닫힌 후 필요한 추가 동작이 있다면 여기에 추가
   };
 
 
@@ -469,6 +513,20 @@ const Interview: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* 코칭 팁 모달 */}
+      <CoachingModal
+        isOpen={showCoachingModal}
+        coachingTips={coachingTips}
+        onClose={handleCoachingModalClose}
+      />
+      
+      {/* 인터뷰 리포트 모달 */}
+      <InterviewReport
+        isOpen={showReportModal}
+        reportData={reportData}
+        onClose={handleReportModalClose}
+      />
     </div>
   );
 };
