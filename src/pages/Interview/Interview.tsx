@@ -153,9 +153,8 @@ const Interview: React.FC = () => {
       if (response.code === 200) {
         setSessionId(response.data.sessionId);
         setCurrentQuestion(response.data.firstQuestion);
-        // 세션 생성 시에는 questionIntent와 answerGuides가 없음
-        setQuestionIntent('');
-        setAnswerGuides([]);
+        setQuestionIntent((response.data as any).questionIntent || '');
+        setAnswerGuides((response.data as any).answerGuides || []);
         setTotalQuestions(response.data.totalQuestions);
         setCurrentQuestionIndex(0);
         setInterviewStarted(true);
@@ -240,9 +239,9 @@ const Interview: React.FC = () => {
               resetTranscript();
               
               // 응답 데이터로 상태 업데이트
-              setQuestionIntent(response.data.questionIntent || '');
-              setAnswerGuides(response.data.answerGuides || []);
-              setCurrentQuestionIndex(response.data.currentIndex);
+              setQuestionIntent((response.data as any).questionIntent || '');
+              setAnswerGuides((response.data as any).answerGuides || []);
+              setCurrentQuestionIndex((response.data as any).currentIndex);
               
               // Check if interview is done
               if (response.data.done) {
@@ -362,9 +361,9 @@ const Interview: React.FC = () => {
         setIsTextInputMode(false);
         
         // 응답 데이터로 상태 업데이트
-        setQuestionIntent(response.data.questionIntent || '');
-        setAnswerGuides(response.data.answerGuides || []);
-        setCurrentQuestionIndex(response.data.currentIndex);
+        setQuestionIntent((response.data as any).questionIntent || '');
+        setAnswerGuides((response.data as any).answerGuides || []);
+        setCurrentQuestionIndex((response.data as any).currentIndex);
         
         // Check if interview is done
         if (response.data.done) {
