@@ -5,8 +5,6 @@ import Pagination from '../../components/Pagination/Pagination';
 import Banner from '../../components/Banner/Banner';
 import { getNews } from '../../services/apiService';
 import type { NewsItem } from '../../services/apiService';
-import newspaperImg from '../../assets/images/newspaper.png';
-import avatarImg from '../../assets/images/avatar.png';
 
 const AINewsList = () => {
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -28,8 +26,12 @@ const AINewsList = () => {
       const newsData = response?.data && Array.isArray(response.data) ? response.data : [];
       setNews(newsData);
       setFilteredNews(newsData);
-      // 인기글은 첫 4개를 사용
-      setPopularNews(newsData.slice(0, 4));
+      // isPopular가 1인 항목들을 필터링하여 최신순으로 정렬 후 상위 4개 선택
+      const popularItems = newsData
+        .filter(item => item.isPopular === 1)
+        .sort((a, b) => parseDate(b.pubDate).getTime() - parseDate(a.pubDate).getTime())
+        .slice(0, 4);
+      setPopularNews(popularItems);
     } catch (error) {
       console.error('뉴스 조회 실패:', error);
       setError('뉴스를 불러오는데 실패했습니다.');
@@ -65,6 +67,18 @@ const AINewsList = () => {
       setFilteredNews(news);
       setCurrentPage(1);
     }
+  };
+
+  // 날짜를 Date 객체로 변환하는 함수
+  const parseDate = (dateString: string | number[]): Date => {
+    if (typeof dateString === 'string') {
+      return new Date(dateString);
+    }
+    if (Array.isArray(dateString)) {
+      const [year, month, day, hour, minute] = dateString;
+      return new Date(year, month - 1, day, hour, minute);
+    }
+    return new Date();
   };
 
   // 날짜 포맷 함수
@@ -123,7 +137,7 @@ const AINewsList = () => {
                 onClick={() => handleNewsClick(popularNews[0].link)}
               >
                 <div className={styles.mainArticleImage}>
-                  <img src={avatarImg} alt="메인 기사" />
+                  <img src={popularNews[0].imageUrl} alt="메인 기사" />
                 </div>
                 <div className={styles.titleAndContent}>
                   <h2 className={styles.mainTitle}>{popularNews[0].title}</h2>
@@ -145,7 +159,7 @@ const AINewsList = () => {
                       <p className={styles.sideDescription}>{article.description}</p>
                     </div>
                     <div className={styles.sideImage}>
-                      <img src={avatarImg} alt="사이드 기사" />
+                      <img src={article.imageUrl} alt="사이드 기사" />
                     </div>
                   </div>
                 ))}
@@ -196,7 +210,7 @@ const AINewsList = () => {
                 <div className={styles.thumbnailAndInfo}>
                   {/* 썸네일 */}
                   <div className={styles.thumbnail}>
-                    <img src={newspaperImg} alt="뉴스" />
+                    <img src={item.imageUrl} alt="뉴스" />
                   </div>
                   
                   {/* 정보들 */}
