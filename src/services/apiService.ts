@@ -250,6 +250,8 @@ export interface NewsItem {
   link: string;
   description: string;
   pubDate: string | number[];  // API 응답 형식 변경 대응
+  isPopular: number;  // 0 또는 1
+  imageUrl: string;   // 썸네일 이미지 URL
 }
 
 interface NewsResponse {
