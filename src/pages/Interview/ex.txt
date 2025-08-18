@@ -1,0 +1,260 @@
+ 1. API 응답 구조
+
+  /api/interview/session?withAudio=true 응답
+
+  interface StartSessionResponse {
+    sessionId: string;
+    greeting: string;
+    firstQuestion: string;
+    totalQuestions: number;
+    tts: TtsPayload | null;  // withAudio=true일 때만 포함
+  }
+
+  /api/interview/turn?withAudio=true 응답
+
+  interface NextTurnResponse {
+    nextQuestion: string;
+    questionIntent: string;
+    answerGuides: string[];
+    coachingTips: string;
+    scoreDelta: Record<string, number>;
+    currentIndex: number;
+    done: boolean;
+    tts: TtsPayload | null;  // withAudio=true일 때만 포함
+  }
+
+  interface TtsPayload {
+    format: string;  // "mp3", "wav", "ogg" 등
+    base64: string;  // Base64 인코딩된 오디오 데이터
+  }
+
+  2. 프론트엔드 오디오 처리 구현
+
+  Base64 to Blob 변환 함수
+
+  function base64ToBlob(base64Data, mimeType) {
+    const byteCharacters = atob(base64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mimeType });
+  }
+
+  오디오 재생 함수
+
+  function playTtsAudio(ttsPayload) {
+    if (!ttsPayload || !ttsPayload.base64) {
+      console.warn('TTS 데이터가 없습니다.');
+      return Promise.resolve();
+    }
+
+    const { format, base64 } = ttsPayload;
+    const mimeType = `audio/${format}`;
+    const blob = base64ToBlob(base64, mimeType);
+    const audioUrl = URL.createObjectURL(blob);
+
+    const audio = new Audio(audioUrl);
+
+    return new Promise((resolve, reject) => {
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+        resolve();
+      };
+
+      audio.onerror = (error) => {
+        console.error('오디오 재생 오류:', error);
+        URL.revokeObjectURL(audioUrl);
+        reject(error);
+      };
+
+      audio.play().catch(reject);
+    });
+  }
+
+  3. API별 구체적인 처리 방법
+
+  Session 시작 API 처리
+
+  async function startInterviewSession(requestData) {
+    try {
+      const response = await fetch('/api/interview/session?withAudio=true', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(requestData)
+      });
+
+      const data = await response.json();
+
+      // 세션 정보 저장
+      setSessionId(data.sessionId);
+      setGreeting(data.greeting);
+      setFirstQuestion(data.firstQuestion);
+      setTotalQuestions(data.totalQuestions);
+
+      // 오디오 재생 (인사말 + 첫 번째 질문)
+      if (data.tts) {
+        await playTtsAudio(data.tts);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('세션 시작 오류:', error);
+      throw error;
+    }
+  }
+
+  Turn API 처리
+
+  async function submitAnswer(answerData) {
+    try {
+      const response = await fetch('/api/interview/turn?withAudio=true', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(answerData)
+      });
+
+      const data = await response.json();
+
+      // UI 업데이트
+      setNextQuestion(data.nextQuestion);
+      setQuestionIntent(data.questionIntent);
+      setAnswerGuides(data.answerGuides);
+      setCoachingTips(data.coachingTips);
+      setCurrentIndex(data.currentIndex);
+      setIsDone(data.done);
+
+      // 점수 변화 표시
+      if (data.scoreDelta) {
+        updateScoreDisplay(data.scoreDelta);
+      }
+
+      // 다음 질문 오디오 재생
+      if (data.tts && !data.done) {
+        await playTtsAudio(data.tts);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('답변 제출 오류:', error);
+      throw error;
+    }
+  }
+
+  4. React Hook 구현 예시
+
+  import { useState, useCallback } from 'react';
+
+  function useInterviewAudio() {
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [currentAudio, setCurrentAudio] = useState(null);
+
+    const stopCurrentAudio = useCallback(() => {
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        setCurrentAudio(null);
+        setIsPlaying(false);
+      }
+    }, [currentAudio]);
+
+    const playTtsAudio = useCallback(async (ttsPayload) => {
+      if (!ttsPayload?.base64) return;
+
+      // 이전 오디오 정지
+      stopCurrentAudio();
+
+      try {
+        setIsPlaying(true);
+
+        const { format, base64 } = ttsPayload;
+        const mimeType = `audio/${format}`;
+        const blob = base64ToBlob(base64, mimeType);
+        const audioUrl = URL.createObjectURL(blob);
+
+        const audio = new Audio(audioUrl);
+        setCurrentAudio(audio);
+
+        return new Promise((resolve, reject) => {
+          audio.onended = () => {
+            setIsPlaying(false);
+            setCurrentAudio(null);
+            URL.revokeObjectURL(audioUrl);
+            resolve();
+          };
+
+          audio.onerror = (error) => {
+            setIsPlaying(false);
+            setCurrentAudio(null);
+            URL.revokeObjectURL(audioUrl);
+            reject(error);
+          };
+
+          audio.play().catch(reject);
+        });
+      } catch (error) {
+        setIsPlaying(false);
+        setCurrentAudio(null);
+        throw error;
+      }
+    }, [stopCurrentAudio]);
+
+    return {
+      isPlaying,
+      playTtsAudio,
+      stopCurrentAudio
+    };
+  }
+
+  5. 사용 예시
+
+  function InterviewComponent() {
+    const { isPlaying, playTtsAudio, stopCurrentAudio } = useInterviewAudio();
+    const [sessionData, setSessionData] = useState(null);
+
+    const handleStartSession = async () => {
+      const data = await startInterviewSession(requestData);
+      setSessionData(data);
+
+      // 인사말과 첫 질문 자동 재생
+      if (data.tts) {
+        await playTtsAudio(data.tts);
+      }
+    };
+
+    const handleSubmitAnswer = async (answer) => {
+      const data = await submitAnswer({ answer, sessionId });
+
+      // 다음 질문 자동 재생
+      if (data.tts && !data.done) {
+        await playTtsAudio(data.tts);
+      }
+    };
+
+    return (
+      <div>
+        {isPlaying && <div>🔊 음성 재생 중...</div>}
+        <button onClick={stopCurrentAudio} disabled={!isPlaying}>
+          음성 정지
+        </button>
+        {/* 나머지 UI */}
+      </div>
+    );
+  }
+
+  6. 주요 고려사항
+
+  1. 오디오 재생 상태 관리: 이전 오디오가 재생 중일 때 새로운 오디오 처리
+  2. 메모리 관리: URL.revokeObjectURL() 반드시 호출
+  3. 에러 처리: 네트워크 오류, 오디오 디코딩 실패 등
+  4. 사용자 경험: 로딩 상태, 재생 상태 표시
+  5. 브라우저 자동재생 정책: 사용자 인터랙션 후에만 자동재생 가능
