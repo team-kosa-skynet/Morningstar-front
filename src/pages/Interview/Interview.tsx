@@ -4,7 +4,12 @@ import fileUploadIcon from '../../assets/images/file-upload.png';
 import geminiIcon from '../../assets/images/gemini-1336519698502187930_128px.png';
 import anthropicIcon from '../../assets/images/anthropic (1).svg';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
-import { startInterview } from '../../services/apiService';
+import { 
+  uploadDocument, 
+  createInterviewSession, 
+  submitInterviewTurn, 
+  finalizeInterviewReport 
+} from '../../services/apiService';
 
 const Interview: React.FC = () => {
   const [selectedJob, setSelectedJob] = useState<string>('');
@@ -13,6 +18,16 @@ const Interview: React.FC = () => {
   const [microphonePermission, setMicrophonePermission] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown');
   const [interviewStarted, setInterviewStarted] = useState<boolean>(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
+  
+  // New state for API flow
+  const [documentId, setDocumentId] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState<string>('');
+  const [questionIntent, setQuestionIntent] = useState<string>('');
+  const [answerGuides, setAnswerGuides] = useState<string[]>([]);
+  const [totalQuestions, setTotalQuestions] = useState<number>(0);
+  const [greeting, setGreeting] = useState<string>('');
+  const [isUploadingDocument, setIsUploadingDocument] = useState<boolean>(false);
   
   const {
     transcript,
@@ -61,10 +76,32 @@ const Interview: React.FC = () => {
     setSelectedJob(job);
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setUploadedFile(file);
+      
+      // Automatically upload the document
+      const token = localStorage.getItem('token');
+      if (token) {
+        setIsUploadingDocument(true);
+        try {
+          const response = await uploadDocument(file, token);
+          if (response.code === 200) {
+            setDocumentId(response.data);
+            console.log('Document uploaded successfully:', response.data);
+          } else {
+            alert('문서 업로드에 실패했습니다: ' + response.message);
+            setUploadedFile(null);
+          }
+        } catch (error: any) {
+          console.error('Document upload error:', error);
+          alert('문서 업로드 중 오류가 발생했습니다.');
+          setUploadedFile(null);
+        } finally {
+          setIsUploadingDocument(false);
+        }
+      }
     }
   };
 
@@ -74,8 +111,55 @@ const Interview: React.FC = () => {
       return;
     }
 
-    // 인터뷰 시작 - 화면 전환
-    setInterviewStarted(true);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Map selected job to API format
+      const jobRoleMap: {[key: string]: string} = {
+        '풀스택': 'FULLSTACK',
+        '프론트엔드': 'FRONTEND', 
+        '백엔드': 'BACKEND'
+      };
+
+      // Get user info for display name
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      const displayName = userInfo.name || '사용자';
+
+      const sessionData = {
+        displayName,
+        jobRole: jobRoleMap[selectedJob] || 'BACKEND',
+        documentId
+      };
+
+      const response = await createInterviewSession(sessionData, token);
+      
+      if (response.code === 200) {
+        setSessionId(response.data.sessionId);
+        setGreeting(response.data.greeting);
+        setCurrentQuestion(response.data.firstQuestion);
+        setTotalQuestions(response.data.totalQuestions);
+        setCurrentQuestionIndex(0);
+        setInterviewStarted(true);
+      } else {
+        alert(response.message || '인터뷰 세션 생성에 실패했습니다.');
+      }
+    } catch (error: any) {
+      console.error('Session creation error:', error);
+      if (error.response?.status === 401) {
+        alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+      } else if (error.response?.status === 403) {
+        alert('포인트가 부족합니다. 포인트를 충전해주세요.');
+      } else {
+        alert(error.message || '인터뷰 세션 생성 중 오류가 발생했습니다.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleMicStart = async () => {
@@ -107,7 +191,7 @@ const Interview: React.FC = () => {
       return;
     }
 
-    if (transcript && !isLoading) {
+    if (transcript && !isLoading && sessionId) {
       if (transcript.trim().length < 10) {
         alert('최소 10자 이상의 음성 입력이 필요합니다.');
         return;
@@ -121,20 +205,36 @@ const Interview: React.FC = () => {
           return;
         }
 
-        const interviewData = {
-          job: selectedJob,
-          audioText: transcript.trim(),
-          resumeFile: uploadedFile || undefined
+        const turnData = {
+          sessionId,
+          questionIndex: currentQuestionIndex,
+          transcript: transcript.trim()
         };
 
-        const response = await startInterview(interviewData, token);
+        const response = await submitInterviewTurn(turnData, token);
         
         if (response.code === 200) {
-          alert('인터뷰가 처리되었습니다!');
           resetTranscript();
-          // 다음 질문으로 이동하는 로직 추가 가능 (더미 데이터 범위 내에서)
-          const maxQuestions = 2; // 더미 데이터 개수
-          if (currentQuestionIndex < maxQuestions - 1) {
+          
+          // Check if this was the last question
+          if (currentQuestionIndex >= totalQuestions - 1) {
+            // Interview finished, finalize report
+            try {
+              const reportResponse = await finalizeInterviewReport({ sessionId }, token);
+              if (reportResponse.code === 200) {
+                alert('인터뷰가 완료되었습니다! 결과를 확인해보세요.');
+                // TODO: Navigate to results page or show results
+                console.log('Interview report:', reportResponse.data);
+              }
+            } catch (error) {
+              console.error('Report finalization error:', error);
+              alert('인터뷰는 완료되었지만 리포트 생성에 실패했습니다.');
+            }
+          } else {
+            // Move to next question
+            setCurrentQuestion(response.data.nextQuestion);
+            setQuestionIntent(response.data.questionIntent);
+            setAnswerGuides(response.data.answerGuides);
             setCurrentQuestionIndex(prev => prev + 1);
           }
         } else {
@@ -155,31 +255,6 @@ const Interview: React.FC = () => {
     }
   };
 
-  // 더미 데이터
-  const dummyQuestions = [
-    {
-      id: 1,
-      question: "프론트엔드 개발자로서 가장 중요하다고 생각하는 역량은 무엇인가요?",
-      intent: "프론트엔드 직무에 대한 이해도와 본인이 추구하는 개발 방향성을 파악합니다",
-      guidelines: [
-        "빠른 변화에 적응하며 최신 프론트엔드 기술을 습득하는 역량이 핵심",
-        "사용자 중심의 UI·UX 설계와 구현을 위한 공감 능력과 디테일 추구",
-        "협업 툴과 커뮤니케이션을 활용한 원활한 팀 협업 역량이 중요"
-      ]
-    },
-    {
-      id: 2,
-      question: "최근 진행한 프로젝트에서 어려웠던 기술적 문제와 해결 과정을 설명해주세요.",
-      intent: "문제 해결 능력과 기술적 깊이, 학습 능력을 평가합니다",
-      guidelines: [
-        "구체적인 문제 상황과 원인 분석 과정 설명",
-        "해결을 위해 시도한 다양한 접근 방법 제시",
-        "최종 해결책과 그를 통해 얻은 학습 경험 공유"
-      ]
-    }
-  ];
-
-  const currentQuestion = dummyQuestions[currentQuestionIndex];
 
   return (
     <div className={styles.container}>
@@ -196,13 +271,13 @@ const Interview: React.FC = () => {
               <div className={styles.questionArea}>
                 <div className={styles.questionBox}>
                   <div className={styles.questionHeader}>
-                    <span className={styles.questionNumber}>Q{currentQuestion.id}.</span>
+                    <span className={styles.questionNumber}>Q{currentQuestionIndex + 1}.</span>
                     <div className={styles.questionProgress}>
-                      {currentQuestion.id} / {dummyQuestions.length}
+                      {currentQuestionIndex + 1} / {totalQuestions}
                     </div>
                   </div>
                   <div className={styles.questionContent}>
-                    <p className={styles.questionText}>{currentQuestion.question}</p>
+                    <p className={styles.questionText}>{currentQuestion}</p>
                   </div>
                   <button 
                     className={styles.micButton} 
@@ -272,6 +347,8 @@ const Interview: React.FC = () => {
                     {uploadedFile && (
                       <div className={styles.filePreview}>
                         {uploadedFile.name}
+                        {isUploadingDocument && <span> (업로드 중...)</span>}
+                        {documentId && <span> ✓ 업로드 완료</span>}
                       </div>
                     )}
                     <p className={styles.fileInfo}>*pdf(권장),ppt,doc,docx,hwp (최대 50MB)</p>
@@ -293,8 +370,9 @@ const Interview: React.FC = () => {
                 <button 
                   className={styles.startButton} 
                   onClick={handleStart}
+                  disabled={isLoading || isUploadingDocument}
                 >
-                  시작하기
+                  {isLoading ? '세션 생성 중...' : isUploadingDocument ? '문서 업로드 중...' : '시작하기'}
                 </button>
               </>
             ) : (
@@ -305,27 +383,31 @@ const Interview: React.FC = () => {
                   <h3 className={styles.guideTitle}>답변 가이드</h3>
                 </div>
 
-                <div className={styles.intentSection}>
-                  <div className={styles.intentHeader}>
-                    <img src={geminiIcon} alt="gemini" className={styles.intentIcon} />
-                    <h4 className={styles.intentTitle}>질문 의도</h4>
+                {questionIntent && (
+                  <div className={styles.intentSection}>
+                    <div className={styles.intentHeader}>
+                      <img src={geminiIcon} alt="gemini" className={styles.intentIcon} />
+                      <h4 className={styles.intentTitle}>질문 의도</h4>
+                    </div>
+                    <p className={styles.intentText}>{questionIntent}</p>
                   </div>
-                  <p className={styles.intentText}>{currentQuestion.intent}</p>
-                </div>
+                )}
 
-                <div className={styles.guidelinesSection}>
-                  <div className={styles.guidelinesHeader}>
-                    <img src={geminiIcon} alt="gemini" className={styles.guidelineIcon} />
-                    <h4 className={styles.guidelinesTitle}>답변 가이드</h4>
+                {answerGuides.length > 0 && (
+                  <div className={styles.guidelinesSection}>
+                    <div className={styles.guidelinesHeader}>
+                      <img src={geminiIcon} alt="gemini" className={styles.guidelineIcon} />
+                      <h4 className={styles.guidelinesTitle}>답변 가이드</h4>
+                    </div>
+                    <div className={styles.guidelinesList}>
+                      {answerGuides.map((guideline, index) => (
+                        <div key={index} className={styles.guidelineItem}>
+                          {guideline}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className={styles.guidelinesList}>
-                    {currentQuestion.guidelines.map((guideline, index) => (
-                      <div key={index} className={styles.guidelineItem}>
-                        {guideline}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                )}
 
                 {/* 음성 인식 상태 */}
                 {(isListening || transcript || speechError) && (

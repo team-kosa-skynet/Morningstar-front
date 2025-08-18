@@ -273,6 +273,70 @@ interface StartInterviewResponse {
   } | null;
 }
 
+interface DocumentUploadResponse {
+  code: number;
+  message: string;
+  data: string; // documentId
+}
+
+interface CreateSessionRequest {
+  displayName: string;
+  jobRole: string;
+  documentId: string | null;
+}
+
+interface CreateSessionResponse {
+  code: number;
+  message: string;
+  data: {
+    sessionId: string;
+    greeting: string;
+    firstQuestion: string;
+    totalQuestions: number;
+  };
+}
+
+interface InterviewTurnRequest {
+  sessionId: string;
+  questionIndex: number;
+  transcript: string;
+}
+
+interface InterviewTurnResponse {
+  code: number;
+  message: string;
+  data: {
+    nextQuestion: string;
+    questionIntent: string;
+    answerGuides: string[];
+  };
+}
+
+interface FinalizeReportRequest {
+  sessionId: string;
+}
+
+interface FinalizeReportResponse {
+  code: number;
+  message: string;
+  data: {
+    overallScore: number;
+    subscores: {
+      clarity: number;
+      tech_depth: number;
+      structure_STAR: number;
+      fit: number;
+    };
+    strongPoints: string[];
+    improvementAreas: string[];
+    detailedFeedback: Array<{
+      question: string;
+      score: number;
+      feedback: string;
+    }>;
+  };
+}
+
 interface CreateBoardRequest {
   title: string;
   content: string;
@@ -786,6 +850,93 @@ export const startInterview = async (interviewData: StartInterviewRequest, token
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const uploadDocument = async (file: File, token: string): Promise<DocumentUploadResponse> => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await axios.post<DocumentUploadResponse>(
+      `${API_BASE_URL}/interview/documents/parse`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const createInterviewSession = async (sessionData: CreateSessionRequest, token: string): Promise<CreateSessionResponse> => {
+  try {
+    const response = await axios.post<CreateSessionResponse>(
+      `${API_BASE_URL}/interview/session?withAudio=true`,
+      sessionData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const submitInterviewTurn = async (turnData: InterviewTurnRequest, token: string): Promise<InterviewTurnResponse> => {
+  try {
+    const response = await axios.post<InterviewTurnResponse>(
+      `${API_BASE_URL}/interview/turn?withAudio=true`,
+      turnData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const finalizeInterviewReport = async (reportData: FinalizeReportRequest, token: string): Promise<FinalizeReportResponse> => {
+  try {
+    const response = await axios.post<FinalizeReportResponse>(
+      `${API_BASE_URL}/interview/report/finalize`,
+      reportData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       }
     );
