@@ -42,6 +42,9 @@ const Navigation: React.FC = () => {
     if (item === '리더보드') {
       navigate('/leaderboard');
     }
+    if (item === 'AI 업데이트 소식') {
+      navigate('/ai-update');
+    }
   };
 
   return (
