@@ -21,6 +21,7 @@ import MyPage from "./pages/MyPage/MyPage.tsx";
 import AIChat from "./pages/AIChat/AIChat.tsx";
 import AIChatDetail from "./pages/AIChat/AIChatDetail.tsx";
 import AINewsList from "./pages/AINews/AINewsList.tsx";
+import AIUpdate from "./pages/AIUpdate/AIUpdate.tsx";
 import JobsPage from "./pages/jobs/JobsPage.tsx";
 import Interview from "./pages/Interview/Interview.tsx";
 import Leaderboard from "./pages/Leaderboard/Leaderboard.tsx";
@@ -52,6 +53,7 @@ function AppContent() {
                         <Route path="/ai-chat" element={<AIChat />} />
                         <Route path="/ai-chat/detail" element={<AIChatDetail />} />
                         <Route path="/ai-news" element={<AINewsList />} />
+                        <Route path="/ai-update" element={<AIUpdate />} />
                         <Route path="/jobs" element={<JobsPage />} />
                         <Route path="/interview" element={<Interview />} />
                         <Route path="/leaderboard" element={<Leaderboard />} />
