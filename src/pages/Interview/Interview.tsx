@@ -26,7 +26,6 @@ const Interview: React.FC = () => {
   const [questionIntent, setQuestionIntent] = useState<string>('');
   const [answerGuides, setAnswerGuides] = useState<string[]>([]);
   const [totalQuestions, setTotalQuestions] = useState<number>(0);
-  const [greeting, setGreeting] = useState<string>('');
   const [isUploadingDocument, setIsUploadingDocument] = useState<boolean>(false);
   
   const {
@@ -140,7 +139,6 @@ const Interview: React.FC = () => {
       
       if (response.code === 200) {
         setSessionId(response.data.sessionId);
-        setGreeting(response.data.greeting);
         setCurrentQuestion(response.data.firstQuestion);
         setTotalQuestions(response.data.totalQuestions);
         setCurrentQuestionIndex(0);
