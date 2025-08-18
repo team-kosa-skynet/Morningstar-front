@@ -243,6 +243,11 @@ interface UpdatePasswordResponse {
   data: any;
 }
 
+export interface TtsPayload {
+  format: string;  // "mp3", "wav", "ogg" 등
+  base64: string;  // Base64 인코딩된 오디오 데이터
+}
+
 export interface NewsItem {
   newsId: number;
   title: string;
@@ -295,6 +300,7 @@ interface CreateSessionResponse {
     greeting: string;
     firstQuestion: string;
     totalQuestions: number;
+    tts: TtsPayload | null;  // withAudio=true일 때만 포함
   };
 }
 
@@ -311,6 +317,11 @@ interface InterviewTurnResponse {
     nextQuestion: string;
     questionIntent: string;
     answerGuides: string[];
+    coachingTips: string;
+    scoreDelta: Record<string, number>;
+    currentIndex: number;
+    done: boolean;
+    tts: TtsPayload | null;  // withAudio=true일 때만 포함
   };
 }
 

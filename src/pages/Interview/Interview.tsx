@@ -10,6 +10,9 @@ import {
   submitInterviewTurn, 
   finalizeInterviewReport 
 } from '../../services/apiService';
+import { playTtsAudio } from '../../utils/audioUtils';
+import CoachingModal from '../../components/CoachingModal/CoachingModal';
+import InterviewReport from '../../components/InterviewReport/InterviewReport';
 
 const Interview: React.FC = () => {
   const [selectedJob, setSelectedJob] = useState<string>('');
@@ -27,6 +30,17 @@ const Interview: React.FC = () => {
   const [answerGuides, setAnswerGuides] = useState<string[]>([]);
   const [totalQuestions, setTotalQuestions] = useState<number>(0);
   const [isUploadingDocument, setIsUploadingDocument] = useState<boolean>(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
+  
+  // 새로운 API 응답 필드들
+  const [coachingTips, setCoachingTips] = useState<string>('');
+  const [showCoachingModal, setShowCoachingModal] = useState<boolean>(false);
+  const [pendingNextQuestion, setPendingNextQuestion] = useState<string>('');
+  const [pendingTtsData, setPendingTtsData] = useState<any>(null);
+  const [showReportModal, setShowReportModal] = useState<boolean>(false);
+  const [reportData, setReportData] = useState<any>(null);
+  const [isTextInputMode, setIsTextInputMode] = useState<boolean>(false);
+  const [textAnswer, setTextAnswer] = useState<string>('');
   
   const {
     transcript,
@@ -34,8 +48,7 @@ const Interview: React.FC = () => {
     isSupported,
     startListening,
     stopListening,
-    resetTranscript,
-    error: speechError
+    resetTranscript
   } = useSpeechRecognition();
 
   useEffect(() => {
@@ -140,9 +153,23 @@ const Interview: React.FC = () => {
       if (response.code === 200) {
         setSessionId(response.data.sessionId);
         setCurrentQuestion(response.data.firstQuestion);
+        setQuestionIntent((response.data as any).questionIntent || '');
+        setAnswerGuides((response.data as any).answerGuides || []);
         setTotalQuestions(response.data.totalQuestions);
         setCurrentQuestionIndex(0);
         setInterviewStarted(true);
+        
+        // 첫 번째 질문 오디오 재생 (인사말 + 첫 번째 질문)
+        if (response.data.tts) {
+          try {
+            setIsPlayingAudio(true);
+            await playTtsAudio(response.data.tts);
+          } catch (error) {
+            console.error('오디오 재생 실패:', error);
+          } finally {
+            setIsPlayingAudio(false);
+          }
+        }
       } else {
         alert(response.message || '인터뷰 세션 생성에 실패했습니다.');
       }
@@ -171,6 +198,7 @@ const Interview: React.FC = () => {
       return;
     }
 
+    // 녹음 시작
     if (!isListening && !transcript) {
       if (microphonePermission !== 'granted') {
         const permissionGranted = await requestMicrophonePermission();
@@ -184,72 +212,212 @@ const Interview: React.FC = () => {
       return;
     }
 
+    // 녹음 중지 및 바로 제출
     if (isListening) {
       stopListening();
+      
+      // 약간의 지연 후 제출 (transcript가 업데이트될 시간을 줌)
+      setTimeout(async () => {
+        if (transcript && !isLoading && sessionId) {
+          setIsLoading(true);
+          try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+              alert('로그인이 필요합니다.');
+              return;
+            }
+
+            const turnData = {
+              sessionId,
+              questionIndex: currentQuestionIndex,
+              transcript: transcript.trim()
+            };
+
+            const response = await submitInterviewTurn(turnData, token);
+            
+            if (response.code === 200) {
+              resetTranscript();
+              
+              // 응답 데이터로 상태 업데이트
+              setQuestionIntent((response.data as any).questionIntent || '');
+              setAnswerGuides((response.data as any).answerGuides || []);
+              setCurrentQuestionIndex((response.data as any).currentIndex);
+              
+              // Check if interview is done
+              if (response.data.done) {
+                // Interview finished, finalize report
+                try {
+                  const reportResponse = await finalizeInterviewReport({ sessionId }, token);
+                  if (reportResponse.code === 200) {
+                    setReportData(reportResponse.data);
+                    setShowReportModal(true);
+                  } else {
+                    alert('리포트 생성에 실패했습니다: ' + reportResponse.message);
+                  }
+                } catch (error) {
+                  console.error('Report finalization error:', error);
+                  alert('인터뷰는 완료되었지만 리포트 생성에 실패했습니다.');
+                }
+              } else {
+                // 코칭 팁이 있으면 모달 표시, 없으면 바로 다음 질문 진행
+                if (response.data.coachingTips) {
+                  setCoachingTips(response.data.coachingTips);
+                  setPendingNextQuestion(response.data.nextQuestion);
+                  setPendingTtsData(response.data.tts);
+                  setShowCoachingModal(true);
+                } else {
+                  // 바로 다음 질문 진행
+                  setCurrentQuestion(response.data.nextQuestion);
+                  
+                  // 다음 질문 오디오 재생
+                  if (response.data.tts) {
+                    try {
+                      setIsPlayingAudio(true);
+                      await playTtsAudio(response.data.tts);
+                    } catch (error) {
+                      console.error('오디오 재생 실패:', error);
+                    } finally {
+                      setIsPlayingAudio(false);
+                    }
+                  }
+                }
+              }
+            } else {
+              alert(response.message || '인터뷰 처리에 실패했습니다.');
+            }
+          } catch (error: any) {
+            console.error('인터뷰 처리 오류:', error);
+            if (error.response?.status === 401) {
+              alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+            } else if (error.response?.status === 403) {
+              alert('포인트가 부족합니다. 포인트를 충전해주세요.');
+            } else {
+              alert(error.message || '인터뷰 처리 중 오류가 발생했습니다.');
+            }
+          } finally {
+            setIsLoading(false);
+          }
+        }
+      }, 500); // 0.5초 지연
       return;
     }
+  };
 
-    if (transcript && !isLoading && sessionId) {
-      if (transcript.trim().length < 10) {
-        alert('최소 10자 이상의 음성 입력이 필요합니다.');
+  const handleCoachingModalClose = async () => {
+    setShowCoachingModal(false);
+    
+    // 모달이 닫힌 후 다음 질문 진행
+    if (pendingNextQuestion) {
+      setCurrentQuestion(pendingNextQuestion);
+      setPendingNextQuestion('');
+      
+      // 다음 질문 오디오 재생
+      if (pendingTtsData) {
+        try {
+          setIsPlayingAudio(true);
+          await playTtsAudio(pendingTtsData);
+        } catch (error) {
+          console.error('오디오 재생 실패:', error);
+        } finally {
+          setIsPlayingAudio(false);
+        }
+        setPendingTtsData(null);
+      }
+    }
+  };
+
+  const handleReportModalClose = () => {
+    setShowReportModal(false);
+    setReportData(null);
+    // 리포트 모달이 닫힌 후 필요한 추가 동작이 있다면 여기에 추가
+  };
+
+  const handleKeyboardToggle = () => {
+    setIsTextInputMode(!isTextInputMode);
+    setTextAnswer('');
+  };
+
+  const handleTextSubmit = async () => {
+    if (!textAnswer.trim() || !sessionId) return;
+    
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('로그인이 필요합니다.');
         return;
       }
 
-      setIsLoading(true);
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          alert('로그인이 필요합니다.');
-          return;
-        }
+      const turnData = {
+        sessionId,
+        questionIndex: currentQuestionIndex,
+        transcript: textAnswer.trim()
+      };
 
-        const turnData = {
-          sessionId,
-          questionIndex: currentQuestionIndex,
-          transcript: transcript.trim()
-        };
-
-        const response = await submitInterviewTurn(turnData, token);
+      const response = await submitInterviewTurn(turnData, token);
+      
+      if (response.code === 200) {
+        setTextAnswer('');
+        setIsTextInputMode(false);
         
-        if (response.code === 200) {
-          resetTranscript();
-          
-          // Check if this was the last question
-          if (currentQuestionIndex >= totalQuestions - 1) {
-            // Interview finished, finalize report
-            try {
-              const reportResponse = await finalizeInterviewReport({ sessionId }, token);
-              if (reportResponse.code === 200) {
-                alert('인터뷰가 완료되었습니다! 결과를 확인해보세요.');
-                // TODO: Navigate to results page or show results
-                console.log('Interview report:', reportResponse.data);
-              }
-            } catch (error) {
-              console.error('Report finalization error:', error);
-              alert('인터뷰는 완료되었지만 리포트 생성에 실패했습니다.');
+        // 응답 데이터로 상태 업데이트
+        setQuestionIntent((response.data as any).questionIntent || '');
+        setAnswerGuides((response.data as any).answerGuides || []);
+        setCurrentQuestionIndex((response.data as any).currentIndex);
+        
+        // Check if interview is done
+        if (response.data.done) {
+          // Interview finished, finalize report
+          try {
+            const reportResponse = await finalizeInterviewReport({ sessionId }, token);
+            if (reportResponse.code === 200) {
+              setReportData(reportResponse.data);
+              setShowReportModal(true);
+            } else {
+              alert('리포트 생성에 실패했습니다: ' + reportResponse.message);
             }
-          } else {
-            // Move to next question
-            setCurrentQuestion(response.data.nextQuestion);
-            setQuestionIntent(response.data.questionIntent);
-            setAnswerGuides(response.data.answerGuides);
-            setCurrentQuestionIndex(prev => prev + 1);
+          } catch (error) {
+            console.error('Report finalization error:', error);
+            alert('인터뷰는 완료되었지만 리포트 생성에 실패했습니다.');
           }
         } else {
-          alert(response.message || '인터뷰 처리에 실패했습니다.');
+          // 코칭 팁이 있으면 모달 표시, 없으면 바로 다음 질문 진행
+          if (response.data.coachingTips) {
+            setCoachingTips(response.data.coachingTips);
+            setPendingNextQuestion(response.data.nextQuestion);
+            setPendingTtsData(response.data.tts);
+            setShowCoachingModal(true);
+          } else {
+            // 바로 다음 질문 진행
+            setCurrentQuestion(response.data.nextQuestion);
+            
+            // 다음 질문 오디오 재생
+            if (response.data.tts) {
+              try {
+                setIsPlayingAudio(true);
+                await playTtsAudio(response.data.tts);
+              } catch (error) {
+                console.error('오디오 재생 실패:', error);
+              } finally {
+                setIsPlayingAudio(false);
+              }
+            }
+          }
         }
-      } catch (error: any) {
-        console.error('인터뷰 처리 오류:', error);
-        if (error.response?.status === 401) {
-          alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
-        } else if (error.response?.status === 403) {
-          alert('포인트가 부족합니다. 포인트를 충전해주세요.');
-        } else {
-          alert(error.message || '인터뷰 처리 중 오류가 발생했습니다.');
-        }
-      } finally {
-        setIsLoading(false);
+      } else {
+        alert(response.message || '인터뷰 처리에 실패했습니다.');
       }
+    } catch (error: any) {
+      console.error('인터뷰 처리 오류:', error);
+      if (error.response?.status === 401) {
+        alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+      } else if (error.response?.status === 403) {
+        alert('포인트가 부족합니다. 포인트를 충전해주세요.');
+      } else {
+        alert(error.message || '인터뷰 처리 중 오류가 발생했습니다.');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -277,18 +445,61 @@ const Interview: React.FC = () => {
                   <div className={styles.questionContent}>
                     <p className={styles.questionText}>{currentQuestion}</p>
                   </div>
-                  <button 
-                    className={styles.micButton} 
-                    onClick={handleMicStart}
-                    disabled={isLoading}
-                  >
-                    <i className="bi bi-mic-fill"></i>
-                    <span>
-                      {isLoading ? '처리 중...' : 
-                       isListening ? '녹음 중지' : 
-                       transcript ? '답변 제출' : '시작'}
-                    </span>
-                  </button>
+                  {!isTextInputMode ? (
+                    // 음성 입력 모드 - 마이크 + 키보드 버튼
+                    <div className={styles.inputButtons}>
+                      <button 
+                        className={styles.micButton} 
+                        onClick={handleMicStart}
+                        disabled={isLoading || isPlayingAudio}
+                      >
+                        <i className="bi bi-mic-fill"></i>
+                        <span>
+                          {isPlayingAudio ? '재생 중...' :
+                           isLoading ? '처리 중...' : 
+                           isListening ? '녹음 중지' : '시작'}
+                        </span>
+                      </button>
+                      <button 
+                        className={styles.keyboardButton} 
+                        onClick={handleKeyboardToggle}
+                        disabled={isLoading || isPlayingAudio}
+                      >
+                        <i className="bi bi-keyboard"></i>
+                      </button>
+                    </div>
+                  ) : (
+                    // 텍스트 입력 모드 - 입력창 + X 버튼 + 제출 버튼
+                    <div className={styles.textInputContainer}>
+                      <input
+                        type="text"
+                        value={textAnswer}
+                        onChange={(e) => setTextAnswer(e.target.value)}
+                        className={styles.textInput}
+                        placeholder="답변을 입력하세요..."
+                        disabled={isLoading}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && !isLoading && textAnswer.trim()) {
+                            handleTextSubmit();
+                          }
+                        }}
+                      />
+                      <button 
+                        className={styles.closeButton} 
+                        onClick={handleKeyboardToggle}
+                        disabled={isLoading}
+                      >
+                        <i className="bi bi-x-lg"></i>
+                      </button>
+                      <button 
+                        className={styles.submitButton} 
+                        onClick={handleTextSubmit}
+                        disabled={isLoading || !textAnswer.trim()}
+                      >
+                        {isLoading ? '처리 중...' : '제출'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -391,7 +602,7 @@ const Interview: React.FC = () => {
                   </div>
                 )}
 
-                {answerGuides.length > 0 && (
+                {answerGuides && answerGuides.length > 0 && (
                   <div className={styles.guidelinesSection}>
                     <div className={styles.guidelinesHeader}>
                       <img src={geminiIcon} alt="gemini" className={styles.guidelineIcon} />
@@ -407,42 +618,26 @@ const Interview: React.FC = () => {
                   </div>
                 )}
 
-                {/* 음성 인식 상태 */}
-                {(isListening || transcript || speechError) && (
-                  <div className={styles.speechStatus}>
-                    {speechError && (
-                      <div className={styles.errorMessage}>
-                        <p>❌ {speechError}</p>
-                      </div>
-                    )}
-                    
-                    {isListening && (
-                      <div className={styles.listeningIndicator}>
-                        <div className={styles.recordingIcon}>🎤</div>
-                        <p>음성을 인식하고 있습니다...</p>
-                      </div>
-                    )}
-                    
-                    {transcript && (
-                      <div className={styles.transcriptArea}>
-                        <h4>인식된 음성:</h4>
-                        <p>{transcript}</p>
-                        <button 
-                          className={styles.resetButton} 
-                          onClick={resetTranscript}
-                          type="button"
-                        >
-                          다시 녹음
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
+
               </>
             )}
           </div>
         </div>
       </div>
+      
+      {/* 코칭 팁 모달 */}
+      <CoachingModal
+        isOpen={showCoachingModal}
+        coachingTips={coachingTips}
+        onClose={handleCoachingModalClose}
+      />
+      
+      {/* 인터뷰 리포트 모달 */}
+      <InterviewReport
+        isOpen={showReportModal}
+        reportData={reportData}
+        onClose={handleReportModalClose}
+      />
     </div>
   );
 };
