@@ -10,7 +10,7 @@ import {
   submitInterviewTurn, 
   finalizeInterviewReport 
 } from '../../services/apiService';
-import { playTtsAudio, stopCurrentAudio, isAudioPlaying } from '../../utils/audioUtils';
+import { playTtsAudio } from '../../utils/audioUtils';
 import CoachingModal from '../../components/CoachingModal/CoachingModal';
 import InterviewReport from '../../components/InterviewReport/InterviewReport';
 
@@ -34,8 +34,6 @@ const Interview: React.FC = () => {
   
   // 새로운 API 응답 필드들
   const [coachingTips, setCoachingTips] = useState<string>('');
-  const [scoreDelta, setScoreDelta] = useState<Record<string, number>>({});
-  const [isDone, setIsDone] = useState<boolean>(false);
   const [showCoachingModal, setShowCoachingModal] = useState<boolean>(false);
   const [pendingNextQuestion, setPendingNextQuestion] = useState<string>('');
   const [pendingTtsData, setPendingTtsData] = useState<any>(null);
@@ -50,8 +48,7 @@ const Interview: React.FC = () => {
     isSupported,
     startListening,
     stopListening,
-    resetTranscript,
-    error: speechError
+    resetTranscript
   } = useSpeechRecognition();
 
   useEffect(() => {
@@ -156,8 +153,9 @@ const Interview: React.FC = () => {
       if (response.code === 200) {
         setSessionId(response.data.sessionId);
         setCurrentQuestion(response.data.firstQuestion);
-        setQuestionIntent(response.data.questionIntent || '');
-        setAnswerGuides(response.data.answerGuides || []);
+        // 세션 생성 시에는 questionIntent와 answerGuides가 없음
+        setQuestionIntent('');
+        setAnswerGuides([]);
         setTotalQuestions(response.data.totalQuestions);
         setCurrentQuestionIndex(0);
         setInterviewStarted(true);
@@ -242,11 +240,9 @@ const Interview: React.FC = () => {
               resetTranscript();
               
               // 응답 데이터로 상태 업데이트
-              setQuestionIntent(response.data.questionIntent);
-              setAnswerGuides(response.data.answerGuides);
-              setScoreDelta(response.data.scoreDelta);
+              setQuestionIntent(response.data.questionIntent || '');
+              setAnswerGuides(response.data.answerGuides || []);
               setCurrentQuestionIndex(response.data.currentIndex);
-              setIsDone(response.data.done);
               
               // Check if interview is done
               if (response.data.done) {
@@ -366,11 +362,9 @@ const Interview: React.FC = () => {
         setIsTextInputMode(false);
         
         // 응답 데이터로 상태 업데이트
-        setQuestionIntent(response.data.questionIntent);
-        setAnswerGuides(response.data.answerGuides);
-        setScoreDelta(response.data.scoreDelta);
+        setQuestionIntent(response.data.questionIntent || '');
+        setAnswerGuides(response.data.answerGuides || []);
         setCurrentQuestionIndex(response.data.currentIndex);
-        setIsDone(response.data.done);
         
         // Check if interview is done
         if (response.data.done) {
@@ -609,7 +603,7 @@ const Interview: React.FC = () => {
                   </div>
                 )}
 
-                {answerGuides.length > 0 && (
+                {answerGuides && answerGuides.length > 0 && (
                   <div className={styles.guidelinesSection}>
                     <div className={styles.guidelinesHeader}>
                       <img src={geminiIcon} alt="gemini" className={styles.guidelineIcon} />
