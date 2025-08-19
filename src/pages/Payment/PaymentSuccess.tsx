@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './PaymentSuccess.module.scss';
 
 function PaymentSuccess() {
+    const navigate = useNavigate();
+
     useEffect(() => {
-        // 부모 창에 결제 완료 메시지 전달
-        if (window.opener) {
-            window.opener.postMessage({ type: 'PAYMENT_SUCCESS' }, '*');
-        }
-        window.close();
-    }, []);
+        // 결제 완료 후 바로 홈으로 리다이렉트 (성공 파라미터 포함)
+        navigate('/?payment=success');
+    }, [navigate]);
 
     return (
         <div className={styles.container}>
