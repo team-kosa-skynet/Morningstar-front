@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './AIUpdate.module.scss';
 import SearchBox from '../../components/SearchBox/SearchBox';
 import Pagination from '../../components/Pagination/Pagination';
-import SupportBanner from '../../components/SupportBanner/SupportBanner';
+import SupportBanner from '../../components/Banner/SupportBanner.tsx';
 
 interface AIUpdateItem {
   id: number;

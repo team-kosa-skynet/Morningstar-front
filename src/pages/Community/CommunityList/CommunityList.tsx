@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './CommunityList.module.scss';
 import Pagination from '../../../components/Pagination/Pagination';
 import SearchBox from '../../../components/SearchBox/SearchBox';
-import SupportBanner from '../../../components/SupportBanner/SupportBanner';
+import SupportBanner from '../../../components/Banner/SupportBanner.tsx';
 import { getBoards, searchBoards } from '../../../services/apiService.ts';
 import { useAuthStore } from '../../../stores/authStore';
 import { getLevelIcon } from '../../../utils/levelUtils';
