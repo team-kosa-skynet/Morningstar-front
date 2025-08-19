@@ -1,10 +1,4 @@
-https://www.figma.com/design/XO6o8kTarJg1vXccGHaFBo/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-%EC%83%9B%EB%B3%84--%EB%B3%B5%EC%82%AC-?node-id=2257-453
 
-이제 후원배너를 눌렀을 때 나오는 모달창을 만들거야
-피그마 페이지 확인해주고
-src/components/Modal 여기 디렉토리 안에다가 파일 만들어줘.
-
-아직 api 연동 전이라 그냥 모달창만 만들어주면되.
-필요 이미지는
-C:\Users\kosa\WebstormProjects\morningstar-front\src\assets\images\payment_icon_yellow_large.png
-이거 사용하면되.
+후원하기 모달 클릭 > 금액 입력하고 결재하기 > 새 창이 아니라 현재 창에서 결재 링크로 바로 넘어가게
+> 결재가 완료되면 /payment/success로 리다이렉트 되는데 여기 페이지로 오면 바로 메인 페이지인 /home 여기로 넘어오게
+> /home 으로 정상적으로 넘어와졌다면 포인트를 갱신
