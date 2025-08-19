@@ -11,7 +11,7 @@ import {
   finalizeInterviewReport 
 } from '../../services/apiService';
 import { playTtsAudio } from '../../utils/audioUtils';
-import CoachingModal from '../../components/CoachingModal/CoachingModal';
+import CoachingModal from '../../components/Modal/CoachingModal.tsx';
 import InterviewReport from '../../components/InterviewReport/InterviewReport';
 
 const Interview: React.FC = () => {
