@@ -74,17 +74,19 @@ function App() {
     const isAuthInitialized = useAuthStore((state) => state.isAuthInitialized);
     const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
     const checkDailyAttendance = useAuthStore((state) => state.checkDailyAttendance);
+    const refreshUserPoint = useAuthStore((state) => state.refreshUserPoint);
 
     useEffect(() => {
         initializeAuth();
     }, [initializeAuth]);
 
-    // 인증 초기화 완료 후 로그인된 사용자의 경우 출석 체크
+    // 인증 초기화 완료 후 로그인된 사용자의 경우 출석 체크 및 포인트 갱신
     useEffect(() => {
         if (isAuthInitialized && isLoggedIn) {
             checkDailyAttendance();
+            refreshUserPoint();
         }
-    }, [isAuthInitialized, isLoggedIn, checkDailyAttendance]);
+    }, [isAuthInitialized, isLoggedIn, checkDailyAttendance, refreshUserPoint]);
 
 
     // 인증 초기화가 완료되지 않았으면 로딩 화면 표시
