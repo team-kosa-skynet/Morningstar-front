@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './AIUpdate.module.scss';
 import SearchBox from '../../components/SearchBox/SearchBox';
 import Pagination from '../../components/Pagination/Pagination';
@@ -26,6 +27,7 @@ interface APIResponse {
 }
 
 const AIUpdate = () => {
+  const navigate = useNavigate();
   const [updateItems, setUpdateItems] = useState<AIUpdateItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<AIUpdateItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -102,6 +104,11 @@ const AIUpdate = () => {
     return content.substring(0, maxLength) + '...';
   };
 
+  // 아이템 클릭 핸들러
+  const handleItemClick = (item: AIUpdateItem) => {
+    navigate(`/ai-update/detail/${item.id}`, { state: { item } });
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.innerBox}>
@@ -136,7 +143,7 @@ const AIUpdate = () => {
             </div>
           ) : (
             filteredItems.map((item) => (
-              <div key={item.id} className={styles.updateItem}>
+              <div key={item.id} className={styles.updateItem} onClick={() => handleItemClick(item)}>
                 <div className={styles.leftSection}>
                   <div className={styles.titleAndContent}>
                     <h3 className={styles.itemTitle}>{item.title}</h3>
