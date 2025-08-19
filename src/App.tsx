@@ -26,11 +26,12 @@ import AIUpdateDetail from "./pages/AIUpdate/AIUpdateDetail.tsx";
 import JobsPage from "./pages/jobs/JobsPage.tsx";
 import Interview from "./pages/Interview/Interview.tsx";
 import Leaderboard from "./pages/Leaderboard/Leaderboard.tsx";
+import PaymentSuccess from "./pages/Payment/PaymentSuccess.tsx";
 import { useAuthStore } from './stores/authStore';
 
 function AppContent() {
     const location = useLocation();
-    const hideLayout = location.pathname === '/signup' || location.pathname === '/login' || location.pathname === '/email-verify' || location.pathname === '/find-password' || location.pathname === '/reset-password' || location.pathname === '/auth/social';
+    const hideLayout = location.pathname === '/signup' || location.pathname === '/login' || location.pathname === '/email-verify' || location.pathname === '/find-password' || location.pathname === '/reset-password' || location.pathname === '/auth/social' || location.pathname === '/payment/success';
 
     return (
         <div className={styles.layoutWrapper}>
@@ -59,6 +60,7 @@ function AppContent() {
                         <Route path="/jobs" element={<JobsPage />} />
                         <Route path="/interview" element={<Interview />} />
                         <Route path="/leaderboard" element={<Leaderboard />} />
+                        <Route path="/payment/success" element={<PaymentSuccess />} />
                     </Routes>
                 </main>
                 {!hideLayout && <Footer />}
@@ -72,6 +74,7 @@ function App() {
     const isAuthInitialized = useAuthStore((state) => state.isAuthInitialized);
     const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
     const checkDailyAttendance = useAuthStore((state) => state.checkDailyAttendance);
+    const refreshUserPoint = useAuthStore((state) => state.refreshUserPoint);
 
     useEffect(() => {
         initializeAuth();
@@ -83,6 +86,18 @@ function App() {
             checkDailyAttendance();
         }
     }, [isAuthInitialized, isLoggedIn, checkDailyAttendance]);
+
+    // 결제 완료 메시지 수신 시 포인트 새로고침
+    useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+            if (event.data.type === 'PAYMENT_SUCCESS') {
+                refreshUserPoint();
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, [refreshUserPoint]);
 
     // 인증 초기화가 완료되지 않았으면 로딩 화면 표시
     if (!isAuthInitialized) {
