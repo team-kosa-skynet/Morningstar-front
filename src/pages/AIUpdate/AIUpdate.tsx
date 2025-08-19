@@ -100,8 +100,15 @@ const AIUpdate = () => {
 
   // 컨텐츠 요약 함수 (API response의 content가 길어서 요약)
   const getSummary = (content: string, maxLength: number = 200) => {
-    if (content.length <= maxLength) return content;
-    return content.substring(0, maxLength) + '...';
+    // 마크다운 문법 제거
+    const cleanContent = content
+      .replace(/##\s+/g, '') // ## 제거
+      .replace(/\*\*(.*?)\*\*/g, '$1') // ** 제거하고 내용만 남김
+      .replace(/\n+/g, ' ') // 줄바꿈을 공백으로 변환
+      .trim();
+    
+    if (cleanContent.length <= maxLength) return cleanContent;
+    return cleanContent.substring(0, maxLength) + '...';
   };
 
   // 아이템 클릭 핸들러

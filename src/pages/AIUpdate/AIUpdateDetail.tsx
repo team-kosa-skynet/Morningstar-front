@@ -29,6 +29,13 @@ const AIUpdateDetail = () => {
     navigate('/ai-update');
   };
 
+  // 마크다운 형식을 HTML로 변환하는 함수
+  const formatContent = (content: string) => {
+    return content
+      .replace(/##\s+(.*?)(\n|$)/g, '<h2>$1</h2>') // ## 제목 처리
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // ** bold 처리
+  };
+
   if (!item) {
     return <div className={styles.loading}>로딩 중...</div>;
   }
@@ -55,9 +62,10 @@ const AIUpdateDetail = () => {
 
         {/* 콘텐츠 */}
         <div className={styles.contentSection}>
-          <div className={styles.content}>
-            {item.content}
-          </div>
+          <div 
+            className={styles.content}
+            dangerouslySetInnerHTML={{ __html: formatContent(item.content) }}
+          />
         </div>
       </div>
     </div>
