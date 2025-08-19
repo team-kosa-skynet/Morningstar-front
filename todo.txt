@@ -1,17 +1,10 @@
 https://www.figma.com/design/XO6o8kTarJg1vXccGHaFBo/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-%EC%83%9B%EB%B3%84--%EB%B3%B5%EC%82%AC-?node-id=2257-453
 
-여기 있는 배너를 만들거야.
+이제 후원배너를 눌렀을 때 나오는 모달창을 만들거야
+피그마 페이지 확인해주고
+src/components/Modal 여기 디렉토리 안에다가 파일 만들어줘.
 
-코인 이미지는
-src/assets/images/gold-coin.png
-이거 쓰면 되고
-
-배너 클릭했을 때 나오는 창은 아직 디자인중이라 나중에 다시 얘기할테니깐 일단 배너만 만들어서
-위치만 조정하려고해.
-
-일단 사이트 우측에다가 fix 속성으로 콘텐츠 우측에다가 배치시키려고 하고
-배너가 나올 화면은 아래에 적어둘게
-
-ai 업데이트 소식, 리더보드, it뉴스, 채용공고, 커뮤니티
-
-이렇게만 나오게 해줘.
+아직 api 연동 전이라 그냥 모달창만 만들어주면되.
+필요 이미지는
+C:\Users\kosa\WebstormProjects\morningstar-front\src\assets\images\payment_icon_yellow_large.png
+이거 사용하면되.
