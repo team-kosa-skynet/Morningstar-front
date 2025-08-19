@@ -3,7 +3,6 @@ import styles from './AINewsList.module.scss';
 import SearchBox from '../../components/SearchBox/SearchBox';
 import Pagination from '../../components/Pagination/Pagination';
 import Banner from '../../components/Banner/Banner';
-import SupportBanner from '../../components/SupportBanner/SupportBanner';
 import { getNews } from '../../services/apiService';
 import type { NewsItem } from '../../services/apiService';
 
@@ -130,7 +129,6 @@ const AINewsList = () => {
 
   return (
     <div className={styles.newsContainer}>
-      <SupportBanner />
       <div className={styles.innerBox}>
         {/* 인기 기사들 */}
         <div className={styles.popularArticles}>
