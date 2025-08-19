@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import styles from './SupportModal.module.scss';
 import paymentIcon from '../../assets/images/payment_icon_yellow_large.png';
+import { paymentReady } from '../../services/apiService';
+import { useAuthStore } from '../../stores/authStore';
 
 interface SupportModalProps {
   isOpen: boolean;
@@ -9,6 +11,8 @@ interface SupportModalProps {
 
 const SupportModal = ({ isOpen, onClose }: SupportModalProps) => {
   const [amount, setAmount] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { token } = useAuthStore();
 
   if (!isOpen) return null;
 
@@ -18,10 +22,35 @@ const SupportModal = ({ isOpen, onClose }: SupportModalProps) => {
     }
   };
 
-  const handlePayment = () => {
-    // TODO: API 연동 전이므로 임시로 콘솔 출력
-    console.log('결제 금액:', amount);
-    onClose();
+  const handlePayment = async () => {
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    if (!amount || parseInt(amount) <= 0) {
+      alert('올바른 금액을 입력해주세요.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await paymentReady({ amount: parseInt(amount) }, token);
+      
+      if (response.code === 200 && response.data) {
+        // PC 환경에서는 PC URL로 리다이렉트
+        const redirectUrl = response.data.next_redirect_pc_url;
+        window.open(redirectUrl, '_blank');
+        onClose();
+      } else {
+        alert('결제 준비 중 오류가 발생했습니다.');
+      }
+    } catch (error: any) {
+      console.error('Payment error:', error);
+      alert(error?.message || '결제 처리 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,9 +92,9 @@ const SupportModal = ({ isOpen, onClose }: SupportModalProps) => {
             <button 
               className={styles.paymentButton}
               onClick={handlePayment}
-              disabled={!amount}
+              disabled={!amount || isLoading}
             >
-              결제하기
+              {isLoading ? '처리 중...' : '결제하기'}
             </button>
           </div>
         </div>
