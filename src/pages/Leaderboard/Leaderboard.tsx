@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Chart, registerables } from 'chart.js';
 import styles from './Leaderboard.module.scss';
 import ModelFinderModal from '../../components/Modal/ModelFinderModal.tsx';
+import SupportBanner from '../../components/SupportBanner/SupportBanner';
 
 Chart.register(...registerables);
 
@@ -338,6 +339,7 @@ const Leaderboard: React.FC = () => {
 
   return (
     <div className={styles.leaderboardContainer}>
+      <SupportBanner />
       <div className={styles.innerContainer}>
         
         {/* 차트 섹션 */}
