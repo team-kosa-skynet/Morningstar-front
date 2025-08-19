@@ -350,6 +350,24 @@ interface FinalizeReportResponse {
   };
 }
 
+interface PaymentReadyRequest {
+  amount: number;
+}
+
+interface PaymentReadyResponse {
+  code: number;
+  message: string;
+  data: {
+    tid: string;
+    next_redirect_app_url: string;
+    next_redirect_mobile_url: string;
+    next_redirect_pc_url: string;
+    android_app_scheme: string;
+    ios_app_scheme: string;
+    created_at: string;
+  };
+}
+
 interface CreateBoardRequest {
   title: string;
   content: string;
@@ -946,6 +964,27 @@ export const finalizeInterviewReport = async (reportData: FinalizeReportRequest,
     const response = await axios.post<FinalizeReportResponse>(
       `${API_BASE_URL}/interview/report/finalize`,
       reportData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const paymentReady = async (paymentData: PaymentReadyRequest, token: string): Promise<PaymentReadyResponse> => {
+  try {
+    const response = await axios.post<PaymentReadyResponse>(
+      `${API_BASE_URL}/payment/ready`,
+      paymentData,
       {
         headers: {
           Authorization: `Bearer ${token}`,
