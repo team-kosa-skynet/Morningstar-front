@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
 import styles from './Navigation.module.scss';
 import {useNavigate} from "react-router-dom";
+import anthropicIcon from '../../assets/images/anthropic (1).svg';
+import leaderboardIcon from '../../assets/images/nav-img/leaderboard-removebg-preview 1.png';
+import itNewsIcon from '../../assets/images/nav-img/news.svg';
+import jobIcon from '../../assets/images/nav-img/job.svg';
+import questionIcon from '../../assets/images/nav-img/question.svg';
+import micIcon from '../../assets/images/nav-img/mic.svg';
+import communityIcon from '../../assets/images/nav-img/community.svg';
 
 const Navigation: React.FC = () => {
   const [activeItem, setActiveItem] = useState('프롬프트 가이드');
 
   const navItems = [
-    'AI 업데이트 소식',
+    '업데이트 소식',
     '리더보드',
     'divider',
     'IT 뉴스',
@@ -19,6 +26,25 @@ const Navigation: React.FC = () => {
   ];
 
   const navigate = useNavigate();
+
+  const getIconForItem = (item: string) => {
+    switch (item) {
+      case '리더보드':
+        return leaderboardIcon;
+      case 'IT 뉴스':
+        return itNewsIcon;
+      case '채용공고':
+        return jobIcon;
+      case '질문하기':
+        return questionIcon;
+      case '모의면접':
+        return micIcon;
+      case '커뮤니티':
+        return communityIcon;
+      default:
+        return anthropicIcon;
+    }
+  };
 
   const handleItemClick = (item: string) => {
     if (item !== 'divider') {
@@ -42,7 +68,7 @@ const Navigation: React.FC = () => {
     if (item === '리더보드') {
       navigate('/leaderboard');
     }
-    if (item === 'AI 업데이트 소식') {
+    if (item === '업데이트 소식') {
       navigate('/ai-update');
     }
   };
@@ -67,10 +93,14 @@ const Navigation: React.FC = () => {
             >
               {activeItem === item ? (
                 <div className={styles.activeNavItem}>
+                  <img src={getIconForItem(item)} alt="icon" className={styles.navIcon} />
                   <span>{item}</span>
                 </div>
               ) : (
-                <span>{item}</span>
+                <div className={styles.navItemContent}>
+                  <img src={getIconForItem(item)} alt="icon" className={styles.navIcon} />
+                  <span>{item}</span>
+                </div>
               )}
             </div>
           );
