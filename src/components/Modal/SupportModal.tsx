@@ -40,8 +40,7 @@ const SupportModal = ({ isOpen, onClose }: SupportModalProps) => {
       if (response.code === 200 && response.data) {
         // PC 환경에서는 PC URL로 리다이렉트
         const redirectUrl = response.data.next_redirect_pc_url;
-        window.open(redirectUrl, '_blank');
-        onClose();
+        window.location.href = redirectUrl;
       } else {
         alert('결제 준비 중 오류가 발생했습니다.');
       }

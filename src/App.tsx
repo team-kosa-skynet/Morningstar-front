@@ -74,7 +74,6 @@ function App() {
     const isAuthInitialized = useAuthStore((state) => state.isAuthInitialized);
     const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
     const checkDailyAttendance = useAuthStore((state) => state.checkDailyAttendance);
-    const refreshUserPoint = useAuthStore((state) => state.refreshUserPoint);
 
     useEffect(() => {
         initializeAuth();
@@ -87,17 +86,6 @@ function App() {
         }
     }, [isAuthInitialized, isLoggedIn, checkDailyAttendance]);
 
-    // 결제 완료 메시지 수신 시 포인트 새로고침
-    useEffect(() => {
-        const handleMessage = (event: MessageEvent) => {
-            if (event.data.type === 'PAYMENT_SUCCESS') {
-                refreshUserPoint();
-            }
-        };
-
-        window.addEventListener('message', handleMessage);
-        return () => window.removeEventListener('message', handleMessage);
-    }, [refreshUserPoint]);
 
     // 인증 초기화가 완료되지 않았으면 로딩 화면 표시
     if (!isAuthInitialized) {
