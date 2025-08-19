@@ -3,8 +3,8 @@ import styles from './PaymentSuccess.module.scss';
 
 function PaymentSuccess() {
     useEffect(() => {
-        // 결제 완료 후 바로 홈으로 페이지 새로고침과 함께 리다이렉트
-        window.location.href = '/';
+        // 결제 완료 후 바로 홈으로 완전한 URL 리다이렉트
+        window.location.replace(window.location.origin + '/#/');
     }, []);
 
     return (
