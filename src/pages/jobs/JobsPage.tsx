@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import styles from './Jobs.module.scss';
 import SearchBox from '../../components/SearchBox/SearchBox';
 import Pagination from '../../components/Pagination/Pagination';
+import SupportBanner from '../../components/Banner/SupportBanner.tsx';
 import { jobsApi, transformJobData } from '../../services/jobsApi.ts';
 import type { JobItem } from '../../types/jobs';
 
@@ -198,6 +199,7 @@ const JobsPage = () => {
 
   return (
     <div className={styles.jobsContainer}>
+      <SupportBanner />
       <div className={styles.jobsInner}>
         {/* 리스트 헤더 */}
         <div className={styles.jobsListHeader}>
