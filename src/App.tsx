@@ -74,7 +74,6 @@ function App() {
     const isAuthInitialized = useAuthStore((state) => state.isAuthInitialized);
     const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
     const checkDailyAttendance = useAuthStore((state) => state.checkDailyAttendance);
-    const refreshUserPoint = useAuthStore((state) => state.refreshUserPoint);
 
     useEffect(() => {
         initializeAuth();
