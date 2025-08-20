@@ -12,7 +12,7 @@ const DonationCompleteModal = ({ isOpen, onClose }: DonationCompleteModalProps) 
     if (isOpen) {
       const timer = setTimeout(() => {
         onClose();
-      }, 2000);
+      }, 3000);
 
       return () => clearTimeout(timer);
     }
