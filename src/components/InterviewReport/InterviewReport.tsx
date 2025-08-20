@@ -66,8 +66,8 @@ const InterviewReport: React.FC<InterviewReportProps> = ({ isOpen, reportData, o
   };
 
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+    <div className={styles.modalOverlay}>
+      <div className={styles.modalContent}>
         <div className={styles.modalHeader}>
           <h2>면접 결과 리포트</h2>
           <button className={styles.closeButton} onClick={onClose}>×</button>
