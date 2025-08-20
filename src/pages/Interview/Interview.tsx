@@ -644,8 +644,11 @@ const Interview: React.FC = () => {
                     {uploadedFile && (
                       <div className={styles.filePreview}>
                         {uploadedFile.name}
-                        {isUploadingDocument && <span> (업로드 중...)</span>}
-                        {documentId && <span> ✓ 업로드 완료</span>}
+                        {isUploadingDocument ? (
+                          <i className={`bi bi-arrow-clockwise ${styles.spinIcon}`} style={{marginLeft: '8px'}}></i>
+                        ) : documentId ? (
+                          <i className={`bi bi-check-lg ${styles.checkIcon}`} style={{marginLeft: '8px'}}></i>
+                        ) : null}
                       </div>
                     )}
                     <p className={styles.fileInfo}>*pdf(권장),ppt,doc,docx,hwp (최대 50MB)</p>
