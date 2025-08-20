@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import styles from './InterviewReport.module.scss';
 import { Doughnut } from 'react-chartjs-2';
 import {
