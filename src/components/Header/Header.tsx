@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Header.module.scss';
 import logoImage from '../../assets/images/logo.png';
 import { useAuthStore } from '../../stores/authStore';
 import { getLevelIcon } from '../../utils/levelUtils';
+import LevelInfoModal from '../Modal/LevelInfoModal';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const { isLoggedIn, user } = useAuthStore();
+  const [isLevelModalVisible, setIsLevelModalVisible] = useState(false);
 
   // 디버깅을 위한 로그
   console.log('Header - isLoggedIn:', isLoggedIn);
@@ -28,6 +30,10 @@ const Header: React.FC = () => {
 
   const handleUserNameClick = () => {
     navigate('/mypage');
+  };
+
+  const handleQuestionClick = () => {
+    setIsLevelModalVisible(!isLevelModalVisible);
   };
   return (
     <>
@@ -55,6 +61,12 @@ const Header: React.FC = () => {
                       <span className={styles.userName}>{user?.name}</span>
                     </div>
                     <span className={styles.pointText}>포인트: <span className={styles.pointValue}>{user?.point ?? 0}P</span></span>
+                    <div 
+                      className={styles.questionIconBox}
+                      onClick={handleQuestionClick}
+                    >
+                      <i className="bi bi-question-circle" />
+                    </div>
                   </div>
                 </>
               ) : (
@@ -67,6 +79,10 @@ const Header: React.FC = () => {
           </div>
         </div>
       </header>
+      <LevelInfoModal 
+        isVisible={isLevelModalVisible} 
+        onClose={() => setIsLevelModalVisible(false)}
+      />
     </>
   );
 };

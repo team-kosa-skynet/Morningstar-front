@@ -77,7 +77,6 @@
         .userInfo {
           display: flex;
           align-items: center;
-          gap: 32px;
           margin-right: 26px;
           
           .userProfile {
@@ -118,10 +117,31 @@
             font-size: 18px;
             line-height: 1.193359375em;
             color: #000D1C;
+            margin-left: 24px;
           }
           
           .pointValue {
             color: #4E4EFF;
+          }
+          
+          .questionIconBox {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background-color: #ffffff;
+            cursor: pointer;
+            margin-left: 14px;
+            
+            &:hover {
+              background-color: #f5f5f5;
+            }
+            
+            i {
+              color: #777777;
+              font-size: 16px;
+            }
           }
         }
         
