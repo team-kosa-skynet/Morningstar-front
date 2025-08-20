@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './InterviewReport.module.scss';
 import { Doughnut } from 'react-chartjs-2';
 import {
@@ -29,6 +29,21 @@ interface InterviewReportProps {
 }
 
 const InterviewReport: React.FC<InterviewReportProps> = ({ isOpen, reportData, onClose }) => {
+  useEffect(() => {
+    if (isOpen) {
+      // 모달이 열릴 때 body 스크롤 비활성화
+      document.body.style.overflow = 'hidden';
+    } else {
+      // 모달이 닫힐 때 body 스크롤 복원
+      document.body.style.overflow = 'unset';
+    }
+
+    // 컴포넌트 언마운트 시 스크롤 복원
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   if (!isOpen || !reportData) return null;
 
   const scoreDescriptions = {
