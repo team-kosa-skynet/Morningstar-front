@@ -5,8 +5,8 @@ function PaymentSuccess() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // 결제 완료 후 홈으로 리다이렉트
-        navigate('/');
+        // 결제 완료 후 홈으로 리다이렉트 (모달 표시를 위해 쿼리 파라미터 추가)
+        navigate('/?donation=success');
     }, [navigate]);
 
     return (
