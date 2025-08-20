@@ -11,6 +11,7 @@ import { getLevelIcon } from '../../../utils/levelUtils';
 // 아이콘 import
 import ThumbsUpIcon from '../../../assets/icons/hand-thumbs-up.svg';
 import ClockIcon from '../../../assets/icons/clock.svg';
+import MorningStarImg from '../../../assets/images/morning-star.png';
 
 interface PostItem {
   boardId: number;
@@ -72,10 +73,10 @@ const CommunityList = () => {
         // 일반 목록 조회
         response = await getBoards(page, 10, 'createdAt,desc', token || undefined);
       }
-      // BoardItem을 PostItem으로 변환 (writerLevel 기본값 추가)
+      // BoardItem을 PostItem으로 변환 (API에서 넘어온 writerLevel 사용)
       const postsWithLevel = response.data.content.map(board => ({
         ...board,
-        writerLevel: 1 // 기본값으로 1 설정 (추후 API에서 실제 레벨 제공시 수정)
+        writerLevel: board.writerLevel || 1 // API에서 레벨이 없으면 기본값 1
       }));
       setPosts(postsWithLevel);
       setTotalPages(response.data.totalPages);
@@ -169,7 +170,7 @@ const CommunityList = () => {
                     {post.imageUrl && post.imageUrl !== 'https://example.com/image1.jpg' ? (
                       <img src={post.imageUrl} alt="" />
                     ) : (
-                      <div className={styles.noImage}></div>
+                      <img src={MorningStarImg} alt="기본 썸네일" />
                     )}
                   </div>
                   <div className={styles.postContent}>

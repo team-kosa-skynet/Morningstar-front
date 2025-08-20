@@ -65,6 +65,7 @@ interface BoardItem {
   createdDate: string;
   viewCount: number;
   likeCount: number;
+  writerLevel?: number;
 }
 
 interface BoardsResponse {

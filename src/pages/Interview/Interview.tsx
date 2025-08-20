@@ -13,6 +13,7 @@ import {
 import { playTtsAudio } from '../../utils/audioUtils';
 import CoachingModal from '../../components/Modal/CoachingModal.tsx';
 import InterviewReport from '../../components/InterviewReport/InterviewReport';
+import LoadingModal from '../../components/Modal/LoadingModal';
 
 const Interview: React.FC = () => {
   const [selectedJob, setSelectedJob] = useState<string>('');
@@ -41,6 +42,10 @@ const Interview: React.FC = () => {
   const [reportData, setReportData] = useState<any>(null);
   const [isTextInputMode, setIsTextInputMode] = useState<boolean>(false);
   const [textAnswer, setTextAnswer] = useState<string>('');
+  
+  // 로딩 모달 상태
+  const [loadingModalOpen, setLoadingModalOpen] = useState<boolean>(false);
+  const [loadingModalType, setLoadingModalType] = useState<'session' | 'report'>('session');
   
   const {
     transcript,
@@ -129,6 +134,9 @@ const Interview: React.FC = () => {
       return;
     }
 
+    // 세션 생성 로딩 모달 시작
+    setLoadingModalType('session');
+    setLoadingModalOpen(true);
     setIsLoading(true);
     try {
       // Map selected job to API format
@@ -151,30 +159,38 @@ const Interview: React.FC = () => {
       const response = await createInterviewSession(sessionData, token);
       
       if (response.code === 200) {
-        setSessionId(response.data.sessionId);
-        setCurrentQuestion(response.data.firstQuestion);
-        setQuestionIntent((response.data as any).questionIntent || '');
-        setAnswerGuides((response.data as any).answerGuides || []);
-        setTotalQuestions(response.data.totalQuestions);
-        setCurrentQuestionIndex(0);
-        setInterviewStarted(true);
-        
-        // 첫 번째 질문 오디오 재생 (인사말 + 첫 번째 질문)
-        if (response.data.tts) {
-          try {
-            setIsPlayingAudio(true);
-            await playTtsAudio(response.data.tts);
-          } catch (error) {
-            console.error('오디오 재생 실패:', error);
-          } finally {
-            setIsPlayingAudio(false);
+        // 로딩 모달을 100%로 완료하고 닫기
+        setTimeout(() => {
+          setLoadingModalOpen(false);
+          
+          setSessionId(response.data.sessionId);
+          setCurrentQuestion(response.data.firstQuestion);
+          setQuestionIntent((response.data as any).questionIntent || '');
+          setAnswerGuides((response.data as any).answerGuides || []);
+          setTotalQuestions(response.data.totalQuestions);
+          setCurrentQuestionIndex(0);
+          setInterviewStarted(true);
+          
+          // 첫 번째 질문 오디오 재생 (인사말 + 첫 번째 질문)
+          if (response.data.tts) {
+            try {
+              setIsPlayingAudio(true);
+              playTtsAudio(response.data.tts).finally(() => {
+                setIsPlayingAudio(false);
+              });
+            } catch (error) {
+              console.error('오디오 재생 실패:', error);
+              setIsPlayingAudio(false);
+            }
           }
-        }
+        }, 500); // 100% 보여주고 0.5초 후 닫기
       } else {
+        setLoadingModalOpen(false);
         alert(response.message || '인터뷰 세션 생성에 실패했습니다.');
       }
     } catch (error: any) {
       console.error('Session creation error:', error);
+      setLoadingModalOpen(false);
       if (error.response?.status === 401) {
         alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
       } else if (error.response?.status === 403) {
@@ -245,17 +261,26 @@ const Interview: React.FC = () => {
               
               // Check if interview is done
               if (response.data.done) {
-                // Interview finished, finalize report
+                // Interview finished, finalize report with loading modal
+                setLoadingModalType('report');
+                setLoadingModalOpen(true);
+                
                 try {
                   const reportResponse = await finalizeInterviewReport({ sessionId }, token);
                   if (reportResponse.code === 200) {
-                    setReportData(reportResponse.data);
-                    setShowReportModal(true);
+                    // 로딩 모달을 100%로 완료하고 리포트 모달 표시
+                    setTimeout(() => {
+                      setLoadingModalOpen(false);
+                      setReportData(reportResponse.data);
+                      setShowReportModal(true);
+                    }, 500);
                   } else {
+                    setLoadingModalOpen(false);
                     alert('리포트 생성에 실패했습니다: ' + reportResponse.message);
                   }
                 } catch (error) {
                   console.error('Report finalization error:', error);
+                  setLoadingModalOpen(false);
                   alert('인터뷰는 완료되었지만 리포트 생성에 실패했습니다.');
                 }
               } else {
@@ -367,17 +392,26 @@ const Interview: React.FC = () => {
         
         // Check if interview is done
         if (response.data.done) {
-          // Interview finished, finalize report
+          // Interview finished, finalize report with loading modal
+          setLoadingModalType('report');
+          setLoadingModalOpen(true);
+          
           try {
             const reportResponse = await finalizeInterviewReport({ sessionId }, token);
             if (reportResponse.code === 200) {
-              setReportData(reportResponse.data);
-              setShowReportModal(true);
+              // 로딩 모달을 100%로 완료하고 리포트 모달 표시
+              setTimeout(() => {
+                setLoadingModalOpen(false);
+                setReportData(reportResponse.data);
+                setShowReportModal(true);
+              }, 500);
             } else {
+              setLoadingModalOpen(false);
               alert('리포트 생성에 실패했습니다: ' + reportResponse.message);
             }
           } catch (error) {
             console.error('Report finalization error:', error);
+            setLoadingModalOpen(false);
             alert('인터뷰는 완료되었지만 리포트 생성에 실패했습니다.');
           }
         } else {
@@ -421,6 +455,52 @@ const Interview: React.FC = () => {
     }
   };
 
+  const handleTestSubmit = async () => {
+    if (!sessionId) {
+      alert('인터뷰 세션이 없습니다.');
+      return;
+    }
+
+    // 리포트 생성 로딩 모달 시작
+    setLoadingModalType('report');
+    setLoadingModalOpen(true);
+    setIsLoading(true);
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('로그인이 필요합니다.');
+        setLoadingModalOpen(false);
+        return;
+      }
+
+      const reportResponse = await finalizeInterviewReport({ sessionId }, token);
+      if (reportResponse.code === 200) {
+        // 로딩 모달을 100%로 완료하고 리포트 모달 표시
+        setTimeout(() => {
+          setLoadingModalOpen(false);
+          setReportData(reportResponse.data);
+          setShowReportModal(true);
+        }, 500);
+      } else {
+        setLoadingModalOpen(false);
+        alert('리포트 생성에 실패했습니다: ' + reportResponse.message);
+      }
+    } catch (error: any) {
+      console.error('테스트 제출 오류:', error);
+      setLoadingModalOpen(false);
+      if (error.response?.status === 401) {
+        alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+      } else if (error.response?.status === 403) {
+        alert('포인트가 부족합니다. 포인트를 충전해주세요.');
+      } else {
+        alert(error.message || '리포트 생성 중 오류가 발생했습니다.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
   return (
     <div className={styles.container}>
@@ -446,7 +526,7 @@ const Interview: React.FC = () => {
                     <p className={styles.questionText}>{currentQuestion}</p>
                   </div>
                   {!isTextInputMode ? (
-                    // 음성 입력 모드 - 마이크 + 키보드 버튼
+                    // 음성 입력 모드 - 마이크 + 키보드 + 테스트 제출 버튼
                     <div className={styles.inputButtons}>
                       <button 
                         className={styles.micButton} 
@@ -466,6 +546,14 @@ const Interview: React.FC = () => {
                         disabled={isLoading || isPlayingAudio}
                       >
                         <i className="bi bi-keyboard"></i>
+                      </button>
+                      <button 
+                        className={styles.testSubmitButton} 
+                        onClick={handleTestSubmit}
+                        disabled={isLoading || isPlayingAudio}
+                      >
+                        <i className="bi bi-send"></i>
+                        <span>테스트 제출</span>
                       </button>
                     </div>
                   ) : (
@@ -556,8 +644,11 @@ const Interview: React.FC = () => {
                     {uploadedFile && (
                       <div className={styles.filePreview}>
                         {uploadedFile.name}
-                        {isUploadingDocument && <span> (업로드 중...)</span>}
-                        {documentId && <span> ✓ 업로드 완료</span>}
+                        {isUploadingDocument ? (
+                          <i className={`bi bi-arrow-clockwise ${styles.spinIcon}`} style={{marginLeft: '8px'}}></i>
+                        ) : documentId ? (
+                          <i className={`bi bi-check-lg ${styles.checkIcon}`} style={{marginLeft: '8px'}}></i>
+                        ) : null}
                       </div>
                     )}
                     <p className={styles.fileInfo}>*pdf(권장),ppt,doc,docx,hwp (최대 50MB)</p>
@@ -624,6 +715,12 @@ const Interview: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* 로딩 모달 */}
+      <LoadingModal
+        isOpen={loadingModalOpen}
+        type={loadingModalType}
+      />
       
       {/* 코칭 팁 모달 */}
       <CoachingModal
