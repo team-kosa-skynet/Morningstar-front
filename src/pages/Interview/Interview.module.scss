@@ -451,39 +451,6 @@
   color: #333333;
 }
 
-.micButton {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
-  padding: 10px 15px;
-  width: fit-content;
-  margin: 0 auto;
-  background-color: #4E4EFF;
-  border: none;
-  border-radius: 20px;
-  font-family: 'Pretendard', sans-serif;
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 19px;
-  color: #ffffff;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  i {
-    font-size: 16px;
-  }
-
-  &:hover:not(:disabled) {
-    background-color: #3d3dff;
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
 // 답변 가이드 스타일
 .guideHeader {
   display: flex;
@@ -604,6 +571,37 @@
   margin: 20px 0;
 }
 
+.micButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 15px;
+  background-color: #4E4EFF;
+  border: none;
+  border-radius: 20px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 19px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  i {
+    font-size: 16px;
+  }
+
+  &:hover:not(:disabled) {
+    background-color: #3d3dff;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 .keyboardButton {
   display: flex;
   justify-content: center;
@@ -611,9 +609,10 @@
   padding: 10px;
   background-color: #ffffff;
   border: 1px solid #DDDDDD;
-  border-radius: 20px;
+  border-radius: 50px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  width: 45px;
+  height: 45px;
 
   i {
     font-size: 20px;
