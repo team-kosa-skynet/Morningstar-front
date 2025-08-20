@@ -1,5 +1,14 @@
 import React from 'react';
 import styles from './InterviewReport.module.scss';
+import { Doughnut } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend
+} from 'chart.js';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface InterviewReportProps {
   isOpen: boolean;
@@ -29,6 +38,33 @@ const InterviewReport: React.FC<InterviewReportProps> = ({ isOpen, reportData, o
     return '#dc3545';
   };
 
+  const chartData = {
+    datasets: [
+      {
+        data: [reportData.overallScore, 100 - reportData.overallScore],
+        backgroundColor: [
+          getScoreColor(reportData.overallScore),
+          '#e9ecef'
+        ],
+        borderWidth: 0,
+        cutout: '70%',
+      }
+    ]
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        enabled: false
+      }
+    }
+  };
+
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -41,11 +77,16 @@ const InterviewReport: React.FC<InterviewReportProps> = ({ isOpen, reportData, o
           {/* 전체 점수 */}
           <div className={styles.overallScoreSection}>
             <h3>전체 점수</h3>
-            <div 
-              className={styles.overallScore}
-              style={{ color: getScoreColor(reportData.overallScore) }}
-            >
-              {reportData.overallScore}점
+            <div className={styles.chartContainer}>
+              <div className={styles.chartWrapper}>
+                <Doughnut data={chartData} options={chartOptions} />
+                <div className={styles.chartCenterText}>
+                  <div className={styles.scoreText}>
+                    {reportData.overallScore}
+                  </div>
+                  <div className={styles.totalText}>/ 100</div>
+                </div>
+              </div>
             </div>
           </div>
 
