@@ -421,6 +421,41 @@ const Interview: React.FC = () => {
     }
   };
 
+  const handleTestSubmit = async () => {
+    if (!sessionId) {
+      alert('인터뷰 세션이 없습니다.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+
+      const reportResponse = await finalizeInterviewReport({ sessionId }, token);
+      if (reportResponse.code === 200) {
+        setReportData(reportResponse.data);
+        setShowReportModal(true);
+      } else {
+        alert('리포트 생성에 실패했습니다: ' + reportResponse.message);
+      }
+    } catch (error: any) {
+      console.error('테스트 제출 오류:', error);
+      if (error.response?.status === 401) {
+        alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+      } else if (error.response?.status === 403) {
+        alert('포인트가 부족합니다. 포인트를 충전해주세요.');
+      } else {
+        alert(error.message || '리포트 생성 중 오류가 발생했습니다.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
   return (
     <div className={styles.container}>
@@ -446,7 +481,7 @@ const Interview: React.FC = () => {
                     <p className={styles.questionText}>{currentQuestion}</p>
                   </div>
                   {!isTextInputMode ? (
-                    // 음성 입력 모드 - 마이크 + 키보드 버튼
+                    // 음성 입력 모드 - 마이크 + 키보드 + 테스트 제출 버튼
                     <div className={styles.inputButtons}>
                       <button 
                         className={styles.micButton} 
@@ -466,6 +501,14 @@ const Interview: React.FC = () => {
                         disabled={isLoading || isPlayingAudio}
                       >
                         <i className="bi bi-keyboard"></i>
+                      </button>
+                      <button 
+                        className={styles.testSubmitButton} 
+                        onClick={handleTestSubmit}
+                        disabled={isLoading || isPlayingAudio}
+                      >
+                        <i className="bi bi-send"></i>
+                        <span>테스트 제출</span>
                       </button>
                     </div>
                   ) : (
