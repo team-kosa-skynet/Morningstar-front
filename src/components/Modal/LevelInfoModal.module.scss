@@ -23,23 +23,29 @@
   gap: 10px;
   min-width: 220px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  width: 300px;
+  width: 270px;
 }
 
 .levelRow {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   width: 100%;
   gap: 15px;
+}
+
+.levelGroup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 90px;
+  gap: 10px;
 }
 
 .iconLevel {
   display: flex;
   align-items: center;
   gap: 10px;
-  width: 90px;
-  justify-content: space-between;
 }
 
 .iconContainer {

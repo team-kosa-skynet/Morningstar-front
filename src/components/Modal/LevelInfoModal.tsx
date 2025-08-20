@@ -31,13 +31,15 @@ const LevelInfoModal: React.FC<LevelInfoModalProps> = ({ isVisible, onClose }) =
       >
         {levelData.map((item) => (
           <div key={item.level} className={styles.levelRow}>
-            <div className={styles.iconLevel}>
-              <div className={styles.iconContainer}>
-                <img src={getLevelIcon(item.icon)} alt={`레벨 ${item.level}`} />
+            <div className={styles.levelGroup}>
+              <div className={styles.iconLevel}>
+                <div className={styles.iconContainer}>
+                  <img src={getLevelIcon(item.icon)} alt={`레벨 ${item.level}`} />
+                </div>
+                <span className={styles.levelText}>레벨 {item.level}</span>
               </div>
-              <span className={styles.levelText}>레벨 {item.level}</span>
+              <span className={styles.separator}>:</span>
             </div>
-            <span className={styles.separator}>:</span>
             <div className={styles.pointRange}>
               <span>{item.range}</span>
             </div>
