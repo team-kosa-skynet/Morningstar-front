@@ -4,6 +4,7 @@ import styles from './AIUpdate.module.scss';
 import SearchBox from '../../components/SearchBox/SearchBox';
 import Pagination from '../../components/Pagination/Pagination';
 import SupportBanner from '../../components/Banner/SupportBanner.tsx';
+import AIBotImage from '../../assets/images/AIBOT.png';
 
 interface AIUpdateItem {
   id: number;
@@ -125,6 +126,10 @@ const AIUpdate = () => {
         <div className={styles.listHeader}>
           <div className={styles.titleAndSearch}>
             <h1 className={styles.pageTitle}>업데이트 소식</h1>
+            <div className={styles.aiBotInfo}>
+              <img src={AIBotImage} alt="AI 봇" className={styles.aiBotIcon} />
+              <span className={styles.aiBotText}>AI 봇이 자동으로 포스팅하는 페이지입니다</span>
+            </div>
           </div>
           <div className={styles.searchBoxWrapper}>
             <SearchBox

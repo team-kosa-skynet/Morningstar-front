@@ -12,6 +12,7 @@ import { getLevelIcon } from '../../../utils/levelUtils';
 import ThumbsUpIcon from '../../../assets/icons/hand-thumbs-up.svg';
 import ClockIcon from '../../../assets/icons/clock.svg';
 import MorningStarImg from '../../../assets/images/morning-star.png';
+import AIBotImage from '../../../assets/images/AIBOT.png';
 
 interface PostItem {
   boardId: number;
@@ -131,7 +132,13 @@ const CommunityList = () => {
           {/* 헤더 */}
           <div className={styles.listHeader}>
             <div className={styles.titleSection}>
-              <h1 className={styles.title}>{isSearching ? `"${searchQuery}" 검색 결과` : '전체 글'}</h1>
+              <div className={styles.titleAndBot}>
+                <h1 className={styles.title}>{isSearching ? `"${searchQuery}" 검색 결과` : '전체 글'}</h1>
+                <div className={styles.aiBotInfo}>
+                  <img src={AIBotImage} alt="AI 봇" className={styles.aiBotIcon} />
+                  <span className={styles.aiBotText}>AI 봇이 관리중인 페이지입니다. 욕설과 비방글은 자동으로 삭제됩니다.</span>
+                </div>
+              </div>
               {token && <button className={styles.writeButton} onClick={handleWriteClick}>글쓰기</button>}
             </div>
             <SearchBox
