@@ -1,21 +1,18 @@
 .supportBanner {
   position: absolute;
   left: calc(50vw + 680px);
-  top: 51%;
+  top: 54%;
   transform: translateY(-50%);
   width: 70px;
-  background: rgba(242, 255, 0, 0.56);
+  height: 265px;
+  background: #000D1C;
   border: 1px solid #555555;
-  padding: 20px 10px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   cursor: pointer;
   z-index: 1000;
-
-  @media (max-width: 1400px) {
-    display: none;
-  }
 
   .coinImage {
     width: 40px;
@@ -31,10 +28,10 @@
 
   .text {
     font-family: 'Pretendard', sans-serif;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 24px;
     line-height: 1.193359375em;
-    color: #C37B0A;
+    color: white;
     text-align: center;
   }
 }
