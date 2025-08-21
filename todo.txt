@@ -1,12 +1,212 @@
-https://www.figma.com/design/XO6o8kTarJg1vXccGHaFBo/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-%EC%83%9B%EB%B3%84--%EB%B3%B5%EC%82%AC-?node-id=2229-293
-https://www.figma.com/design/XO6o8kTarJg1vXccGHaFBo/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-%EC%83%9B%EB%B3%84--%EB%B3%B5%EC%82%AC-?node-id=103-230
+# CSS 애니메이션 파형 만들기 가이드
 
-이 두 페이지에 보면 오토레이아웃 이름이 AI봇이라고 작성되어있는게 있어. 이 ai 봇에 대한 안내문구를 추가할거야.
+## 🎯 개요
+순수 CSS로 음성 파형 애니메이션을 만드는 방법입니다. 실제 오디오 데이터 없이도 시각적으로 매력적인 파형 효과를 구현할 수 있습니다.
 
-ai업데이트 소식 페이지하고
-커뮤니티 리스트 페이지 두군데다가.
+## 📁 파일 구조
+```
+project/
+├── index.html
+└── style.css
+```
 
-src/assets/images/AIBOT.png
-aibot 이미지는 이거 사용하면되
+## 🏗️ 1단계: HTML 구조 만들기
 
-두 페이지에 ai 봇 안내문구만 추가해주고 다른 작업은 하지 말아줘.
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS 파형 애니메이션</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <section>
+        <div class="wave0"></div>
+        <div class="wave1"></div>
+        <div class="wave2"></div>
+        <div class="wave3"></div>
+        <div class="wave4"></div>
+        <div class="wave5"></div>
+        <div class="wave6"></div>
+    </section>
+</body>
+</html>
+```
+
+**포인트:**
+- 7개의 div 요소가 각각 하나의 파형 바를 나타냄
+- 각 div에 `wave0`부터 `wave6`까지 고유한 클래스 부여
+
+## 🎨 2단계: 기본 CSS 스타일링
+
+```css
+/* 전역 변수 설정 */
+:root {
+    --m: 17.5;
+    --wavefreq: calc(100ms * var(--m));
+}
+
+/* 섹션 레이아웃 */
+section {
+    display: flex;
+    gap: 15px;
+    margin-top: 5vw;
+    justify-content: center;
+    align-items: end;
+}
+
+/* 모든 파형 바 기본 스타일 */
+[class*='wave'] {
+    aspect-ratio: .125/1;
+    background-color: white;
+    border-radius: 15px;
+    width: .5vw;
+    animation: waveform var(--wavefreq) ease-in-out infinite forwards;
+}
+```
+
+**핵심 속성 설명:**
+- `aspect-ratio: .125/1`: 세로로 긴 막대 모양 생성
+- `[class*='wave']`: 'wave'가 포함된 모든 클래스에 적용
+- `var(--wavefreq)`: CSS 변수로 애니메이션 속도 제어
+
+## ⚡ 3단계: 애니메이션 키프레임 정의
+
+```css
+@keyframes waveform {
+    0% {
+        transform: scaleY(.5);
+    }
+    50% {
+        transform: scaleY(1.5);
+    }
+    100% {
+        transform: scaleY(.5);
+    }
+}
+```
+
+**애니메이션 동작:**
+- 시작(0%): 원래 높이의 50%로 축소
+- 중간(50%): 원래 높이의 150%로 확대
+- 끝(100%): 다시 50%로 축소하여 반복
+
+## 🎵 4단계: 각 바의 개별 타이밍 설정
+
+```css
+.wave1 {
+    --wavefreq: calc(200ms * var(--m));
+}
+
+.wave2 {
+    --wavefreq: calc(300ms * var(--m));
+}
+
+.wave3 {
+    --wavefreq: calc(400ms * var(--m));
+}
+
+.wave4 {
+    --wavefreq: calc(500ms * var(--m));
+}
+
+.wave5 {
+    --wavefreq: calc(600ms * var(--m));
+}
+
+.wave6 {
+    --wavefreq: calc(700ms * var(--m));
+}
+```
+
+**각 바가 다른 속도로 움직여서 자연스러운 파형 효과 생성**
+
+## 🎛️ 커스터마이징 옵션
+
+### 색상 변경
+```css
+[class*='wave'] {
+    background-color: #00ff00; /* 원하는 색상으로 변경 */
+}
+```
+
+### 크기 조절
+```css
+[class*='wave'] {
+    width: 1vw; /* 바 두께 조절 */
+    aspect-ratio: .1/1; /* 비율 조절 */
+}
+
+section {
+    gap: 20px; /* 바 사이 간격 조절 */
+}
+```
+
+### 애니메이션 속도 조절
+```css
+:root {
+    --m: 10; /* 숫자를 줄이면 빠르게, 늘리면 느리게 */
+}
+```
+
+### 모양 변경
+```css
+[class*='wave'] {
+    border-radius: 0; /* 직사각형 모양 */
+    /* 또는 */
+    border-radius: 50%; /* 원 모양 */
+}
+```
+
+## 🚀 음성 출력과 연동하기
+
+JavaScript로 음성 상태에 따라 애니메이션을 제어할 수 있습니다:
+
+```css
+/* 비활성 상태 */
+.wave-container.inactive [class*='wave'] {
+    animation-play-state: paused;
+    transform: scaleY(0.3);
+}
+
+/* 활성 상태 */
+.wave-container.active [class*='wave'] {
+    animation-play-state: running;
+}
+```
+
+```javascript
+// 음성 출력 시작할 때
+document.querySelector('section').classList.add('active');
+
+// 음성 출력 종료할 때
+document.querySelector('section').classList.remove('active');
+```
+
+## 💡 활용 팁
+
+1. **배경색 조절**: 어두운 배경에서는 밝은 색상 사용
+2. **반응형 디자인**: `vw` 단위 사용으로 화면 크기에 맞춰 조절
+3. **접근성**: 움직임에 민감한 사용자를 위해 `prefers-reduced-motion` 미디어 쿼리 고려
+4. **성능**: 많은 바를 사용할 때는 `will-change: transform` 속성 고려
+
+## 🔧 고급 설정
+
+```css
+/* 접근성을 위한 애니메이션 줄이기 */
+@media (prefers-reduced-motion: reduce) {
+    [class*='wave'] {
+        animation: none;
+        transform: scaleY(0.8);
+    }
+}
+
+/* 성능 최적화 */
+[class*='wave'] {
+    will-change: transform;
+}
+```
+
+이제 음성 출력과 함께 멋진 파형 애니메이션을 사용할 수 있습니다! 🎉

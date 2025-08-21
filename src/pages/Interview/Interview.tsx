@@ -3,6 +3,7 @@ import styles from './Interview.module.scss';
 import fileUploadIcon from '../../assets/images/file-upload.png';
 import geminiIcon from '../../assets/images/gemini-1336519698502187930_128px.png';
 import anthropicIcon from '../../assets/images/anthropic (1).svg';
+import morningStar from '../../assets/images/morning-star.png';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import { 
   uploadDocument, 
@@ -14,6 +15,7 @@ import { playTtsAudio } from '../../utils/audioUtils';
 import CoachingModal from '../../components/Modal/CoachingModal.tsx';
 import InterviewReport from '../../components/InterviewReport/InterviewReport';
 import LoadingModal from '../../components/Modal/LoadingModal';
+import WaveAnimation from '../../components/WaveAnimation/WaveAnimation';
 
 const Interview: React.FC = () => {
   const [selectedJob, setSelectedJob] = useState<string>('');
@@ -509,12 +511,20 @@ const Interview: React.FC = () => {
           {/* 왼쪽 모니터 */}
           <div className={styles.leftMonitor}>
             {!interviewStarted ? (
-              // 초기 화면 - 검은 배경
+              // 초기 화면 - 검은 배경에 로고와 텍스트
               <div className={styles.videoArea}>
+                <div className={styles.logoContainer}>
+                  <img src={morningStar} alt="Morning Star" className={styles.logoImage} />
+                  <h1 className={styles.logoText}>GAEBANG</h1>
+                </div>
               </div>
             ) : (
               // 인터뷰 시작 후 - 질문 화면
               <div className={styles.questionArea}>
+                {/* 음성 파형 애니메이션 - 검은 배경에 표시 */}
+                <div className={styles.waveAnimationOverlay}>
+                  <WaveAnimation isActive={isPlayingAudio} />
+                </div>
                 <div className={styles.questionBox}>
                   <div className={styles.questionHeader}>
                     <span className={styles.questionNumber}>Q{currentQuestionIndex + 1}.</span>
