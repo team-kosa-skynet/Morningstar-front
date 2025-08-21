@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import styles from './SupportBanner.module.scss';
-import goldCoin from '../../assets/images/gold-coin.png';
+import morningStar from '../../assets/images/morning-star.png';
 import SupportModal from '../Modal/SupportModal';
 
 const SupportBanner = () => {
@@ -14,13 +14,15 @@ const SupportBanner = () => {
     <>
       <div className={styles.supportBanner} onClick={handleClick}>
         <div className={styles.coinImage}>
-          <img src={goldCoin} alt="금화" />
+          <img src={morningStar} alt="모닝스타" />
         </div>
         <div className={styles.text}>
-          후<br />
-          원<br />
-          하<br />
-          기
+          D<br />
+          O<br />
+          N<br />
+          A<br />
+          T<br />
+          E
         </div>
       </div>
       <SupportModal 
