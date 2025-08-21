@@ -9,6 +9,14 @@ import { useAuthStore } from '../../stores/authStore';
 import type { NewsItem } from '../../services/apiService';
 import type { JobItem } from '../../types/jobs';
 
+interface AIUpdateItem {
+  id: number;
+  title: string;
+  content: string;
+  imageUrl: string;
+  createdAt: string;
+}
+
 interface PostItem {
   boardId: number;
   title: string;
@@ -31,6 +39,7 @@ const Home: React.FC = () => {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [jobs, setJobs] = useState<JobItem[]>([]);
   const [posts, setPosts] = useState<PostItem[]>([]);
+  const [aiUpdates, setAiUpdates] = useState<AIUpdateItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -49,10 +58,11 @@ const Home: React.FC = () => {
         setLoading(true);
         
         // 병렬로 데이터 가져오기
-        const [newsResponse, jobsResponse, postsResponse] = await Promise.all([
+        const [newsResponse, jobsResponse, postsResponse, aiUpdatesResponse] = await Promise.all([
           getNews(),
           jobsApi.getRecruitments(),
-          getBoards(0, 7, 'createdAt,desc', token || undefined)
+          getBoards(0, 7, 'createdAt,desc', token || undefined),
+          fetch('https://gaebang.site/api/ai-updates?page=0&size=4')
         ]);
 
         // 뉴스 데이터 처리 (상위 7개만)
@@ -71,6 +81,14 @@ const Home: React.FC = () => {
           writerLevel: board.writerLevel || 1
         }));
         setPosts(postsWithLevel);
+
+        // AI 업데이트 데이터 처리
+        if (aiUpdatesResponse.ok) {
+          const aiUpdatesData = await aiUpdatesResponse.json();
+          if (aiUpdatesData.code === 200 && aiUpdatesData.data?.content) {
+            setAiUpdates(aiUpdatesData.data.content);
+          }
+        }
 
       } catch (error) {
         console.error('데이터 로딩 실패:', error);
@@ -103,6 +121,11 @@ const Home: React.FC = () => {
     navigate(`/community/detail/${boardId}`);
   };
 
+  // AI 업데이트 클릭 핸들러
+  const handleAIUpdateClick = (item: AIUpdateItem) => {
+    navigate(`/ai-update/detail/${item.id}`, { state: { item } });
+  };
+
 
   if (loading) {
     return (
@@ -114,112 +137,152 @@ const Home: React.FC = () => {
 
   return (
     <div className={styles.homeContainer}>
-      <div className={styles.mainSection}>
-        {/* 뉴스 섹션 */}
-        <div className={styles.newsSection}>
-          {/* 헤더 */}
-          <div className={styles.sectionHeader}
-               onClick={() => navigate('/ai-news')}
-               style={{ cursor: 'pointer' }}>
-            <h2 className={styles.sectionTitle}>최신 IT 소식</h2>
-            <div 
-              className={styles.chevronRight}
+      {/* 상단 섹션 - IT 소식, 채용공고, 커뮤니티 */}
+      <div className={styles.topSection}>
+        <div className={styles.mainSection}>
+          {/* 뉴스 섹션 */}
+          <div className={styles.newsSection}>
+            {/* 헤더 */}
+            <div className={styles.sectionHeader}
+                 onClick={() => navigate('/ai-news')}
+                 style={{ cursor: 'pointer' }}>
+              <h2 className={styles.sectionTitle}>최신 IT 소식</h2>
+              <div 
+                className={styles.chevronRight}
 
-            >
-              <svg width="21" height="21" viewBox="0 0 21 21" fill="none">
-                <path d="M8 6L14 12L8 18" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              >
+                <svg width="21" height="21" viewBox="0 0 21 21" fill="none">
+                  <path d="M8 6L14 12L8 18" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
+
+            {/* 메인 기사들 */}
+            <div className={styles.mainArticles}>
+              {news.slice(0, 2).map((article) => (
+                <div 
+                  key={article.newsId} 
+                  className={styles.mainArticle}
+                  onClick={() => handleNewsClick(article.link)}
+                >
+                  <div className={styles.articleImageWrapper}>
+                    <div className={styles.articleImage}>
+                      <img src={article.imageUrl} alt="뉴스 이미지" />
+                    </div>
+                    <div className={styles.articleTitle}>
+                      {article.title}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 뉴스 목록 */}
+            <div className={styles.newsListItems}>
+              {news.slice(2, 7).map((article) => (
+                <div 
+                  key={article.newsId} 
+                  className={styles.newsListItem}
+                  onClick={() => handleNewsClick(article.link)}
+                >
+                  <span className={styles.newsTitle}>{article.title}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.sideSection}>
+          {/* 채용공고 섹션 */}
+          <div className={styles.jobsSection}>
+            <div className={styles.sectionHeader}
+                 onClick={() => navigate('/jobs')}
+                 style={{ cursor: 'pointer' }}>
+              <h2 className={styles.sectionTitle}>채용공고</h2>
+              <div 
+                className={styles.chevronRight}
+              >
+                <svg width="21" height="21" viewBox="0 0 21 21" fill="none">
+                  <path d="M8 6L14 12L8 18" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
+            <div className={styles.jobItems}>
+              {jobs.map((job) => (
+                <div 
+                  key={job.id} 
+                  className={styles.jobItem}
+                  onClick={() => handleJobClick(job.link)}
+                >
+                  <span className={styles.jobTitle}>{job.title}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* 메인 기사들 */}
-          <div className={styles.mainArticles}>
-            {news.slice(0, 2).map((article) => (
+          {/* 커뮤니티 섹션 */}
+          <div className={styles.communitySection}>
+            <div className={styles.sectionHeader}
+                 onClick={() => navigate('/community')}
+                 style={{ cursor: 'pointer' }}>
+              <h2 className={styles.sectionTitle}>커뮤니티</h2>
               <div 
-                key={article.newsId} 
-                className={styles.mainArticle}
-                onClick={() => handleNewsClick(article.link)}
+                className={styles.chevronRight}
               >
-                <div className={styles.articleImageWrapper}>
-                  <div className={styles.articleImage}>
-                    <img src={article.imageUrl} alt="뉴스 이미지" />
-                  </div>
-                  <div className={styles.articleTitle}>
-                    {article.title}
-                  </div>
+                <svg width="21" height="21" viewBox="0 0 21 21" fill="none">
+                  <path d="M8 6L14 12L8 18" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
+            <div className={styles.communityItems}>
+              {posts.map((post) => (
+                <div 
+                  key={post.boardId} 
+                  className={styles.communityItem}
+                  onClick={() => handlePostClick(post.boardId)}
+                >
+                  <span className={styles.postTitle}>{post.title}</span>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* 뉴스 목록 */}
-          <div className={styles.newsListItems}>
-            {news.slice(2, 7).map((article) => (
-              <div 
-                key={article.newsId} 
-                className={styles.newsListItem}
-                onClick={() => handleNewsClick(article.link)}
-              >
-                <span className={styles.newsTitle}>{article.title}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className={styles.sideSection}>
-        {/* 채용공고 섹션 */}
-        <div className={styles.jobsSection}>
-          <div className={styles.sectionHeader}
-               onClick={() => navigate('/jobs')}
-               style={{ cursor: 'pointer' }}>
-            <h2 className={styles.sectionTitle}>채용공고</h2>
-            <div 
-              className={styles.chevronRight}
-            >
-              <svg width="21" height="21" viewBox="0 0 21 21" fill="none">
-                <path d="M8 6L14 12L8 18" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-          </div>
-          <div className={styles.jobItems}>
-            {jobs.map((job) => (
-              <div 
-                key={job.id} 
-                className={styles.jobItem}
-                onClick={() => handleJobClick(job.link)}
-              >
-                <span className={styles.jobTitle}>{job.title}</span>
-              </div>
-            ))}
+      {/* AI 업데이트 소식 섹션 */}
+      <div className={styles.aiUpdateSection}>
+        {/* 헤더 */}
+        <div className={styles.sectionHeader}
+             onClick={() => navigate('/ai-update')}
+             style={{ cursor: 'pointer' }}>
+          <h2 className={styles.sectionTitle}>AI 업데이트 소식</h2>
+          <div className={styles.chevronRight}>
+            <svg width="21" height="21" viewBox="0 0 21 21" fill="none">
+              <path d="M8 6L14 12L8 18" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
         </div>
 
-        {/* 커뮤니티 섹션 */}
-        <div className={styles.communitySection}>
-          <div className={styles.sectionHeader}
-               onClick={() => navigate('/community')}
-               style={{ cursor: 'pointer' }}>
-            <h2 className={styles.sectionTitle}>커뮤니티</h2>
+        {/* AI 업데이트 아이템들 */}
+        <div className={styles.aiUpdateItems}>
+          {aiUpdates.map((item) => (
             <div 
-              className={styles.chevronRight}
+              key={item.id} 
+              className={styles.aiUpdateItem}
+              onClick={() => handleAIUpdateClick(item)}
             >
-              <svg width="21" height="21" viewBox="0 0 21 21" fill="none">
-                <path d="M8 6L14 12L8 18" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-          </div>
-          <div className={styles.communityItems}>
-            {posts.map((post) => (
-              <div 
-                key={post.boardId} 
-                className={styles.communityItem}
-                onClick={() => handlePostClick(post.boardId)}
-              >
-                <span className={styles.postTitle}>{post.title}</span>
+              <div className={styles.aiUpdateImage}>
+                {item.imageUrl ? (
+                  <img src={item.imageUrl} alt="AI 업데이트 썸네일" />
+                ) : (
+                  <div className={styles.noImage}></div>
+                )}
               </div>
-            ))}
-          </div>
+              <div className={styles.aiUpdateContent}>
+                <h3 className={styles.aiUpdateTitle}>{item.title}</h3>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

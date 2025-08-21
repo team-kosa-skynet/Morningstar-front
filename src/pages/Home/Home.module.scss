@@ -1,12 +1,9 @@
 .homeContainer {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 30px;
+  flex-direction: column;
+  gap: 35px;
   width: 1160px;
   margin: 0 auto;
-  padding: 0 20px;
-  min-height: 700px;
 
   .loading {
     display: flex;
@@ -18,19 +15,25 @@
   }
 }
 
+.topSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 30px;
+}
+
 .mainSection {
   display: flex;
   flex-direction: column;
   width: 750px;
-  height: 700px;
 }
 
 .newsSection {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 32px;
   padding: 25px 20px;
-  height: 100%;
+  height: 700px;
   border: 1px solid #DDDDDD;
   border-radius: 10px;
   box-shadow: 0 0 4px 0 rgba(153, 153, 153, 0.5);
@@ -179,6 +182,81 @@
   line-height: 1.193359375em;
   color: #333333;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// AI 업데이트 섹션 스타일
+.aiUpdateSection {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 25px 20px;
+  border: 1px solid #DDDDDD;
+  border-radius: 10px;
+  box-shadow: 0 0 4px 0 rgba(153, 153, 153, 0.5);
+  background: #FFFFFF;
+  width: 100%;
+}
+
+.aiUpdateItems {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.aiUpdateItem {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 262px;
+  height: 300px;
+  cursor: pointer;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.aiUpdateImage {
+  width: 100%;
+  height: 197px;
+  border-radius: 6px;
+  overflow: hidden;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.noImage {
+  width: 100%;
+  height: 100%;
+  background: #F5F5F5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 14px;
+}
+
+.aiUpdateContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.aiUpdateTitle {
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.193359375em;
+  color: #333333;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
 }
