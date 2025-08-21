@@ -114,7 +114,7 @@
 .newsListItems {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 2px;
   flex: 1;
 }
 
@@ -122,17 +122,11 @@
   display: flex;
   align-items: center;
   padding: 5px;
-  border: 1px solid #F5F5FF;
   cursor: pointer;
   min-height: 46px;
-  
-  &:hover {
-    background-color: #F8F9FA;
-  }
 }
 
 .newsTitle {
-  font-family: Pretendard;
   font-weight: 500;
   font-size: 18px;
   line-height: 1.193359375em;

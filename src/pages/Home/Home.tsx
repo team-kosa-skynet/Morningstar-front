@@ -118,12 +118,13 @@ const Home: React.FC = () => {
         {/* 뉴스 섹션 */}
         <div className={styles.newsSection}>
           {/* 헤더 */}
-          <div className={styles.sectionHeader}>
+          <div className={styles.sectionHeader}
+               onClick={() => navigate('/ai-news')}
+               style={{ cursor: 'pointer' }}>
             <h2 className={styles.sectionTitle}>최신 IT 소식</h2>
             <div 
               className={styles.chevronRight}
-              onClick={() => navigate('/news')}
-              style={{ cursor: 'pointer' }}
+
             >
               <svg width="21" height="21" viewBox="0 0 21 21" fill="none">
                 <path d="M8 6L14 12L8 18" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -169,12 +170,12 @@ const Home: React.FC = () => {
       <div className={styles.sideSection}>
         {/* 채용공고 섹션 */}
         <div className={styles.jobsSection}>
-          <div className={styles.sectionHeader}>
+          <div className={styles.sectionHeader}
+               onClick={() => navigate('/jobs')}
+               style={{ cursor: 'pointer' }}>
             <h2 className={styles.sectionTitle}>채용공고</h2>
             <div 
               className={styles.chevronRight}
-              onClick={() => navigate('/jobs')}
-              style={{ cursor: 'pointer' }}
             >
               <svg width="21" height="21" viewBox="0 0 21 21" fill="none">
                 <path d="M8 6L14 12L8 18" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -196,12 +197,12 @@ const Home: React.FC = () => {
 
         {/* 커뮤니티 섹션 */}
         <div className={styles.communitySection}>
-          <div className={styles.sectionHeader}>
+          <div className={styles.sectionHeader}
+               onClick={() => navigate('/community')}
+               style={{ cursor: 'pointer' }}>
             <h2 className={styles.sectionTitle}>커뮤니티</h2>
             <div 
               className={styles.chevronRight}
-              onClick={() => navigate('/community')}
-              style={{ cursor: 'pointer' }}
             >
               <svg width="21" height="21" viewBox="0 0 21 21" fill="none">
                 <path d="M8 6L14 12L8 18" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
