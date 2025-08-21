@@ -33,7 +33,7 @@
   height: 100%;
   border: 1px solid #DDDDDD;
   border-radius: 10px;
-  box-shadow: 0px 0px 4px 0px rgba(153, 153, 153, 0.5);
+  box-shadow: 0 0 4px 0 rgba(153, 153, 153, 0.5);
   background: #FFFFFF;
 }
 
@@ -44,7 +44,6 @@
 }
 
 .sectionTitle {
-  font-family: Pretendard;
   font-weight: 500;
   font-size: 18px;
   line-height: 1.193359375em;
@@ -99,9 +98,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 20px;
+  padding: 20px 0;
   background: rgba(255, 255, 255, 0.95);
-  font-family: Pretendard;
   font-weight: 500;
   font-size: 24px;
   line-height: 1.193359375em;
@@ -149,7 +147,7 @@
   height: 340px;
   border: 1px solid #DDDDDD;
   border-radius: 10px;
-  box-shadow: 0px 0px 4px 0px rgba(153, 153, 153, 0.25);
+  box-shadow: 0 0 4px 0 rgba(153, 153, 153, 0.25);
   background: #FFFFFF;
 }
 
@@ -176,7 +174,6 @@
 
 .jobTitle,
 .postTitle {
-  font-family: Pretendard;
   font-weight: 500;
   font-size: 16px;
   line-height: 1.193359375em;
