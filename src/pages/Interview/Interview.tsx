@@ -3,6 +3,7 @@ import styles from './Interview.module.scss';
 import fileUploadIcon from '../../assets/images/file-upload.png';
 import geminiIcon from '../../assets/images/gemini-1336519698502187930_128px.png';
 import anthropicIcon from '../../assets/images/anthropic (1).svg';
+import morningStar from '../../assets/images/morning-star.png';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import { 
   uploadDocument, 
@@ -509,8 +510,12 @@ const Interview: React.FC = () => {
           {/* 왼쪽 모니터 */}
           <div className={styles.leftMonitor}>
             {!interviewStarted ? (
-              // 초기 화면 - 검은 배경
+              // 초기 화면 - 검은 배경에 로고와 텍스트
               <div className={styles.videoArea}>
+                <div className={styles.logoContainer}>
+                  <img src={morningStar} alt="Morning Star" className={styles.logoImage} />
+                  <h1 className={styles.logoText}>GAEBANG</h1>
+                </div>
               </div>
             ) : (
               // 인터뷰 시작 후 - 질문 화면

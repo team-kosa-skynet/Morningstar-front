@@ -38,6 +38,29 @@
   border-radius: 20px;
 }
 
+.logoContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-right: 15px;
+}
+
+.logoImage {
+  width: 80px;
+  height: 80px;
+}
+
+.logoText {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size:46px;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
 .videoContent {
   width: 100%;
   height: 100%;
