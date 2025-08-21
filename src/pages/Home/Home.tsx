@@ -103,28 +103,6 @@ const Home: React.FC = () => {
     navigate(`/community/detail/${boardId}`);
   };
 
-  // 날짜 포맷 함수
-  const formatDate = (dateString: string | number[]) => {
-    if (typeof dateString === 'string') {
-      const date = new Date(dateString);
-      const year = date.getFullYear().toString().slice(2);
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const day = date.getDate().toString().padStart(2, '0');
-      const hour = date.getHours().toString().padStart(2, '0');
-      const minute = date.getMinutes().toString().padStart(2, '0');
-      return `${year}.${month}.${day} ${hour}:${minute}`;
-    }
-    if (Array.isArray(dateString)) {
-      const [year, month, day, hour, minute] = dateString;
-      const yearStr = year.toString().slice(2);
-      const monthStr = month.toString().padStart(2, '0');
-      const dayStr = day.toString().padStart(2, '0');
-      const hourStr = hour.toString().padStart(2, '0');
-      const minuteStr = minute.toString().padStart(2, '0');
-      return `${yearStr}.${monthStr}.${dayStr} ${hourStr}:${minuteStr}`;
-    }
-    return '';
-  };
 
   if (loading) {
     return (
@@ -155,7 +133,7 @@ const Home: React.FC = () => {
 
           {/* 메인 기사들 */}
           <div className={styles.mainArticles}>
-            {news.slice(0, 2).map((article, index) => (
+            {news.slice(0, 2).map((article) => (
               <div 
                 key={article.newsId} 
                 className={styles.mainArticle}
