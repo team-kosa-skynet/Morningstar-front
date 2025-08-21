@@ -14,19 +14,19 @@ export default defineConfig({
     port: 8081,
     proxy: {
       '/api': {
-        target: 'https://gaebang.site',
+        target: 'http://localhost:8080',
         changeOrigin: true,
-        secure: true
+        secure: false
       },
       '/login': {
-        target: 'https://gaebang.site',
+        target: 'http://localhost:8080',
         changeOrigin: true,
-        secure: true
+        secure: false
       },
       '/oauth2': {
-        target: 'https://gaebang.site',
+        target: 'http://localhost:8080',
         changeOrigin: true,
-        secure: true
+        secure: false
       }
     }
   }
