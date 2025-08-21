@@ -32,11 +32,43 @@
   height: 40px;
 }
 
+.titleAndBot {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .title {
   font-size: $font-size-xl;
   font-weight: $font-weight-bold;
   color: $text-black;
   margin: 0;
+}
+
+.aiBotInfo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 10px;
+  padding-right: 15px;
+  height: 29px;
+  background: #f5f5ff;
+  border-radius: 10px;
+
+  .aiBotIcon {
+    width: 29px;
+    height: 29px;
+    object-fit: cover;
+  }
+
+  .aiBotText {
+    font-family: 'Pretendard', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    color: #333333;
+    white-space: nowrap;
+  }
 }
 
 .writeButton {
