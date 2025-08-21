@@ -1,0 +1,101 @@
+/* CSS 변수 설정 */
+:root {
+  --m: 8;
+  --wavefreq: calc(100ms * var(--m));
+}
+
+/* 웨이브 컨테이너 */
+.waveContainer {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: end;
+  height: 100px;
+  padding: 12px 24px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 50px;
+  backdrop-filter: blur(10px);
+  margin-bottom: 160px;
+}
+
+/* 모든 파형 바 기본 스타일 */
+.wave {
+  aspect-ratio: 0.125/1;
+  background-color: #ffffff;
+  border-radius: 20px;
+  width: 10px;
+  height: 40px;
+  animation: waveform var(--wavefreq) ease-in-out infinite forwards;
+}
+
+/* 애니메이션 키프레임 */
+@keyframes waveform {
+  0% {
+    transform: scaleY(0.5);
+  }
+  50% {
+    transform: scaleY(1.5);
+  }
+  100% {
+    transform: scaleY(0.5);
+  }
+}
+
+/* 각 바의 개별 타이밍 및 초기 높이 설정 */
+.wave0 {
+  height: 30px;
+}
+
+.wave1 {
+  --wavefreq: calc(150ms * var(--m));
+  height: 45px;
+}
+
+.wave2 {
+  --wavefreq: calc(180ms * var(--m));
+  height: 25px;
+}
+
+.wave3 {
+  --wavefreq: calc(220ms * var(--m));
+  height: 55px;
+}
+
+.wave4 {
+  --wavefreq: calc(170ms * var(--m));
+  height: 35px;
+}
+
+.wave5 {
+  --wavefreq: calc(200ms * var(--m));
+  height: 48px;
+}
+
+.wave6 {
+  --wavefreq: calc(160ms * var(--m));
+  height: 28px;
+}
+
+/* 비활성 상태 */
+.waveContainer.inactive .wave {
+  animation-play-state: paused;
+  transform: scaleY(0.3);
+}
+
+/* 활성 상태 */
+.waveContainer.active .wave {
+  animation-play-state: running;
+}
+
+/* 접근성을 위한 애니메이션 줄이기 */
+@media (prefers-reduced-motion: reduce) {
+  .wave {
+    animation: none;
+    transform: scaleY(0.8);
+  }
+}
+
+/* 성능 최적화 */
+.wave {
+  will-change: transform;
+}

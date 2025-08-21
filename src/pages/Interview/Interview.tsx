@@ -15,6 +15,7 @@ import { playTtsAudio } from '../../utils/audioUtils';
 import CoachingModal from '../../components/Modal/CoachingModal.tsx';
 import InterviewReport from '../../components/InterviewReport/InterviewReport';
 import LoadingModal from '../../components/Modal/LoadingModal';
+import WaveAnimation from '../../components/WaveAnimation/WaveAnimation';
 
 const Interview: React.FC = () => {
   const [selectedJob, setSelectedJob] = useState<string>('');
@@ -520,6 +521,10 @@ const Interview: React.FC = () => {
             ) : (
               // 인터뷰 시작 후 - 질문 화면
               <div className={styles.questionArea}>
+                {/* 음성 파형 애니메이션 - 검은 배경에 표시 */}
+                <div className={styles.waveAnimationOverlay}>
+                  <WaveAnimation isActive={isPlayingAudio} />
+                </div>
                 <div className={styles.questionBox}>
                   <div className={styles.questionHeader}>
                     <span className={styles.questionNumber}>Q{currentQuestionIndex + 1}.</span>
