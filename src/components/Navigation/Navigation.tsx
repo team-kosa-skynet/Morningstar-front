@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './Navigation.module.scss';
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useLocation} from "react-router-dom";
 import anthropicIcon from '../../assets/images/anthropic (1).svg';
 import leaderboardIcon from '../../assets/images/nav-img/leaderboard-removebg-preview 1.png';
 import itNewsIcon from '../../assets/images/nav-img/news.svg';
@@ -10,7 +10,15 @@ import micIcon from '../../assets/images/nav-img/mic.svg';
 import communityIcon from '../../assets/images/nav-img/community.svg';
 
 const Navigation: React.FC = () => {
-  const [activeItem, setActiveItem] = useState('프롬프트 가이드');
+  const [activeItem, setActiveItem] = useState('');
+  const location = useLocation();
+
+  // 홈 페이지('/')에서는 activeItem을 초기화
+  useEffect(() => {
+    if (location.pathname === '/') {
+      setActiveItem('');
+    }
+  }, [location.pathname]);
 
   const navItems = [
     '업데이트 소식',
