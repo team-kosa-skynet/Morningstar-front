@@ -38,6 +38,28 @@
   border-radius: 20px;
 }
 
+.logoContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-right: 15px;
+}
+
+.logoImage {
+  width: 80px;
+  height: 80px;
+}
+
+.logoText {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size:46px;
+  color: #ffffff;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
 .videoContent {
   width: 100%;
   height: 100%;
@@ -407,6 +429,7 @@
   width: 100%;
   height: 100%;
   padding: 10px;
+  position: relative;
 }
 
 .questionBox {
@@ -418,6 +441,7 @@
   background-color: #ffffff;
   border-radius: 10px;
   position: relative;
+  z-index: 2;
 }
 
 .questionHeader {
@@ -586,7 +610,8 @@
   justify-content: center;
   align-items: center;
   gap: 10px;
-  margin: 20px 0;
+  margin-top: auto;
+  margin-bottom: 0;
 }
 
 .micButton {
@@ -689,8 +714,8 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin-top: auto;
+  margin-bottom: 0;
 }
 
 .textInput {
@@ -770,4 +795,13 @@
     background-color: #cccccc;
     cursor: not-allowed;
   }
+}
+
+// 음성 파형 애니메이션 오버레이 (검은 배경에 표시)
+.waveAnimationOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
 }
