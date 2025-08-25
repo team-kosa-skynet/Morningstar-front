@@ -66,47 +66,49 @@ const AIChat: React.FC = () => {
     'Moonshot AI': '#9C27B0'
   };
 
-  // 더미 데이터 - 모델 세부 리스트
-  const modelDetails: Record<string, Array<{id: string, name: string, icon: string}>> = {
-    gpt: [
-      { id: 'gpt-4o', name: 'GPT-4o', icon: openAILogo },
-      { id: 'gpt-4o-mini', name: 'GPT-4o mini', icon: openAILogo },
-      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', icon: openAILogo },
-      { id: 'gpt-4', name: 'GPT-4', icon: openAILogo },
-      { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', icon: openAILogo },
-      { id: 'o1-preview', name: 'OpenAI o1-preview', icon: openAILogo },
-      { id: 'o1-mini', name: 'OpenAI o1-mini', icon: openAILogo },
-      { id: 'gpt-oss-120b', name: 'gpt-oss-120b', icon: openAILogo },
-      { id: 'o3-pro', name: 'OpenAI o3-pro', icon: openAILogo },
-      { id: 'gpt-4.1', name: 'GPT-4.1', icon: openAILogo },
-      { id: 'o1', name: 'OpenAI o1', icon: openAILogo },
-      { id: 'gpt-5', name: 'GPT-5', icon: openAILogo }
-    ],
-    gemini: [
-      { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', icon: geminiLogo },
-      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', icon: geminiLogo },
-      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', icon: geminiLogo },
-      { id: 'gemini-pro', name: 'Gemini Pro', icon: geminiLogo },
-      { id: 'gemini-ultra', name: 'Gemini Ultra', icon: geminiLogo },
-      { id: 'gemini-nano', name: 'Gemini Nano', icon: geminiLogo },
-      { id: 'gemini-experimental', name: 'Gemini Experimental', icon: geminiLogo },
-      { id: 'gemini-code', name: 'Gemini Code', icon: geminiLogo },
-      { id: 'gemini-vision', name: 'Gemini Vision', icon: geminiLogo },
-      { id: 'gemini-thinking', name: 'Gemini Thinking', icon: geminiLogo }
-    ],
-    claude: [
-      { id: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', icon: claudeLogo },
-      { id: 'claude-3.5-haiku', name: 'Claude 3.5 Haiku', icon: claudeLogo },
-      { id: 'claude-3-opus', name: 'Claude 3 Opus', icon: claudeLogo },
-      { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', icon: claudeLogo },
-      { id: 'claude-3-haiku', name: 'Claude 3 Haiku', icon: claudeLogo },
-      { id: 'claude-2.1', name: 'Claude 2.1', icon: claudeLogo },
-      { id: 'claude-2', name: 'Claude 2', icon: claudeLogo },
-      { id: 'claude-instant', name: 'Claude Instant', icon: claudeLogo },
-      { id: 'claude-4', name: 'Claude 4', icon: claudeLogo },
-      { id: 'claude-computer-use', name: 'Claude Computer Use', icon: claudeLogo }
-    ]
+  // API 데이터를 기반으로 모델 세부 리스트 생성
+  const getModelDetails = (): Record<string, Array<{id: string, name: string, icon: string}>> => {
+    if (!modelInfoData) {
+      return {};
+    }
+
+    const details: Record<string, Array<{id: string, name: string, icon: string}>> = {};
+
+    // OpenAI 모델들
+    if (modelInfoData.openai) {
+      details.gpt = modelInfoData.openai.models.map((model: any) => ({
+        id: model.name,
+        name: model.name.toUpperCase(),
+        icon: openAILogo
+      }));
+    }
+
+    // Gemini 모델들
+    if (modelInfoData.gemini) {
+      details.gemini = modelInfoData.gemini.models.map((model: any) => ({
+        id: model.name,
+        name: model.name.charAt(0).toUpperCase() + model.name.slice(1).replace(/-/g, ' '),
+        icon: geminiLogo
+      }));
+    }
+
+    // Claude 모델들
+    if (modelInfoData.claude) {
+      details.claude = modelInfoData.claude.models.map((model: any) => ({
+        id: model.name,
+        name: model.name.charAt(0).toUpperCase() + model.name.slice(1).replace(/-/g, ' '),
+        icon: claudeLogo
+      }));
+    }
+
+    return details;
   };
+
+  const modelDetails = getModelDetails();
+
+  // AI 모델 정보 로딩
+  const [modelInfoData, setModelInfoData] = useState<any>(null);
+  const [modelInfoLoading, setModelInfoLoading] = useState(false);
 
   // 데이터 로딩
   useEffect(() => {
@@ -126,6 +128,26 @@ const AIChat: React.FC = () => {
     };
 
     fetchModelData();
+  }, []);
+
+  // AI 모델 정보 로딩
+  useEffect(() => {
+    const fetchModelInfo = async () => {
+      try {
+        setModelInfoLoading(true);
+        const response = await axios.get('https://gaebang.site/api/models/info');
+        
+        if (response.data.code === 200 && response.data.data) {
+          setModelInfoData(response.data.data);
+        }
+      } catch (err) {
+        console.error('모델 정보 API 호출 오류:', err);
+      } finally {
+        setModelInfoLoading(false);
+      }
+    };
+
+    fetchModelInfo();
   }, []);
 
   // 차트 생성
@@ -370,16 +392,20 @@ const AIChat: React.FC = () => {
               </div>
               
               <div className={styles.modelDetailList}>
-                {modelDetails[selectedModelBrand]?.slice(0, 10).map((model) => (
-                  <button
-                    key={model.id}
-                    className={styles.modelDetailOption}
-                    onClick={() => handleModelDetailSelect(model.id)}
-                  >
-                    <img src={model.icon} alt={model.name} className={styles.modelIcon} />
-                    <span>{model.name}</span>
-                  </button>
-                ))}
+                {modelInfoLoading ? (
+                  <div className={styles.loadingMessage}>모델 목록을 불러오는 중...</div>
+                ) : (
+                  modelDetails[selectedModelBrand]?.slice(0, 10).map((model) => (
+                    <button
+                      key={model.id}
+                      className={styles.modelDetailOption}
+                      onClick={() => handleModelDetailSelect(model.id)}
+                    >
+                      <img src={model.icon} alt={model.name} className={styles.modelIcon} />
+                      <span>{model.name}</span>
+                    </button>
+                  ))
+                )}
               </div>
             </div>
           </div>
