@@ -143,7 +143,16 @@ const AIChatDetail: React.FC = () => {
     setIsModelSelectionOpen(true);
   };
 
-  // 타이핑 효과 함수 - 연속적인 업데이트를 위한 개선된 버전
+  // 텍스트 포맷팅 함수 (** ** -> bold)
+  const formatText = (text: string) => {
+    if (!text) return text;
+    
+    // **텍스트** 패턴을 찾아서 <strong> 태그로 변환
+    const boldPattern = /\*\*(.*?)\*\*/g;
+    return text.replace(boldPattern, '<strong>$1</strong>');
+  };
+
+  // 타이핑 효과 함수 - 안전한 복구 메커니즘 포함
   const typeWriter = useCallback((modelName: string, newFullText: string) => {
     const speed = 30; // 타이핑 속도 (ms)
     
@@ -173,16 +182,20 @@ const AIChatDetail: React.FC = () => {
     currentState.isTyping = true;
     console.log(`[${modelName}] 새 타이핑 시작 - 현재:`, currentState.currentIndex, '목표:', newFullText.length);
     
+    let stuckCounter = 0; // 무한루프 방지용 카운터
+    
     const type = () => {
       const state = typingStateRef.current[modelName];
       if (!state || !state.isTyping) {
-        console.log(`[${modelName}] 타이핑 중단`);
+        console.log(`[${modelName}] 타이핑 중단 - 상태:`, state);
         return;
       }
       
       const targetText = state.targetText;
+      console.log(`[${modelName}] 타이핑 진행 - 현재: ${state.currentIndex}, 타겟: ${targetText.length}`);
       
       if (state.currentIndex < targetText.length) {
+        stuckCounter = 0; // 진행되면 카운터 리셋
         const nextChar = targetText.slice(0, state.currentIndex + 1);
         
         // ref와 state 동시 업데이트
@@ -201,8 +214,21 @@ const AIChatDetail: React.FC = () => {
         }));
       } else {
         // 현재 타겟까지 완료했지만, 더 긴 타겟이 있는지 확인
+        console.log(`[${modelName}] 타이핑 체크 - 현재 인덱스: ${state.currentIndex}, 타겟 길이: ${state.targetText.length}`);
         if (state.targetText.length > state.currentIndex) {
+          stuckCounter++;
+          if (stuckCounter > 10) {
+            console.error(`[${modelName}] 타이핑이 계속 멈춰있음 - 강제 완료`);
+            state.isTyping = false;
+            setTypingAnimationIds(prev => {
+              const newIds = { ...prev };
+              delete newIds[modelName];
+              return newIds;
+            });
+            return;
+          }
           // 더 타이핑할 게 있음
+          console.log(`[${modelName}] 더 타이핑할 내용 있음 - 계속 진행`);
           const timeoutId = setTimeout(type, speed);
           setTypingAnimationIds(prev => ({
             ...prev,
@@ -210,7 +236,7 @@ const AIChatDetail: React.FC = () => {
           }));
         } else {
           // 타이핑 완료
-          console.log(`[${modelName}] 타이핑 완료`);
+          console.log(`[${modelName}] 타이핑 완료 - 최종 텍스트: "${state.targetText}"`);
           state.isTyping = false;
           setTypingAnimationIds(prev => {
             const newIds = { ...prev };
@@ -223,6 +249,26 @@ const AIChatDetail: React.FC = () => {
     
     // 즉시 시작
     type();
+    
+    // 5초 후에도 타이핑이 완료되지 않으면 강제 완료 (안전장치)
+    setTimeout(() => {
+      const state = typingStateRef.current[modelName];
+      if (state && state.isTyping && state.currentIndex < state.targetText.length) {
+        console.warn(`[${modelName}] 5초 타임아웃 - 남은 텍스트를 즉시 표시`);
+        displayedMessagesRef.current[modelName] = state.targetText;
+        setDisplayedMessages(prev => ({
+          ...prev,
+          [modelName]: state.targetText
+        }));
+        state.isTyping = false;
+        state.currentIndex = state.targetText.length;
+        setTypingAnimationIds(prev => {
+          const newIds = { ...prev };
+          delete newIds[modelName];
+          return newIds;
+        });
+      }
+    }, 5000);
   }, []);
 
   const startStreaming = async (questionText: string) => {
@@ -279,6 +325,7 @@ const AIChatDetail: React.FC = () => {
             });
           },
           () => {
+            console.log(`[${model.name}] SSE 스트림 완료`);
             setIsStreaming(prev => ({ ...prev, [model.name]: false }));
           },
           (error) => {
@@ -468,7 +515,11 @@ const AIChatDetail: React.FC = () => {
 
                 {/* 답변 내용 */}
                 <div className={styles.responseText}>
-                  {displayedMessages[model.name]}
+                  <span 
+                    dangerouslySetInnerHTML={{ 
+                      __html: formatText(displayedMessages[model.name] || '') 
+                    }} 
+                  />
                   {(isStreaming[model.name] || typingAnimationIds[model.name]) && <span className={styles.cursor}>|</span>}
                 </div>
 

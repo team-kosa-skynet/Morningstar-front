@@ -1167,7 +1167,17 @@ export const sendChatMessageStream = async (
           const text = trimmedLine.slice(5).trim();
           if (text && text !== '[DONE]') {
             console.log('Processing data:', text);
-            onMessage(text);
+            
+            // JSON 형식인지 확인하고 content 추출
+            try {
+              const jsonData = JSON.parse(text);
+              if (jsonData.type === 'text' && jsonData.content) {
+                onMessage(jsonData.content);
+              }
+            } catch (error) {
+              // JSON이 아닌 경우 기존 방식으로 처리
+              onMessage(text);
+            }
           }
         } else if (trimmedLine.startsWith('event:')) {
           const eventType = trimmedLine.slice(6).trim();
@@ -1188,7 +1198,17 @@ export const sendChatMessageStream = async (
       const text = trimmedBuffer.slice(5).trim();
       if (text && text !== '[DONE]') {
         console.log('Processing final data:', text);
-        onMessage(text);
+        
+        // JSON 형식인지 확인하고 content 추출
+        try {
+          const jsonData = JSON.parse(text);
+          if (jsonData.type === 'text' && jsonData.content) {
+            onMessage(jsonData.content);
+          }
+        } catch (error) {
+          // JSON이 아닌 경우 기존 방식으로 처리
+          onMessage(text);
+        }
       }
     }
     

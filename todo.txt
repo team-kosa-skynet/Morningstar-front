@@ -1,338 +1,282 @@
-https://gaebang.site/api/conversations
-
-curl --location 'https://gaebang.site/api/conversations' \
---data '{
-    "title": "gemini 확인용"
-}'
-
-{
-  "code": 200,
-  "message": "요청이 성공적으로 처리되었습니다.",
-  "data": {
-    "conversationId": 10,
-    "title": "gemini 확인용",
-    "createdAt": [
-      2025,
-      8,
-      23,
-      20,
-      21,
-      47,
-      537266646
-    ]
-  }
-}
-
-content
-@NotBlank - 필수값, 빈 문자열 불가
-
-model
-검증 어노테이션 없음 - null 허용 - null값이면 자동으로 기본 모델 활용
-
-files
-검증 어노테이션 없음 - null 또는 빈 리스트 허용
-
-
-curl --location 'https://gaebang.site/api/conversations/8/openai/stream' \
---form 'content="@NotBlank - 필수값, 빈 문자열 불가"' \
---form 'model="검증 어노테이션 없음 - null 허용 - null값이면 자동으로 기본 모델 활용"'
---form 'files=@"/C:/Users/USER/Desktop/고양이.jpg"'
-
-curl --location 'https://gaebang.site/api/conversations/9/claude/stream' \
---form 'content="@NotBlank - 필수값, 빈 문자열 불가"' \
---form 'model="검증 어노테이션 없음 - null 허용 - null값이면 자동으로 기본 모델 활용"' \
---form 'files=@"/C:/Users/USER/Desktop/고양이.jpg"'
-
-curl --location 'https://gaebang.site/api/conversations/10/gemini/stream' \
---form 'content="@NotBlank - 필수값, 빈 문자열 불가"' \
---form 'model="검증 어노테이션 없음 - null 허용 - null값이면 자동으로 기본 모델 활용"' \
---form 'files=@"/C:/Users/USER/Desktop/고양이.jpg"'
-
-
-일단 ai chat 페이지에서
-모델을 선택하고 제출버튼을 눌렀을 때 api를 연동해줘. 리퀘스트 보내는거만 연동해주고
-리스폰스 받아서 상세 페이지 표시해주는거는 나중에 처리할거야.
-
-먼저 전송 버튼을 누르면 세션을 생성해야하고, 200과 세션 아이디를 반환받으면
-사용자가 선택한 모델에 맞게 각 각 개별 api를 세션 아이디와 함께 리퀘스트로 보내줘야되.
-전부 헤더에 토큰도 같이 포함해서 보내줘야되. 세션 생성 api도.
-
-====================================================
+event:message
+data:{"type":"text","content":"아"}
 
 event:message
-data:제
+data:{"type":"text","content":"침"}
 
 event:message
-data:공
+data:{"type":"text","content":" 메뉴"}
 
 event:message
-data:된
+data:{"type":"text","content":"로"}
 
 event:message
-data: 파일
+data:{"type":"text","content":"는"}
 
 event:message
-data: "
+data:{"type":"text","content":" 다음"}
 
 event:message
-data:test
+data:{"type":"text","content":"과"}
 
 event:message
-data:용
+data:{"type":"text","content":" 같은"}
 
 event:message
-data:.txt
+data:{"type":"text","content":" 것"}
 
 event:message
-data:"
+data:{"type":"text","content":"들을"}
 
 event:message
-data:의
+data:{"type":"text","content":" 추천"}
 
 event:message
-data: 내용
+data:{"type":"text","content":"드"}
 
 event:message
-data:은
+data:{"type":"text","content":"려"}
 
 event:message
-data: 다음
+data:{"type":"text","content":"요"}
 
 event:message
-data:과
+data:{"type":"text","content":":\n\n"}
 
 event:message
-data: 같습니다
+data:{"type":"text","content":"1"}
 
 event:message
-data::
-data:
-data:
+data:{"type":"text","content":"."}
 
 event:message
-data:"
+data:{"type":"text","content":" 토"}
 
 event:message
-data:안
+data:{"type":"text","content":"스트"}
 
 event:message
-data:녕하세요
+data:{"type":"text","content":"와"}
 
 event:message
-data:."
-data:
-data:
+data:{"type":"text","content":" 계"}
 
 event:message
-data:이는
+data:{"type":"text","content":"란"}
 
 event:message
-data: 간
+data:{"type":"text","content":" 후"}
 
 event:message
-data:단
+data:{"type":"text","content":"라이"}
 
 event:message
-data:한
+data:{"type":"text","content":"\n"}
 
 event:message
-data: 인
+data:{"type":"text","content":"2"}
 
 event:message
-data:사
+data:{"type":"text","content":"."}
 
 event:message
-data:말
+data:{"type":"text","content":" 요"}
 
 event:message
-data:로
+data:{"type":"text","content":"거"}
 
 event:message
-data:,
+data:{"type":"text","content":"트"}
 
 event:message
-data: 누
+data:{"type":"text","content":"와"}
 
 event:message
-data:군
+data:{"type":"text","content":" 과"}
 
 event:message
-data:가
+data:{"type":"text","content":"일"}
 
 event:message
-data:에게
+data:{"type":"text","content":","}
 
 event:message
-data: 인
+data:{"type":"text","content":" 견"}
 
 event:message
-data:사
+data:{"type":"text","content":"과"}
 
 event:message
-data:하는
+data:{"type":"text","content":"류"}
 
 event:message
-data: 내용을
+data:{"type":"text","content":"\n"}
 
 event:message
-data: 담
+data:{"type":"text","content":"3"}
 
 event:message
-data:고
+data:{"type":"text","content":"."}
 
 event:message
-data: 있습니다
+data:{"type":"text","content":" 오"}
 
 event:message
-data:.
+data:{"type":"text","content":"트"}
 
 event:message
-data: 추가
+data:{"type":"text","content":"밀"}
 
 event:message
-data:적인
+data:{"type":"text","content":"에"}
 
 event:message
-data: 질문
+data:{"type":"text","content":" 바"}
 
 event:message
-data:이
+data:{"type":"text","content":"나"}
 
 event:message
-data: 있
+data:{"type":"text","content":"나"}
 
 event:message
-data:으면
+data:{"type":"text","content":"와"}
 
 event:message
-data: 말씀
+data:{"type":"text","content":" 꿀"}
 
 event:message
-data:해
+data:{"type":"text","content":" 추가"}
 
 event:message
-data: 주세요
+data:{"type":"text","content":"\n"}
 
 event:message
-data:!
+data:{"type":"text","content":"4"}
+
+event:message
+data:{"type":"text","content":"."}
+
+event:message
+data:{"type":"text","content":" 김"}
+
+event:message
+data:{"type":"text","content":"치"}
+
+event:message
+data:{"type":"text","content":"볶"}
+
+event:message
+data:{"type":"text","content":"음"}
+
+event:message
+data:{"type":"text","content":"밥"}
+
+event:message
+data:{"type":"text","content":"과"}
+
+event:message
+data:{"type":"text","content":" 계"}
+
+event:message
+data:{"type":"text","content":"란"}
+
+event:message
+data:{"type":"text","content":"국"}
+
+event:message
+data:{"type":"text","content":"\n"}
+
+event:message
+data:{"type":"text","content":"5"}
+
+event:message
+data:{"type":"text","content":"."}
+
+event:message
+data:{"type":"text","content":" 샌"}
+
+event:message
+data:{"type":"text","content":"드"}
+
+event:message
+data:{"type":"text","content":"위"}
+
+event:message
+data:{"type":"text","content":"치"}
+
+event:message
+data:{"type":"text","content":"("}
+
+event:message
+data:{"type":"text","content":"햄"}
+
+event:message
+data:{"type":"text","content":","}
+
+event:message
+data:{"type":"text","content":" 치"}
+
+event:message
+data:{"type":"text","content":"즈"}
+
+event:message
+data:{"type":"text","content":","}
+
+event:message
+data:{"type":"text","content":" 채"}
+
+event:message
+data:{"type":"text","content":"소"}
+
+event:message
+data:{"type":"text","content":")\n\n"}
+
+event:message
+data:{"type":"text","content":"간"}
+
+event:message
+data:{"type":"text","content":"단"}
+
+event:message
+data:{"type":"text","content":"하면서"}
+
+event:message
+data:{"type":"text","content":"도"}
+
+event:message
+data:{"type":"text","content":" 든"}
+
+event:message
+data:{"type":"text","content":"든"}
+
+event:message
+data:{"type":"text","content":"한"}
+
+event:message
+data:{"type":"text","content":" 메뉴"}
+
+event:message
+data:{"type":"text","content":"들이"}
+
+event:message
+data:{"type":"text","content":"니"}
+
+event:message
+data:{"type":"text","content":" 참고"}
+
+event:message
+data:{"type":"text","content":"해"}
+
+event:message
+data:{"type":"text","content":"보"}
+
+event:message
+data:{"type":"text","content":"세요"}
+
+event:message
+data:{"type":"text","content":"!"}
 
 event:done
 data:스트리밍 완료
-
-=========
-
-react-dom_client.js?v=1f4075c3:17987 Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-authStore.ts:173 오늘은 이미 출석체크를 완료했습니다.
-authStore.ts:118 멤버 정보 새로고침 API 호출 시작...
-authStore.ts:120 멤버 정보 API 응답: Object
-authStore.ts:139 포인트 업데이트: 37100 → 37100
-authStore.ts:140 레벨 업데이트: 7 → 7
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-App.tsx:96 주기적 토큰 유효성 검사 중...
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-authStore.ts:173 오늘은 이미 출석체크를 완료했습니다.
-authStore.ts:118 멤버 정보 새로고침 API 호출 시작...
-authStore.ts:120 멤버 정보 API 응답: Object
-authStore.ts:139 포인트 업데이트: 37100 → 37100
-authStore.ts:140 레벨 업데이트: 7 → 7
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-apiService.ts:508 [getBoards] Calling API: /api/boards?page=0&size=7&sort=createdAt,desc
-apiService.ts:509 [getBoards] Using API_BASE_URL: /api
-apiService.ts:508 [getBoards] Calling API: /api/boards?page=0&size=7&sort=createdAt,desc
-apiService.ts:509 [getBoards] Using API_BASE_URL: /api
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Objectemail: "sp2877@naver.com"level: 7name: "안녕하세요"point: 37100role: "ROLE_USER"userId: 4[[Prototype]]: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: {email: 'sp2877@naver.com', name: '안녕하세요', userId: 4, role: 'ROLE_USER', point: 37100, …}email: "sp2877@naver.com"level: 7name: "안녕하세요"point: 37100role: "ROLE_USER"userId: 4[[Prototype]]: Object
-Header.tsx:17 Header - user.point: 37100
-Header.tsx:15 Header - isLoggedIn: true
-Header.tsx:16 Header - user: {email: 'sp2877@naver.com', name: '안녕하세요', userId: 4, role: 'ROLE_USER', point: 37100, …}email: "sp2877@naver.com"level: 7name: "안녕하세요"point: 37100role: "ROLE_USER"userId: 4[[Prototype]]: Objectconstructor: ƒ Object()hasOwnProperty: ƒ hasOwnProperty()isPrototypeOf: ƒ isPrototypeOf()propertyIsEnumerable: ƒ propertyIsEnumerable()toLocaleString: ƒ toLocaleString()toString: ƒ toString()valueOf: ƒ valueOf()__defineGetter__: ƒ __defineGetter__()__defineSetter__: ƒ __defineSetter__()__lookupGetter__: ƒ __lookupGetter__()__lookupSetter__: ƒ __lookupSetter__()__proto__: (...)get __proto__: ƒ __proto__()set __proto__: ƒ __proto__()
-Header.tsx:17 Header - user.point: 37100
-
-=======================================
 
