@@ -7,6 +7,8 @@ import Banner from '../../components/Banner/Banner';
 import openAILogo from '../../assets/images/openAI-Photoroom.png';
 import geminiLogo from '../../assets/images/gemini-1336519698502187930_128px.png';
 import claudeLogo from '../../assets/images/클로드-Photoroom.png';
+import { createConversation, sendChatMessage } from '../../services/apiService';
+import { useAuthStore } from '../../stores/authStore';
 
 Chart.register(...registerables);
 
@@ -25,12 +27,14 @@ interface ModelData {
 
 const AIChat: React.FC = () => {
   const navigate = useNavigate();
+  const { token } = useAuthStore();
   const [isModelSelectionOpen, setIsModelSelectionOpen] = useState(false);
   const [isModelDetailOpen, setIsModelDetailOpen] = useState(false);
   const [selectedModelBrand, setSelectedModelBrand] = useState('');
   const [selectedModels, setSelectedModels] = useState<Array<{id: string, name: string, icon: string, brand: string}>>([]);
   const [isImageMode, setIsImageMode] = useState(false);
   const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   // 차트 관련 상태
@@ -263,11 +267,52 @@ const AIChat: React.FC = () => {
     setIsModelSelectionOpen(true);
   };
 
-  const handleSubmit = () => {
-    if (message.trim()) {
-      console.log('Submitting message:', message);
-      // AIChatDetail 페이지로 이동
-      navigate('/ai-chat/detail');
+  const handleSubmit = async () => {
+    if (!message.trim() || !token) {
+      return;
+    }
+
+    if (selectedModels.length === 0) {
+      alert('모델을 선택해주세요.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const conversationResponse = await createConversation(
+        { title: message.substring(0, 50) + (message.length > 50 ? '...' : '') },
+        token
+      );
+
+      if (conversationResponse.code === 200) {
+        const conversationId = conversationResponse.data.conversationId;
+        
+        const promises = selectedModels.map(async (model) => {
+          try {
+            const provider = model.brand as 'openai' | 'claude' | 'gemini';
+            const chatData = {
+              content: message,
+              model: model.id
+            };
+
+            return await sendChatMessage(conversationId, provider, chatData, token);
+          } catch (error) {
+            console.error(`Error sending message to ${model.brand}:`, error);
+            throw error;
+          }
+        });
+
+        await Promise.all(promises);
+        navigate('/ai-chat/detail');
+      } else {
+        alert('세션 생성에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Error in handleSubmit:', error);
+      alert('요청 처리 중 오류가 발생했습니다.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -330,9 +375,13 @@ const AIChat: React.FC = () => {
                 <button
                   className={styles.sendButton}
                   onClick={handleSubmit}
-                  disabled={!message.trim()}
+                  disabled={!message.trim() || isSubmitting || selectedModels.length === 0}
                 >
-                  <i className="bi bi-send"></i>
+                  {isSubmitting ? (
+                    <i className="bi bi-hourglass-split"></i>
+                  ) : (
+                    <i className="bi bi-send"></i>
+                  )}
                 </button>
               </div>
               

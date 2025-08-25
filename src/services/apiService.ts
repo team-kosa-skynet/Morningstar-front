@@ -1018,3 +1018,83 @@ export const paymentReady = async (paymentData: PaymentReadyRequest, token: stri
     throw error;
   }
 };
+
+interface CreateConversationRequest {
+  title: string;
+}
+
+interface CreateConversationResponse {
+  code: number;
+  message: string;
+  data: {
+    conversationId: number;
+    title: string;
+    createdAt: number[];
+  };
+}
+
+interface ChatRequest {
+  content: string;
+  model?: string;
+  files?: File[];
+}
+
+export const createConversation = async (conversationData: CreateConversationRequest, token: string): Promise<CreateConversationResponse> => {
+  try {
+    const response = await axios.post<CreateConversationResponse>(
+      `${API_BASE_URL}/conversations`,
+      conversationData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const sendChatMessage = async (
+  conversationId: number,
+  provider: 'openai' | 'claude' | 'gemini',
+  chatData: ChatRequest,
+  token: string
+): Promise<any> => {
+  try {
+    const formData = new FormData();
+    formData.append('content', chatData.content);
+    
+    if (chatData.model) {
+      formData.append('model', chatData.model);
+    }
+    
+    if (chatData.files && chatData.files.length > 0) {
+      chatData.files.forEach((file) => {
+        formData.append('files', file);
+      });
+    }
+
+    const response = await axios.post(
+      `${API_BASE_URL}/conversations/${conversationId}/${provider}/stream`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
