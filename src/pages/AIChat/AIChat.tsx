@@ -303,8 +303,9 @@ const AIChat: React.FC = () => {
           }
         });
 
-        // 스트리밍을 기다리지 않고 즉시 상세 페이지로 이동 (conversationId 포함)
-        navigate(`/ai-chat/detail?conversationId=${conversationId}&question=${encodeURIComponent(message)}`);
+        // 선택된 모델들을 URL 파라미터로 전달
+        const modelsParam = selectedModels.map(model => `${model.id}:${model.name}:${model.brand}`).join(',');
+        navigate(`/ai-chat/detail?conversationId=${conversationId}&question=${encodeURIComponent(message)}&models=${encodeURIComponent(modelsParam)}`);
         
         // 백그라운드에서 스트리밍 처리 (결과는 무시)
         Promise.all(promises).catch(error => {

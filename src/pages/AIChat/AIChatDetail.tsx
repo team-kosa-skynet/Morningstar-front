@@ -17,14 +17,8 @@ const AIChatDetail: React.FC = () => {
   const [selectedModelBrand, setSelectedModelBrand] = useState('');
   const [isImageMode, setIsImageMode] = useState(false);
   const [isChatInputFocused, setIsChatInputFocused] = useState(false);
-  const [streamingMessages, setStreamingMessages] = useState<Record<string, string>>({
-    'GPT-4o': '응답을 기다리고 있습니다...',
-    'Claude Sonnet 4': '응답을 기다리고 있습니다...'
-  });
-  const [isStreaming, setIsStreaming] = useState<Record<string, boolean>>({
-    'GPT-4o': false,
-    'Claude Sonnet 4': false
-  });
+  const [streamingMessages, setStreamingMessages] = useState<Record<string, string>>({});
+  const [isStreaming, setIsStreaming] = useState<Record<string, boolean>>({});
   
   // URL 파라미터에서 conversationId와 질문 가져오기
   const conversationId = parseInt(searchParams.get('conversationId') || '0');
@@ -42,20 +36,7 @@ const AIChatDetail: React.FC = () => {
     unselectedModel: { name: '', icon: '' }
   });
 
-  const [selectedModels, setSelectedModels] = useState<Array<{id: string, name: string, icon: string, brand: string}>>([
-    {
-      id: 'gpt-4o',
-      name: 'GPT-4o',
-      icon: openAILogo,
-      brand: 'gpt'
-    },
-    {
-      id: 'claude-sonnet-4',
-      name: 'Claude Sonnet 4',
-      icon: claudeLogo,
-      brand: 'claude'
-    }
-  ]);
+  const [selectedModels, setSelectedModels] = useState<Array<{id: string, name: string, icon: string, brand: string}>>([]);
 
   const models = [
     { id: 'gpt', name: 'GPT by OpenAI', icon: openAILogo },
@@ -165,60 +146,51 @@ const AIChatDetail: React.FC = () => {
 
     console.log('Starting streaming with:', { questionText, conversationId });
 
-    // 두 모델 동시에 스트리밍 시작
-    setIsStreaming({ 'GPT-4o': true, 'Claude Sonnet 4': true });
-    setStreamingMessages({ 'GPT-4o': '', 'Claude Sonnet 4': '' });
-
-    // GPT-4o 스트리밍
-    const gptPromise = sendChatMessageStream(
-      conversationId,
-      'openai',
-      { content: questionText, model: 'gpt-4o' },
-      token,
-      (text: string) => {
-        setStreamingMessages(prev => ({
-          ...prev,
-          'GPT-4o': prev['GPT-4o'] + text
-        }));
-      },
-      () => {
-        setIsStreaming(prev => ({ ...prev, 'GPT-4o': false }));
-      },
-      (error) => {
-        console.error('GPT-4o streaming error:', error);
-        setIsStreaming(prev => ({ ...prev, 'GPT-4o': false }));
-      }
-    ).catch(error => {
-      console.error('GPT-4o error:', error);
-      setIsStreaming(prev => ({ ...prev, 'GPT-4o': false }));
+    // 선택된 모델들로 스트리밍 상태 초기화
+    const initialStreaming: Record<string, boolean> = {};
+    const initialMessages: Record<string, string> = {};
+    
+    selectedModels.forEach(model => {
+      initialStreaming[model.name] = true;
+      initialMessages[model.name] = '';
     });
 
-    // Claude Sonnet 4 스트리밍
-    const claudePromise = sendChatMessageStream(
-      conversationId,
-      'claude',
-      { content: questionText, model: 'claude-sonnet-4' },
-      token,
-      (text: string) => {
-        setStreamingMessages(prev => ({
-          ...prev,
-          'Claude Sonnet 4': prev['Claude Sonnet 4'] + text
-        }));
-      },
-      () => {
-        setIsStreaming(prev => ({ ...prev, 'Claude Sonnet 4': false }));
-      },
-      (error) => {
-        console.error('Claude Sonnet 4 streaming error:', error);
-        setIsStreaming(prev => ({ ...prev, 'Claude Sonnet 4': false }));
+    setIsStreaming(initialStreaming);
+    setStreamingMessages(initialMessages);
+
+    // 선택된 모델들에 대해 동시에 스트리밍 시작
+    const promises = selectedModels.map(async (model) => {
+      try {
+        const provider = model.brand === 'gpt' ? 'openai' : model.brand as 'openai' | 'claude' | 'gemini';
+        
+        return sendChatMessageStream(
+          conversationId,
+          provider,
+          { content: questionText, model: model.id },
+          token,
+          (text: string) => {
+            setStreamingMessages(prev => ({
+              ...prev,
+              [model.name]: prev[model.name] + text
+            }));
+          },
+          () => {
+            setIsStreaming(prev => ({ ...prev, [model.name]: false }));
+          },
+          (error) => {
+            console.error(`${model.name} streaming error:`, error);
+            setIsStreaming(prev => ({ ...prev, [model.name]: false }));
+          }
+        );
+      } catch (error) {
+        console.error(`${model.name} error:`, error);
+        setIsStreaming(prev => ({ ...prev, [model.name]: false }));
+        throw error;
       }
-    ).catch(error => {
-      console.error('Claude Sonnet 4 error:', error);
-      setIsStreaming(prev => ({ ...prev, 'Claude Sonnet 4': false }));
     });
 
     // 백그라운드에서 스트리밍 처리 (페이지는 즉시 사용 가능)
-    Promise.allSettled([gptPromise, claudePromise]).then(() => {
+    Promise.allSettled(promises).then(() => {
       console.log('All streaming completed');
     });
   };
@@ -260,13 +232,73 @@ const AIChatDetail: React.FC = () => {
     updateChatInputHeight();
   }, []);
 
+  // URL 파라미터에서 선택된 모델들 가져오기
+  useEffect(() => {
+    const modelsParam = searchParams.get('models');
+    if (modelsParam) {
+      try {
+        const decodedModels = decodeURIComponent(modelsParam);
+        const parsedModels = decodedModels.split(',').map(modelStr => {
+          const [id, name, brand] = modelStr.split(':');
+          
+          // 브랜드에 따른 아이콘 설정
+          let icon = openAILogo;
+          if (brand === 'claude') icon = claudeLogo;
+          else if (brand === 'gemini') icon = geminiLogo;
+          
+          return { id, name, icon, brand };
+        });
+        
+        setSelectedModels(parsedModels);
+        
+        // 초기 스트리밍 상태 설정
+        const initialMessages: Record<string, string> = {};
+        const initialStreaming: Record<string, boolean> = {};
+        
+        parsedModels.forEach(model => {
+          initialMessages[model.name] = '응답을 기다리고 있습니다...';
+          initialStreaming[model.name] = false;
+        });
+        
+        setStreamingMessages(initialMessages);
+        setIsStreaming(initialStreaming);
+      } catch (error) {
+        console.error('Error parsing models from URL:', error);
+        // 파싱 실패 시 기본값 설정
+        const defaultModels = [
+          {
+            id: 'gpt-4o',
+            name: 'GPT-4o',
+            icon: openAILogo,
+            brand: 'gpt'
+          },
+          {
+            id: 'claude-3.5-sonnet',
+            name: 'Claude 3.5 Sonnet',
+            icon: claudeLogo,
+            brand: 'claude'
+          }
+        ];
+        setSelectedModels(defaultModels);
+        setStreamingMessages({
+          'GPT-4o': '응답을 기다리고 있습니다...',
+          'Claude 3.5 Sonnet': '응답을 기다리고 있습니다...'
+        });
+        setIsStreaming({
+          'GPT-4o': false,
+          'Claude 3.5 Sonnet': false
+        });
+      }
+    }
+  }, [searchParams]);
+
   // 페이지 로드 시 자동으로 스트리밍 시작
   useEffect(() => {
-    if (conversationId && token && currentQuestion) {
+    if (conversationId && token && currentQuestion && selectedModels.length > 0) {
       console.log('Auto-starting stream with conversationId:', conversationId);
       startStreaming(currentQuestion);
     }
-  }, [conversationId, token, currentQuestion]);
+  }, [conversationId, token, currentQuestion, selectedModels]);
 
   return (
     <div className={styles.container}>
@@ -282,69 +314,38 @@ const AIChatDetail: React.FC = () => {
 
         {/* AI 답변들 */}
         <div className={styles.aiResponsesContainer}>
-          {/* GPT-4o 답변 */}
-          <div className={styles.aiResponse}>
-            <div className={styles.responseContent}>
-              {/* 모델 정보 헤더 */}
-              <div className={styles.modelHeader}>
-                <img 
-                  src={openAILogo} 
-                  alt="GPT-4o" 
-                  className={styles.modelIcon}
-                />
-                <span className={styles.modelName}>GPT-4o</span>
-              </div>
+          {selectedModels.map((model) => (
+            <div key={model.id} className={styles.aiResponse}>
+              <div className={styles.responseContent}>
+                {/* 모델 정보 헤더 */}
+                <div className={styles.modelHeader}>
+                  <img 
+                    src={model.icon} 
+                    alt={model.name} 
+                    className={styles.modelIcon}
+                  />
+                  <span className={styles.modelName}>{model.name}</span>
+                </div>
 
-              {/* 답변 내용 */}
-              <div className={styles.responseText}>
-                {streamingMessages['GPT-4o']}
-                {isStreaming['GPT-4o'] && <span className={styles.cursor}>|</span>}
-              </div>
+                {/* 답변 내용 */}
+                <div className={styles.responseText}>
+                  {streamingMessages[model.name]}
+                  {isStreaming[model.name] && <span className={styles.cursor}>|</span>}
+                </div>
 
-              {/* 피드백 버튼 */}
-              <div className={styles.feedbackSection}>
-                <button 
-                  className={styles.likeButton}
-                  onClick={() => handleLike('GPT-4o')}
-                >
-                  <i className="bi bi-hand-thumbs-up"></i>
-                  마음에 들어요
-                </button>
+                {/* 피드백 버튼 */}
+                <div className={styles.feedbackSection}>
+                  <button 
+                    className={styles.likeButton}
+                    onClick={() => handleLike(model.name)}
+                  >
+                    <i className="bi bi-hand-thumbs-up"></i>
+                    마음에 들어요
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Claude Sonnet 4 답변 */}
-          <div className={styles.aiResponse}>
-            <div className={styles.responseContent}>
-              {/* 모델 정보 헤더 */}
-              <div className={styles.modelHeader}>
-                <img 
-                  src={claudeLogo} 
-                  alt="Claude Sonnet 4" 
-                  className={styles.modelIcon}
-                />
-                <span className={styles.modelName}>Claude Sonnet 4</span>
-              </div>
-
-              {/* 답변 내용 */}
-              <div className={styles.responseText}>
-                {streamingMessages['Claude Sonnet 4']}
-                {isStreaming['Claude Sonnet 4'] && <span className={styles.cursor}>|</span>}
-              </div>
-
-              {/* 피드백 버튼 */}
-              <div className={styles.feedbackSection}>
-                <button 
-                  className={styles.likeButton}
-                  onClick={() => handleLike('Claude Sonnet 4')}
-                >
-                  <i className="bi bi-hand-thumbs-up"></i>
-                  마음에 들어요
-                </button>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* 채팅 입력창 */}
