@@ -1,6 +1,23 @@
 import axios from 'axios';
+import { useAuthStore } from '../stores/authStore';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://www.gaebang.site/api';
+
+// axios 인터셉터 설정
+axios.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      console.log('토큰 만료로 인한 401 에러 - 자동 로그아웃 처리');
+      const authStore = useAuthStore.getState();
+      authStore.logout();
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 interface SignUpRequest {
   email: string;
