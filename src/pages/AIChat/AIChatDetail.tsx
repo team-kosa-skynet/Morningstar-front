@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import styles from './AIChatDetail.module.scss';
 import FeedbackModal from '../../components/Modal/FeedbackModal';
@@ -19,6 +19,9 @@ const AIChatDetail: React.FC = () => {
   const [isChatInputFocused, setIsChatInputFocused] = useState(false);
   const [streamingMessages, setStreamingMessages] = useState<Record<string, string>>({});
   const [isStreaming, setIsStreaming] = useState<Record<string, boolean>>({});
+  const [textBuffers, setTextBuffers] = useState<Record<string, string>>({});
+  const [displayedMessages, setDisplayedMessages] = useState<Record<string, string>>({});
+  const [typingAnimationIds, setTypingAnimationIds] = useState<Record<string, number>>({});
   
   // URL 파라미터에서 conversationId와 질문 가져오기
   const conversationId = parseInt(searchParams.get('conversationId') || '0');
@@ -138,6 +141,45 @@ const AIChatDetail: React.FC = () => {
     setIsModelSelectionOpen(true);
   };
 
+  // 타이핑 효과 함수
+  const typeWriter = useCallback((modelName: string, fullText: string) => {
+    const speed = 30; // 타이핑 속도 (ms)
+    let index = displayedMessages[modelName]?.length || 0;
+    
+    // 기존 애니메이션이 있다면 취소
+    setTypingAnimationIds(prev => {
+      if (prev[modelName]) {
+        clearTimeout(prev[modelName]);
+      }
+      return prev;
+    });
+    
+    const type = () => {
+      if (index < fullText.length) {
+        setDisplayedMessages(prev => ({
+          ...prev,
+          [modelName]: fullText.slice(0, index + 1)
+        }));
+        index++;
+        
+        const timeoutId = setTimeout(type, speed);
+        setTypingAnimationIds(prev => ({
+          ...prev,
+          [modelName]: timeoutId
+        }));
+      } else {
+        // 타이핑 완료
+        setTypingAnimationIds(prev => {
+          const newIds = { ...prev };
+          delete newIds[modelName];
+          return newIds;
+        });
+      }
+    };
+    
+    type();
+  }, [displayedMessages]);
+
   const startStreaming = async (questionText: string) => {
     if (!questionText.trim() || !token || !conversationId) {
       console.log('Missing required data for streaming:', { questionText, token: !!token, conversationId });
@@ -149,14 +191,20 @@ const AIChatDetail: React.FC = () => {
     // 선택된 모델들로 스트리밍 상태 초기화
     const initialStreaming: Record<string, boolean> = {};
     const initialMessages: Record<string, string> = {};
+    const initialBuffers: Record<string, string> = {};
+    const initialDisplayed: Record<string, string> = {};
     
     selectedModels.forEach(model => {
       initialStreaming[model.name] = true;
       initialMessages[model.name] = '';
+      initialBuffers[model.name] = '';
+      initialDisplayed[model.name] = '';
     });
 
     setIsStreaming(initialStreaming);
     setStreamingMessages(initialMessages);
+    setTextBuffers(initialBuffers);
+    setDisplayedMessages(initialDisplayed);
 
     // 선택된 모델들에 대해 동시에 스트리밍 시작
     const promises = selectedModels.map(async (model) => {
@@ -169,10 +217,16 @@ const AIChatDetail: React.FC = () => {
           { content: questionText, model: model.id },
           token,
           (text: string) => {
-            setStreamingMessages(prev => ({
-              ...prev,
-              [model.name]: prev[model.name] + text
-            }));
+            // 버퍼에 텍스트 누적
+            setTextBuffers(prev => {
+              const newBuffer = prev[model.name] + text;
+              // 타이핑 효과로 표시
+              typeWriter(model.name, newBuffer);
+              return {
+                ...prev,
+                [model.name]: newBuffer
+              };
+            });
           },
           () => {
             setIsStreaming(prev => ({ ...prev, [model.name]: false }));
@@ -232,6 +286,15 @@ const AIChatDetail: React.FC = () => {
     updateChatInputHeight();
   }, []);
 
+  // 컴포넌트 언마운트 시 타이핑 애니메이션 정리
+  useEffect(() => {
+    return () => {
+      Object.values(typingAnimationIds).forEach(id => {
+        if (id) clearTimeout(id);
+      });
+    };
+  }, [typingAnimationIds]);
+
   // URL 파라미터에서 선택된 모델들 가져오기
   useEffect(() => {
     const modelsParam = searchParams.get('models');
@@ -254,14 +317,20 @@ const AIChatDetail: React.FC = () => {
         // 초기 스트리밍 상태 설정
         const initialMessages: Record<string, string> = {};
         const initialStreaming: Record<string, boolean> = {};
+        const initialBuffers: Record<string, string> = {};
+        const initialDisplayed: Record<string, string> = {};
         
         parsedModels.forEach(model => {
-          initialMessages[model.name] = '응답을 기다리고 있습니다...';
+          initialMessages[model.name] = '';
           initialStreaming[model.name] = false;
+          initialBuffers[model.name] = '';
+          initialDisplayed[model.name] = '응답을 기다리고 있습니다...';
         });
         
         setStreamingMessages(initialMessages);
         setIsStreaming(initialStreaming);
+        setTextBuffers(initialBuffers);
+        setDisplayedMessages(initialDisplayed);
       } catch (error) {
         console.error('Error parsing models from URL:', error);
         // 파싱 실패 시 기본값 설정
@@ -281,12 +350,20 @@ const AIChatDetail: React.FC = () => {
         ];
         setSelectedModels(defaultModels);
         setStreamingMessages({
-          'GPT-4o': '응답을 기다리고 있습니다...',
-          'Claude 3.5 Sonnet': '응답을 기다리고 있습니다...'
+          'GPT-4o': '',
+          'Claude 3.5 Sonnet': ''
         });
         setIsStreaming({
           'GPT-4o': false,
           'Claude 3.5 Sonnet': false
+        });
+        setTextBuffers({
+          'GPT-4o': '',
+          'Claude 3.5 Sonnet': ''
+        });
+        setDisplayedMessages({
+          'GPT-4o': '응답을 기다리고 있습니다...',
+          'Claude 3.5 Sonnet': '응답을 기다리고 있습니다...'
         });
       }
     }
@@ -329,8 +406,8 @@ const AIChatDetail: React.FC = () => {
 
                 {/* 답변 내용 */}
                 <div className={styles.responseText}>
-                  {streamingMessages[model.name]}
-                  {isStreaming[model.name] && <span className={styles.cursor}>|</span>}
+                  {displayedMessages[model.name]}
+                  {(isStreaming[model.name] || typingAnimationIds[model.name]) && <span className={styles.cursor}>|</span>}
                 </div>
 
                 {/* 피드백 버튼 */}
