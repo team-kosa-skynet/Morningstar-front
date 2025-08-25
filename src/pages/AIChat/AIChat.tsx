@@ -288,29 +288,10 @@ const AIChat: React.FC = () => {
       if (conversationResponse.code === 200) {
         const conversationId = conversationResponse.data.conversationId;
         
-        const promises = selectedModels.map(async (model) => {
-          try {
-            const provider = model.brand === 'gpt' ? 'openai' : model.brand as 'openai' | 'claude' | 'gemini';
-            const chatData = {
-              content: message,
-              model: model.id
-            };
-
-            return await sendChatMessage(conversationId, provider, chatData, token);
-          } catch (error) {
-            console.error(`Error sending message to ${model.brand}:`, error);
-            throw error;
-          }
-        });
-
-        // 선택된 모델들을 URL 파라미터로 전달
+        // 선택된 모델들을 URL 파라미터로 전달하고 즉시 페이지 이동
+        // 실제 스트리밍은 AIChatDetail 페이지에서 처리
         const modelsParam = selectedModels.map(model => `${model.id}:${model.name}:${model.brand}`).join(',');
         navigate(`/ai-chat/detail?conversationId=${conversationId}&question=${encodeURIComponent(message)}&models=${encodeURIComponent(modelsParam)}`);
-        
-        // 백그라운드에서 스트리밍 처리 (결과는 무시)
-        Promise.all(promises).catch(error => {
-          console.error('Background streaming error:', error);
-        });
       } else {
         alert('세션 생성에 실패했습니다.');
       }
