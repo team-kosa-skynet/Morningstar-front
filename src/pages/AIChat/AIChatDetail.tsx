@@ -19,11 +19,13 @@ const AIChatDetail: React.FC = () => {
   const [isChatInputFocused, setIsChatInputFocused] = useState(false);
   const [streamingMessages, setStreamingMessages] = useState<Record<string, string>>({});
   const [isStreaming, setIsStreaming] = useState<Record<string, boolean>>({});
-  const [displayedMessages, setDisplayedMessages] = useState<Record<string, string>>({});
   const [typingAnimationIds, setTypingAnimationIds] = useState<Record<string, number>>({});
   const displayedMessagesRef = useRef<Record<string, string>>({});
   const typingStateRef = useRef<Record<string, { isTyping: boolean; currentIndex: number; targetText: string }>>({});
+  const [forceUpdateCounter, setForceUpdateCounter] = useState(0);
+  const forceUpdate = () => setForceUpdateCounter(prev => prev + 1);
   const textBuffersRef = useRef<Record<string, string>>({});
+  const streamStartTimeRef = useRef<Record<string, number>>({});
   
   // URL 파라미터에서 conversationId와 질문 가져오기
   const conversationId = parseInt(searchParams.get('conversationId') || '0');
@@ -198,12 +200,9 @@ const AIChatDetail: React.FC = () => {
         stuckCounter = 0; // 진행되면 카운터 리셋
         const nextChar = targetText.slice(0, state.currentIndex + 1);
         
-        // ref와 state 동시 업데이트
+        // ref 업데이트 및 강제 리렌더링
         displayedMessagesRef.current[modelName] = nextChar;
-        setDisplayedMessages(prev => ({
-          ...prev,
-          [modelName]: nextChar
-        }));
+        forceUpdate();
         
         state.currentIndex++;
         
@@ -256,10 +255,7 @@ const AIChatDetail: React.FC = () => {
       if (state && state.isTyping && state.currentIndex < state.targetText.length) {
         console.warn(`[${modelName}] 5초 타임아웃 - 남은 텍스트를 즉시 표시`);
         displayedMessagesRef.current[modelName] = state.targetText;
-        setDisplayedMessages(prev => ({
-          ...prev,
-          [modelName]: state.targetText
-        }));
+        forceUpdate();
         state.isTyping = false;
         state.currentIndex = state.targetText.length;
         setTypingAnimationIds(prev => {
@@ -298,12 +294,15 @@ const AIChatDetail: React.FC = () => {
 
     setIsStreaming(initialStreaming);
     setStreamingMessages(initialMessages);
-    setDisplayedMessages(initialDisplayed);
 
     // 선택된 모델들에 대해 동시에 스트리밍 시작
     const promises = selectedModels.map(async (model) => {
       try {
         const provider = model.brand === 'gpt' ? 'openai' : model.brand as 'openai' | 'claude' | 'gemini';
+        
+        // 스트림 시작 시간 기록
+        streamStartTimeRef.current[model.name] = Date.now();
+        console.log(`[${model.name}] 스트림 시작:`, new Date().toISOString());
         
         return sendChatMessageStream(
           conversationId,
@@ -311,7 +310,8 @@ const AIChatDetail: React.FC = () => {
           { content: questionText, model: model.id },
           token,
           (text: string) => {
-            console.log(`[${model.name}] SSE 수신:`, text);
+            const elapsed = Date.now() - streamStartTimeRef.current[model.name];
+            console.log(`[${model.name}] SSE 수신 (${elapsed}ms):`, text);
             // ref를 직접 업데이트 (동기적, 경쟁 조건 방지)
             textBuffersRef.current[model.name] = (textBuffersRef.current[model.name] || '') + text;
             const newBuffer = textBuffersRef.current[model.name];
@@ -320,12 +320,30 @@ const AIChatDetail: React.FC = () => {
             typeWriter(model.name, newBuffer);
           },
           () => {
-            console.log(`[${model.name}] SSE 스트림 완료`);
+            const elapsed = Date.now() - streamStartTimeRef.current[model.name];
+            const totalChars = textBuffersRef.current[model.name]?.length || 0;
+            console.log(`[${model.name}] SSE 스트림 완료 - ${elapsed}ms, ${totalChars}글자`);
             setIsStreaming(prev => ({ ...prev, [model.name]: false }));
           },
           (error) => {
             console.error(`${model.name} streaming error:`, error);
             setIsStreaming(prev => ({ ...prev, [model.name]: false }));
+            
+            // 스트림 중단 시 현재까지 받은 텍스트를 즉시 표시
+            const currentBuffer = textBuffersRef.current[model.name];
+            if (currentBuffer) {
+              console.warn(`[${model.name}] 스트림 에러 - 현재 버퍼 내용을 즉시 표시:`, currentBuffer);
+              displayedMessagesRef.current[model.name] = currentBuffer;
+              forceUpdate();
+              
+              // 타이핑 상태 정리
+              const typingState = typingStateRef.current[model.name];
+              if (typingState) {
+                typingState.isTyping = false;
+                typingState.targetText = currentBuffer;
+                typingState.currentIndex = currentBuffer.length;
+              }
+            }
           }
         );
       } catch (error) {
@@ -425,7 +443,6 @@ const AIChatDetail: React.FC = () => {
         
         setStreamingMessages(initialMessages);
         setIsStreaming(initialStreaming);
-        setDisplayedMessages(initialDisplayed);
       } catch (error) {
         console.error('Error parsing models from URL:', error);
         // 파싱 실패 시 기본값 설정
@@ -451,10 +468,6 @@ const AIChatDetail: React.FC = () => {
         setIsStreaming({
           'GPT-4o': false,
           'Claude 3.5 Sonnet': false
-        });
-        setDisplayedMessages({
-          'GPT-4o': '응답을 기다리고 있습니다...',
-          'Claude 3.5 Sonnet': '응답을 기다리고 있습니다...'
         });
         // ref 초기화
         displayedMessagesRef.current = {
@@ -512,7 +525,7 @@ const AIChatDetail: React.FC = () => {
                 <div className={styles.responseText}>
                   <span 
                     dangerouslySetInnerHTML={{ 
-                      __html: formatText(displayedMessages[model.name] || '') 
+                      __html: formatText(displayedMessagesRef.current[model.name] || '') 
                     }} 
                   />
                   {(isStreaming[model.name] || typingAnimationIds[model.name]) && <span className={styles.cursor}>|</span>}
