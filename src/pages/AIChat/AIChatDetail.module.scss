@@ -5,6 +5,23 @@
   flex-direction: column;
 }
 
+// 스트리밍 커서 애니메이션
+.cursor {
+  display: inline-block;
+  animation: blink 1s infinite;
+  color: #000000;
+  font-weight: bold;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
 .content {
   max-width: 1360px;
   margin: 0 auto;

@@ -4,14 +4,27 @@ import FeedbackModal from '../../components/Modal/FeedbackModal';
 import openAILogo from '../../assets/images/openAI-Photoroom.png';
 import geminiLogo from '../../assets/images/gemini-1336519698502187930_128px.png';
 import claudeLogo from '../../assets/images/클로드-Photoroom.png';
+import { sendChatMessageStream } from '../../services/apiService';
+import { useAuthStore } from '../../stores/authStore';
 
 const AIChatDetail: React.FC = () => {
+  const { token } = useAuthStore();
   const [message, setMessage] = useState('');
   const [isModelSelectionOpen, setIsModelSelectionOpen] = useState(false);
   const [isModelDetailOpen, setIsModelDetailOpen] = useState(false);
   const [selectedModelBrand, setSelectedModelBrand] = useState('');
   const [isImageMode, setIsImageMode] = useState(false);
   const [isChatInputFocused, setIsChatInputFocused] = useState(false);
+  const [streamingMessages, setStreamingMessages] = useState<Record<string, string>>({
+    'GPT-4o': '응답을 기다리고 있습니다...',
+    'Claude Sonnet 4': '응답을 기다리고 있습니다...'
+  });
+  const [isStreaming, setIsStreaming] = useState<Record<string, boolean>>({
+    'GPT-4o': false,
+    'Claude Sonnet 4': false
+  });
+  const [conversationId] = useState(23); // 임시 conversation ID
+  const [currentQuestion, setCurrentQuestion] = useState('각자 자신의 모델에 대해 소개한번만 부탁해');
   const chatInputRef = useRef<HTMLDivElement>(null);
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean;
@@ -138,11 +151,71 @@ const AIChatDetail: React.FC = () => {
     setIsModelSelectionOpen(true);
   };
 
-  const handleSubmit = () => {
-    if (message.trim()) {
-      console.log('메시지 전송:', message);
-      setMessage('');
+  const handleSubmit = async () => {
+    if (!message.trim() || !token) {
+      return;
     }
+
+    const currentMessage = message;
+    setCurrentQuestion(currentMessage);
+    setMessage('');
+
+    // 두 모델 동시에 스트리밍 시작
+    setIsStreaming({ 'GPT-4o': true, 'Claude Sonnet 4': true });
+    setStreamingMessages({ 'GPT-4o': '', 'Claude Sonnet 4': '' });
+
+    // GPT-4o 스트리밍
+    const gptPromise = sendChatMessageStream(
+      conversationId,
+      'openai',
+      { content: currentMessage, model: 'gpt-4o' },
+      token,
+      (text: string) => {
+        setStreamingMessages(prev => ({
+          ...prev,
+          'GPT-4o': prev['GPT-4o'] + text
+        }));
+      },
+      () => {
+        setIsStreaming(prev => ({ ...prev, 'GPT-4o': false }));
+      },
+      (error) => {
+        console.error('GPT-4o streaming error:', error);
+        setIsStreaming(prev => ({ ...prev, 'GPT-4o': false }));
+      }
+    ).catch(error => {
+      console.error('GPT-4o error:', error);
+      setIsStreaming(prev => ({ ...prev, 'GPT-4o': false }));
+    });
+
+    // Claude Sonnet 4 스트리밍
+    const claudePromise = sendChatMessageStream(
+      conversationId,
+      'claude',
+      { content: currentMessage, model: 'claude-sonnet-4' },
+      token,
+      (text: string) => {
+        setStreamingMessages(prev => ({
+          ...prev,
+          'Claude Sonnet 4': prev['Claude Sonnet 4'] + text
+        }));
+      },
+      () => {
+        setIsStreaming(prev => ({ ...prev, 'Claude Sonnet 4': false }));
+      },
+      (error) => {
+        console.error('Claude Sonnet 4 streaming error:', error);
+        setIsStreaming(prev => ({ ...prev, 'Claude Sonnet 4': false }));
+      }
+    ).catch(error => {
+      console.error('Claude Sonnet 4 error:', error);
+      setIsStreaming(prev => ({ ...prev, 'Claude Sonnet 4': false }));
+    });
+
+    // 백그라운드에서 스트리밍 처리 (페이지는 즉시 사용 가능)
+    Promise.allSettled([gptPromise, claudePromise]).then(() => {
+      console.log('All streaming completed');
+    });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -177,7 +250,7 @@ const AIChatDetail: React.FC = () => {
         <div className={styles.messageSection}>
           <div className={styles.userMessageContainer}>
             <div className={styles.userMessage}>
-              각자 자신의 모델에 대해 소개한번만 부탁해
+              {currentQuestion}
             </div>
           </div>
         </div>
@@ -199,11 +272,8 @@ const AIChatDetail: React.FC = () => {
 
               {/* 답변 내용 */}
               <div className={styles.responseText}>
-                안녕하세요! 저는 OpenAI에서 개발한 언어 모델인 ChatGPT입니다. 
-                다양한 주제에 대해 대화를 나누고 정보를 제공하도록 설계되었습니다. 
-                텍스트를 이해하고 생성하는 데 강점을 가지고 있으며, 
-                여러분의 질문에 대답하거나 도움을 줄 수 있도록 학습되었습니다. 
-                사용하실 때 궁금한 점이 있으면 언제든지 물어보세요!
+                {streamingMessages['GPT-4o']}
+                {isStreaming['GPT-4o'] && <span className={styles.cursor}>|</span>}
               </div>
 
               {/* 피드백 버튼 */}
@@ -234,15 +304,8 @@ const AIChatDetail: React.FC = () => {
 
               {/* 답변 내용 */}
               <div className={styles.responseText}>
-                안녕하세요! 저는 Anthropic에서 개발한 Claude Sonnet 4입니다.
-                <br/><br/>
-                Claude 4 모델 패밀리의 일원으로, 현재 Claude Opus 4와 Claude Sonnet 4로 구성되어 있습니다. 
-                <br/><br/>
-                저는 그 중에서도 일상적인 사용에 최적화된 스마트하고 효율적인 모델입니다.
-                <br/><br/>
-                다양한 주제에 대해 대화하고, 텍스트 작성, 분석, 창작, 문제 해결 등 폭넓은 작업을 도와드릴 수 있습니다. 
-                <br/><br/>
-                궁금한 것이 있으시면 언제든 말씀해 주세요!
+                {streamingMessages['Claude Sonnet 4']}
+                {isStreaming['Claude Sonnet 4'] && <span className={styles.cursor}>|</span>}
               </div>
 
               {/* 피드백 버튼 */}

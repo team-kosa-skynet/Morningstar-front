@@ -56,3 +56,166 @@ curl --location 'https://gaebang.site/api/conversations/10/gemini/stream' \
 먼저 전송 버튼을 누르면 세션을 생성해야하고, 200과 세션 아이디를 반환받으면
 사용자가 선택한 모델에 맞게 각 각 개별 api를 세션 아이디와 함께 리퀘스트로 보내줘야되.
 전부 헤더에 토큰도 같이 포함해서 보내줘야되. 세션 생성 api도.
+
+====================================================
+
+event:message
+data:제
+
+event:message
+data:공
+
+event:message
+data:된
+
+event:message
+data: 파일
+
+event:message
+data: "
+
+event:message
+data:test
+
+event:message
+data:용
+
+event:message
+data:.txt
+
+event:message
+data:"
+
+event:message
+data:의
+
+event:message
+data: 내용
+
+event:message
+data:은
+
+event:message
+data: 다음
+
+event:message
+data:과
+
+event:message
+data: 같습니다
+
+event:message
+data::
+data:
+data:
+
+event:message
+data:"
+
+event:message
+data:안
+
+event:message
+data:녕하세요
+
+event:message
+data:."
+data:
+data:
+
+event:message
+data:이는
+
+event:message
+data: 간
+
+event:message
+data:단
+
+event:message
+data:한
+
+event:message
+data: 인
+
+event:message
+data:사
+
+event:message
+data:말
+
+event:message
+data:로
+
+event:message
+data:,
+
+event:message
+data: 누
+
+event:message
+data:군
+
+event:message
+data:가
+
+event:message
+data:에게
+
+event:message
+data: 인
+
+event:message
+data:사
+
+event:message
+data:하는
+
+event:message
+data: 내용을
+
+event:message
+data: 담
+
+event:message
+data:고
+
+event:message
+data: 있습니다
+
+event:message
+data:.
+
+event:message
+data: 추가
+
+event:message
+data:적인
+
+event:message
+data: 질문
+
+event:message
+data:이
+
+event:message
+data: 있
+
+event:message
+data:으면
+
+event:message
+data: 말씀
+
+event:message
+data:해
+
+event:message
+data: 주세요
+
+event:message
+data:!
+
+event:done
+data:스트리밍 완료
+

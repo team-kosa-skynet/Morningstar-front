@@ -1098,3 +1098,85 @@ export const sendChatMessage = async (
     throw error;
   }
 };
+
+export const sendChatMessageStream = async (
+  conversationId: number,
+  provider: 'openai' | 'claude' | 'gemini',
+  chatData: ChatRequest,
+  token: string,
+  onMessage: (text: string) => void,
+  onComplete?: () => void,
+  onError?: (error: any) => void
+) => {
+  try {
+    const formData = new FormData();
+    formData.append('content', chatData.content);
+    
+    if (chatData.model) {
+      formData.append('model', chatData.model);
+    }
+    
+    if (chatData.files && chatData.files.length > 0) {
+      chatData.files.forEach((file) => {
+        formData.append('files', file);
+      });
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/conversations/${conversationId}/${provider}/stream`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error('Response body is not readable');
+    }
+
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      
+      // Keep the last incomplete line in buffer
+      buffer = lines.pop() || '';
+      
+      for (const line of lines) {
+        if (line.startsWith('data:')) {
+          const text = line.slice(5);
+          if (text.trim()) {
+            onMessage(text);
+          }
+        }
+      }
+    }
+    
+    // Process any remaining data in buffer
+    if (buffer.startsWith('data:')) {
+      const text = buffer.slice(5);
+      if (text.trim()) {
+        onMessage(text);
+      }
+    }
+    
+    onComplete?.();
+  } catch (error) {
+    console.error('Streaming error:', error);
+    onError?.(error);
+    throw error;
+  }
+};

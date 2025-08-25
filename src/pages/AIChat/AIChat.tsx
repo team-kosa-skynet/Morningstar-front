@@ -7,7 +7,7 @@ import Banner from '../../components/Banner/Banner';
 import openAILogo from '../../assets/images/openAI-Photoroom.png';
 import geminiLogo from '../../assets/images/gemini-1336519698502187930_128px.png';
 import claudeLogo from '../../assets/images/클로드-Photoroom.png';
-import { createConversation, sendChatMessage } from '../../services/apiService';
+import { createConversation, sendChatMessage, sendChatMessageStream } from '../../services/apiService';
 import { useAuthStore } from '../../stores/authStore';
 
 Chart.register(...registerables);
@@ -303,8 +303,13 @@ const AIChat: React.FC = () => {
           }
         });
 
-        await Promise.all(promises);
+        // 스트리밍을 기다리지 않고 즉시 상세 페이지로 이동
         navigate('/ai-chat/detail');
+        
+        // 백그라운드에서 스트리밍 처리 (결과는 무시)
+        Promise.all(promises).catch(error => {
+          console.error('Background streaming error:', error);
+        });
       } else {
         alert('세션 생성에 실패했습니다.');
       }
