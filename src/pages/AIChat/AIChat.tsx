@@ -288,9 +288,11 @@ const AIChat: React.FC = () => {
       if (conversationResponse.code === 200) {
         const conversationId = conversationResponse.data.conversationId;
         
-        // 즉시 상세 페이지로 이동 (conversationId와 질문만 전달)
-        // 실제 스트리밍은 AIChatDetail 컴포넌트에서 처리
-        navigate(`/ai-chat/detail?conversationId=${conversationId}&question=${encodeURIComponent(message)}`);
+        // 선택된 모델 정보를 URL 파라미터로 전달
+        const selectedModelsParam = encodeURIComponent(JSON.stringify(selectedModels));
+        
+        // 즉시 상세 페이지로 이동 (선택된 모델 정보 포함)
+        navigate(`/ai-chat/detail?conversationId=${conversationId}&question=${encodeURIComponent(message)}&selectedModels=${selectedModelsParam}`);
       } else {
         alert('세션 생성에 실패했습니다.');
       }

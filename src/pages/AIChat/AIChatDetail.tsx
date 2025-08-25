@@ -24,11 +24,12 @@ const AIChatDetail: React.FC = () => {
   // AbortController 관리
   const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
   
-  // URL 파라미터에서 conversationId와 질문 가져오기
+  // URL 파라미터에서 conversationId와 질문, 선택된 모델 가져오기
   const conversationId = parseInt(searchParams.get('conversationId') || '0');
   const [currentQuestion, setCurrentQuestion] = useState(
     searchParams.get('question') || '각자 자신의 모델에 대해 소개한번만 부탁해'
   );
+  const urlSelectedModels = searchParams.get('selectedModels');
   const chatInputRef = useRef<HTMLDivElement>(null);
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean;
@@ -316,22 +317,48 @@ const AIChatDetail: React.FC = () => {
         const data = await getModelsInfo();
         setModelsData(data);
         
-        // 기본 선택 모델 설정 (OpenAI와 Claude의 기본 모델)
-        const defaultModels = [
-          {
-            id: data.data.openai.defaultModel,
-            name: data.data.openai.defaultModel,
-            icon: getModelIcon('openai'),
-            brand: 'openai'
-          },
-          {
-            id: data.data.claude.defaultModel,
-            name: data.data.claude.defaultModel,
-            icon: getModelIcon('claude'),
-            brand: 'claude'
+        // URL에서 전달받은 모델이 있으면 사용, 없으면 기본 모델 사용
+        let modelsToUse;
+        
+        if (urlSelectedModels) {
+          try {
+            // URL에서 전달받은 모델 정보 파싱
+            const parsedModels = JSON.parse(decodeURIComponent(urlSelectedModels));
+            
+            // 모델 아이콘 업데이트 (동적 아이콘 매핑 사용)
+            modelsToUse = parsedModels.map((model: any) => ({
+              ...model,
+              icon: getModelIcon(model.brand)
+            }));
+            
+            console.log('전달받은 선택된 모델들:', modelsToUse);
+          } catch (error) {
+            console.error('선택된 모델 파싱 오류:', error);
+            // 파싱 오류 시 기본 모델 사용
+            modelsToUse = null;
           }
-        ];
-        setSelectedModels(defaultModels);
+        }
+        
+        // URL에 선택된 모델이 없거나 파싱 실패 시 기본 모델 사용
+        if (!modelsToUse) {
+          modelsToUse = [
+            {
+              id: data.data.openai.defaultModel,
+              name: data.data.openai.defaultModel,
+              icon: getModelIcon('openai'),
+              brand: 'openai'
+            },
+            {
+              id: data.data.claude.defaultModel,
+              name: data.data.claude.defaultModel,
+              icon: getModelIcon('claude'),
+              brand: 'claude'
+            }
+          ];
+          console.log('기본 모델 사용:', modelsToUse);
+        }
+        
+        setSelectedModels(modelsToUse);
         
         // 초기 스트리밍 메시지 상태 설정
         const initialMessages: Record<string, string> = {};
