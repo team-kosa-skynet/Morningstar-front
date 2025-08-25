@@ -43,7 +43,7 @@ const AIChat: React.FC = () => {
   const chartRef = useRef<Chart | null>(null);
 
   const models = [
-    { id: 'gpt', name: 'GPT by OpenAI', icon: openAILogo },
+    { id: 'openai', name: 'GPT by OpenAI', icon: openAILogo },
     { id: 'gemini', name: 'Gemini by Google', icon: geminiLogo },
     { id: 'claude', name: 'Claude by Anthropic', icon: claudeLogo }
   ];
@@ -83,7 +83,7 @@ const AIChat: React.FC = () => {
 
     // OpenAI 모델들
     if (modelInfoData.openai) {
-      details.gpt = modelInfoData.openai.models.map((model: any) => ({
+      details.openai = modelInfoData.openai.models.map((model: any) => ({
         id: model.name,
         name: model.name.toUpperCase(),
         icon: openAILogo

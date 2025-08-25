@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import styles from './AIChatDetail.module.scss';
 import FeedbackModal from '../../components/Modal/FeedbackModal';
@@ -7,6 +7,21 @@ import geminiLogo from '../../assets/images/gemini-1336519698502187930_128px.png
 import claudeLogo from '../../assets/images/클로드-Photoroom.png';
 import { sendChatMessageStream, getModelsInfo, type ModelsInfoResponse, type ModelInfo } from '../../services/apiService';
 import { useAuthStore } from '../../stores/authStore';
+
+// 모델 아이콘 매핑 함수 (컴포넌트 외부로 이동)
+const getModelIcon = (provider: string) => {
+  switch (provider.toLowerCase()) {
+    case 'openai':
+    case 'gpt':
+      return openAILogo;
+    case 'gemini':
+      return geminiLogo;
+    case 'claude':
+      return claudeLogo;
+    default:
+      return openAILogo;
+  }
+};
 
 const AIChatDetail: React.FC = () => {
   const { token } = useAuthStore();
@@ -24,34 +39,72 @@ const AIChatDetail: React.FC = () => {
   // 타이핑 애니메이션을 위한 상태
   const [bufferedMessages, setBufferedMessages] = useState<Record<string, string>>({});
   const [typingIntervals, setTypingIntervals] = useState<Record<string, NodeJS.Timeout>>({});
+  const [pendingCompletions, setPendingCompletions] = useState<Record<string, boolean>>({});
   
   // AbortController 관리
   const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
   
   // 타이핑 애니메이션 함수
-  const startTypingAnimation = (modelName: string, fullText: string) => {
+  const startTypingAnimation = (modelName: string, fullText: string, isComplete: boolean = false) => {
+    console.log(`🔄 [TYPING] Starting animation for ${modelName}, fullText length: ${fullText.length}, isComplete: ${isComplete}`);
+    
     // 기존 인터벌 제거
     if (typingIntervals[modelName]) {
+      console.log(`🔄 [TYPING] Clearing existing interval for ${modelName}`);
       clearInterval(typingIntervals[modelName]);
     }
     
-    let currentIndex = 0;
-    const typingSpeed = 30; // 30ms마다 한 글자씩
+    let currentIndex = streamingMessages[modelName]?.length || 0;
+    const typingSpeed = 50; // 50ms마다 한 글자씩 (디버깅을 위해 속도 느리게)
+    
+    console.log(`🔄 [TYPING] ${modelName} starting from index: ${currentIndex}, target length: ${fullText.length}`);
+    
+    // 이미 모든 텍스트가 표시된 경우
+    if (currentIndex >= fullText.length) {
+      console.log(`🔄 [TYPING] ${modelName} already fully displayed`);
+      if (isComplete && pendingCompletions[modelName]) {
+        setIsStreaming(prev => ({ ...prev, [modelName]: false }));
+        setPendingCompletions(prev => {
+          const updated = { ...prev };
+          delete updated[modelName];
+          return updated;
+        });
+        console.log(`✅ [${modelName}] Stream finalized immediately`);
+      }
+      return;
+    }
     
     const interval = setInterval(() => {
+      console.log(`🔄 [TYPING] ${modelName} typing progress: ${currentIndex}/${fullText.length}`);
+      
       if (currentIndex >= fullText.length) {
+        console.log(`🔄 [TYPING] ${modelName} typing completed`);
         clearInterval(interval);
         setTypingIntervals(prev => {
           const updated = { ...prev };
           delete updated[modelName];
           return updated;
         });
+        
+        // 타이핑이 완료되고 스트리밍이 완료된 경우 스트리밍 상태 비활성화
+        if (isComplete && pendingCompletions[modelName]) {
+          setIsStreaming(prev => ({ ...prev, [modelName]: false }));
+          setPendingCompletions(prev => {
+            const updated = { ...prev };
+            delete updated[modelName];
+            return updated;
+          });
+          console.log(`✅ [${modelName}] Typing animation completed, stream finalized`);
+        }
         return;
       }
       
+      const textToShow = fullText.substring(0, currentIndex + 1);
+      console.log(`🔄 [TYPING] ${modelName} showing: "${textToShow.substring(textToShow.length - 10)}"`); // 마지막 10자만 로그
+      
       setStreamingMessages(prev => ({
         ...prev,
-        [modelName]: fullText.substring(0, currentIndex + 1)
+        [modelName]: textToShow
       }));
       
       currentIndex++;
@@ -61,6 +114,8 @@ const AIChatDetail: React.FC = () => {
       ...prev,
       [modelName]: interval
     }));
+    
+    console.log(`🔄 [TYPING] ${modelName} interval started`);
   };
   
   // URL 파라미터에서 conversationId와 질문, 선택된 모델 가져오기
@@ -68,7 +123,9 @@ const AIChatDetail: React.FC = () => {
   const [currentQuestion, setCurrentQuestion] = useState(
     searchParams.get('question') || '각자 자신의 모델에 대해 소개한번만 부탁해'
   );
-  const urlSelectedModels = searchParams.get('selectedModels');
+  
+  // URL 파라미터를 한 번만 가져와서 상태로 저장 (안정성을 위해)
+  const [urlSelectedModels] = useState(() => searchParams.get('selectedModels'));
   const chatInputRef = useRef<HTMLDivElement>(null);
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean;
@@ -80,23 +137,9 @@ const AIChatDetail: React.FC = () => {
     unselectedModel: { name: '', icon: '' }
   });
 
-  // 기본 선택 모델들 (데이터 로드 후 설정)
-  const [selectedModels, setSelectedModels] = useState<Array<{id: string, name: string, icon: string, brand: string}>>([])
+  // selectedModels는 이제 finalSelectedModels로 대체됨 (삭제 예정)
 
-  // 모델 아이콘 매핑
-  const getModelIcon = (provider: string) => {
-    switch (provider.toLowerCase()) {
-      case 'openai':
-      case 'gpt':
-        return openAILogo;
-      case 'gemini':
-        return geminiLogo;
-      case 'claude':
-        return claudeLogo;
-      default:
-        return openAILogo;
-    }
-  };
+  // getModelIcon 함수는 컴포넌트 외부로 이동됨
 
   // 동적 모델 목록 생성
   const models = modelsData ? [
@@ -126,8 +169,8 @@ const AIChatDetail: React.FC = () => {
 
   const handleLike = (selectedModelName: string) => {
     // 선택한 모델과 선택하지 않은 모델 찾기
-    const selected = selectedModels.find(m => m.name === selectedModelName);
-    const unselected = selectedModels.find(m => m.name !== selectedModelName);
+    const selected = finalSelectedModels.find(m => m.name === selectedModelName);
+    const unselected = finalSelectedModels.find(m => m.name !== selectedModelName);
     
     if (selected && unselected) {
       setFeedbackModal({
@@ -151,25 +194,15 @@ const AIChatDetail: React.FC = () => {
     setIsModelDetailOpen(true);
   };
 
+  // 모델 선택 기능은 사용하지 않음 (상세 페이지에서는 모델이 이미 선택되어 전달됨)
   const handleModelDetailSelect = (modelId: string) => {
-    const selectedModelData = modelDetails[selectedModelBrand]?.find(model => model.id === modelId);
-    if (selectedModelData) {
-      const newSelectedModel = {
-        ...selectedModelData,
-        brand: selectedModelBrand
-      };
-      
-      // 중복 체크 및 최대 2개 제한
-      const isAlreadySelected = selectedModels.some(model => model.id === modelId);
-      if (!isAlreadySelected && selectedModels.length < 2) {
-        setSelectedModels(prev => [...prev, newSelectedModel]);
-      }
-    }
+    console.warn('모델 선택 기능은 상세 페이지에서 비활성화됨');
     setIsModelDetailOpen(false);
   };
 
+  // 모델 제거 기능은 사용하지 않음
   const handleRemoveModel = (modelId: string) => {
-    setSelectedModels(prev => prev.filter(model => model.id !== modelId));
+    console.warn('모델 제거 기능은 상세 페이지에서 비활성화됨');
   };
 
   const handleBackToModelSelection = () => {
@@ -227,7 +260,7 @@ const AIChatDetail: React.FC = () => {
     cancelAllStreams();
 
     // 선택된 모델들에 대해 AbortController 생성
-    selectedModels.forEach(model => {
+    finalSelectedModels.forEach(model => {
       const controller = new AbortController();
       abortControllersRef.current.set(model.name, controller);
     });
@@ -239,11 +272,13 @@ const AIChatDetail: React.FC = () => {
     const streamingState: Record<string, boolean> = {};
     const messageState: Record<string, string> = {};
     const bufferedState: Record<string, string> = {};
+    const pendingState: Record<string, boolean> = {};
     
-    selectedModels.forEach(model => {
+    finalSelectedModels.forEach(model => {
       streamingState[model.name] = true;
       messageState[model.name] = '';
       bufferedState[model.name] = '';
+      pendingState[model.name] = false;
       
       // 기존 타이핑 인터벌 정리
       if (typingIntervals[model.name]) {
@@ -254,13 +289,14 @@ const AIChatDetail: React.FC = () => {
     setIsStreaming(streamingState);
     setStreamingMessages(messageState);
     setBufferedMessages(bufferedState);
+    setPendingCompletions(pendingState);
     setTypingIntervals({});
     
-    console.log(`🟢 ${selectedModels.length} models set to streaming state`);
+    console.log(`🟢 ${finalSelectedModels.length} models set to streaming state`);
     console.groupEnd();
 
     // 선택된 모델들에 대해 동시 스트리밍 시작
-    const streamingPromises = selectedModels.map(model => {
+    const streamingPromises = finalSelectedModels.map(model => {
       const controller = abortControllersRef.current.get(model.name);
       if (!controller) return Promise.reject(new Error(`Controller not found for ${model.name}`));
 
@@ -276,10 +312,12 @@ const AIChatDetail: React.FC = () => {
           
           // 버퍼에 텍스트 축적
           setBufferedMessages(prev => {
-            const newBuffered = prev[model.name] + text;
+            const previousText = prev[model.name] || '';
+            const newBuffered = previousText + text;
+            console.log(`📨 [${model.name}] Buffer updated: ${previousText.length} -> ${newBuffered.length} chars`);
             
-            // 타이핑 애니메이션 시작
-            startTypingAnimation(model.name, newBuffered);
+            // 진행 중인 타이핑 애니메이션 업데이트 (완료 플래그 false)
+            startTypingAnimation(model.name, newBuffered, false);
             
             return {
               ...prev,
@@ -290,17 +328,36 @@ const AIChatDetail: React.FC = () => {
         () => {
           console.log(`✅ [${model.name}] Stream completed successfully`);
           
-          // 최종 텍스트로 타이핑 애니메이션 완료
+          // 스트림 완료 즉시 AbortController 삭제 (연결 종료)
+          abortControllersRef.current.delete(model.name);
+          console.log(`🗑️ [${model.name}] Controller removed immediately on completion. Remaining: ${Array.from(abortControllersRef.current.keys()).join(', ') || 'none'}`);
+          
+          // 스트림 완료 대기 상태로 설정 (타이핑 애니메이션용)
+          setPendingCompletions(prev => {
+            console.log(`🔄 [${model.name}] Setting pending completion`);
+            return { ...prev, [model.name]: true };
+          });
+          
+          // 최종 텍스트로 타이핑 애니메이션 시작 (완료 플래그 true)
           setBufferedMessages(prev => {
-            if (prev[model.name]) {
-              startTypingAnimation(model.name, prev[model.name]);
+            const finalText = prev[model.name] || '';
+            console.log(`🔄 [${model.name}] Final buffered text length: ${finalText.length}`);
+            console.log(`🔄 [${model.name}] Final text preview: "${finalText.substring(0, 100)}${finalText.length > 100 ? '...' : ''}"`);            
+            
+            if (finalText) {
+              startTypingAnimation(model.name, finalText, true);
+            } else {
+              console.warn(`⚠️ [${model.name}] No buffered text found for final animation`);
+              // 버퍼된 텍스트가 없는 경우 즉시 완료 처리
+              setIsStreaming(prev => ({ ...prev, [model.name]: false }));
+              setPendingCompletions(prev => {
+                const updated = { ...prev };
+                delete updated[model.name];
+                return updated;
+              });
             }
             return prev;
           });
-          
-          setIsStreaming(prev => ({ ...prev, [model.name]: false }));
-          abortControllersRef.current.delete(model.name);
-          console.log(`🗑️ [${model.name}] Controller removed, remaining: ${Array.from(abortControllersRef.current.keys()).join(', ') || 'none'}`);
         },
         (error) => {
           console.error(`❌ [${model.name}] Streaming error:`, error);
@@ -346,7 +403,7 @@ const AIChatDetail: React.FC = () => {
       console.log(`⏰ Completion time: ${new Date().toLocaleTimeString()}`);
       
       results.forEach((result, index) => {
-        const modelName = selectedModels[index]?.name || `Model ${index}`;
+        const modelName = finalSelectedModels[index]?.name || `Model ${index}`;
         if (result.status === 'fulfilled') {
           console.log(`✅ ${modelName}: Successfully completed`);
         } else {
@@ -388,78 +445,12 @@ const AIChatDetail: React.FC = () => {
     }
   };
 
-  // selectedModels가 변경될 때마다 높이 재계산
-  useEffect(() => {
-    updateChatInputHeight();
-  }, [selectedModels]);
-
-  // 컴포넌트 마운트 시 초기 높이 설정
-  useEffect(() => {
-    updateChatInputHeight();
-  }, []);
-
   // 모델 데이터 로드
   useEffect(() => {
     const loadModelsData = async () => {
       try {
         const data = await getModelsInfo();
         setModelsData(data);
-        
-        // URL에서 전달받은 모델이 있으면 사용, 없으면 기본 모델 사용
-        let modelsToUse;
-        
-        if (urlSelectedModels) {
-          try {
-            // URL에서 전달받은 모델 정보 파싱
-            const parsedModels = JSON.parse(decodeURIComponent(urlSelectedModels));
-            
-            // 모델 아이콘 업데이트 (동적 아이콘 매핑 사용)
-            modelsToUse = parsedModels.map((model: any) => ({
-              ...model,
-              icon: getModelIcon(model.brand)
-            }));
-            
-            console.log('전달받은 선택된 모델들:', modelsToUse);
-          } catch (error) {
-            console.error('선택된 모델 파싱 오류:', error);
-            // 파싱 오류 시 기본 모델 사용
-            modelsToUse = null;
-          }
-        }
-        
-        // URL에 선택된 모델이 없거나 파싱 실패 시 기본 모델 사용
-        if (!modelsToUse) {
-          modelsToUse = [
-            {
-              id: data.data.openai.defaultModel,
-              name: data.data.openai.defaultModel,
-              icon: getModelIcon('openai'),
-              brand: 'openai'
-            },
-            {
-              id: data.data.claude.defaultModel,
-              name: data.data.claude.defaultModel,
-              icon: getModelIcon('claude'),
-              brand: 'claude'
-            }
-          ];
-          console.log('기본 모델 사용:', modelsToUse);
-        }
-        
-        setSelectedModels(modelsToUse);
-        
-        // 초기 스트리밍 메시지 상태 설정
-        const initialMessages: Record<string, string> = {};
-        const initialBuffered: Record<string, string> = {};
-        const initialStreaming: Record<string, boolean> = {};
-        modelsToUse.forEach(model => {
-          initialMessages[model.name] = '응답을 기다리고 있습니다...';
-          initialBuffered[model.name] = '';
-          initialStreaming[model.name] = false;
-        });
-        setStreamingMessages(initialMessages);
-        setBufferedMessages(initialBuffered);
-        setIsStreaming(initialStreaming);
       } catch (error) {
         console.error('모델 데이터 로드 실패:', error);
       }
@@ -468,17 +459,99 @@ const AIChatDetail: React.FC = () => {
     loadModelsData();
   }, []);
 
+  // 컴포넌트 마운트 시 초기 높이 설정
+  useEffect(() => {
+    updateChatInputHeight();
+  }, []);
+  
+  // 선택된 모델들 계산 (useMemo로 최적화)
+  const finalSelectedModels = useMemo(() => {
+    if (!modelsData) return [];
+    
+    let modelsToUse;
+    
+    if (urlSelectedModels) {
+      try {
+        // URL에서 전달받은 모델 정보 파싱
+        const parsedModels = JSON.parse(decodeURIComponent(urlSelectedModels));
+        
+        // 모델 아이콘 업데이트 (동적 아이콘 매핑 사용)
+        modelsToUse = parsedModels.map((model: any) => ({
+          ...model,
+          icon: getModelIcon(model.brand)
+        }));
+        
+        // console.log('전달받은 선택된 모델들:', modelsToUse); // 리렌더링 최적화를 위해 주석 처리
+      } catch (error) {
+        console.error('선택된 모델 파싱 오류:', error);
+        modelsToUse = null;
+      }
+    }
+    
+    // URL에 선택된 모델이 없거나 파싱 실패 시 기본 모델 사용
+    if (!modelsToUse) {
+      modelsToUse = [
+        {
+          id: modelsData.data.openai.defaultModel,
+          name: modelsData.data.openai.defaultModel,
+          icon: getModelIcon('openai'),
+          brand: 'openai'
+        },
+        {
+          id: modelsData.data.claude.defaultModel,
+          name: modelsData.data.claude.defaultModel,
+          icon: getModelIcon('claude'),
+          brand: 'claude'
+        }
+      ];
+      // console.log('기본 모델 사용:', modelsToUse); // 리렌더링 최적화를 위해 주석 처리
+    }
+    
+    return modelsToUse;
+  }, [modelsData, urlSelectedModels]); // urlSelectedModels는 이제 안정된 상태값
+  
+  // 초기 상태 설정
+  useEffect(() => {
+    if (finalSelectedModels.length > 0) {
+      // 초기 스트리밍 메시지 상태 설정
+      const initialMessages: Record<string, string> = {};
+      const initialBuffered: Record<string, string> = {};
+      const initialStreaming: Record<string, boolean> = {};
+      const initialPending: Record<string, boolean> = {};
+      
+      finalSelectedModels.forEach(model => {
+        initialMessages[model.name] = '응답을 기다리고 있습니다...';
+        initialBuffered[model.name] = '';
+        initialStreaming[model.name] = false;
+        initialPending[model.name] = false;
+      });
+      
+      setStreamingMessages(initialMessages);
+      setBufferedMessages(initialBuffered);
+      setIsStreaming(initialStreaming);
+      setPendingCompletions(initialPending);
+    }
+  }, [finalSelectedModels]);
+  
+  // finalSelectedModels가 변경될 때마다 높이 재계산
+  useEffect(() => {
+    updateChatInputHeight();
+  }, [finalSelectedModels]);
+
   // 자동 스트리밍 시작 여부 추적 (useRef로 리렌더링 방지)
   const hasAutoStartedRef = useRef(false);
   
   // 모델 데이터와 선택된 모델이 준비되면 한 번만 자동 스트리밍 시작
   useEffect(() => {
-    if (!hasAutoStartedRef.current && conversationId && token && currentQuestion && modelsData && selectedModels.length > 0) {
+    // 모든 조건이 준비되면 자동 시작
+    const canAutoStart = conversationId && token && currentQuestion && modelsData && !hasAutoStartedRef.current;
+    
+    if (canAutoStart) {
       console.log('Auto-starting stream with conversationId:', conversationId);
       hasAutoStartedRef.current = true;
       startStreaming(currentQuestion);
     }
-  }, [conversationId, token, currentQuestion, modelsData, selectedModels]);
+  }, [conversationId, token, currentQuestion, modelsData]);
 
   // 컴포넌트 언마운트 시 모든 스트림 연결 취소 및 타이핑 인터벌 정리
   useEffect(() => {
@@ -487,16 +560,32 @@ const AIChatDetail: React.FC = () => {
       console.log(`⏰ Unmount time: ${new Date().toLocaleTimeString()}`);
       console.log('🧹 Cleaning up all active streams and typing intervals...');
       
-      // 모든 타이핑 인터벌 정리
+      // 모든 타이핑 인터벌 즉시 정리
       Object.values(typingIntervals).forEach(interval => {
-        if (interval) clearInterval(interval);
+        if (interval) {
+          clearInterval(interval);
+          console.log('🧹 Cleared typing interval');
+        }
       });
       
-      cancelAllStreams();
-      console.log('✅ Component cleanup completed');
+      // 모든 AbortController 강제 중단
+      const activeControllers = Array.from(abortControllersRef.current.entries());
+      activeControllers.forEach(([modelName, controller]) => {
+        console.log(`🚫 [CLEANUP] Force aborting ${modelName}`);
+        controller.abort();
+      });
+      abortControllersRef.current.clear();
+      
+      // 상태 초기화
+      setIsStreaming({});
+      setStreamingMessages({});
+      setBufferedMessages({});
+      setPendingCompletions({});
+      
+      console.log('✅ Component cleanup completed with force abort');
       console.groupEnd();
     };
-  }, [typingIntervals]);
+  }, []); // 의존성 배열 제거로 cleanup 함수 안정화
 
   return (
     <div className={styles.container}>
@@ -512,7 +601,7 @@ const AIChatDetail: React.FC = () => {
 
         {/* AI 답변들 */}
         <div className={styles.aiResponsesContainer}>
-          {selectedModels.map((model) => (
+          {finalSelectedModels.map((model) => (
             <div key={model.id} className={styles.aiResponse}>
               <div className={styles.responseContent}>
                 {/* 모델 정보 헤더 */}
@@ -604,9 +693,9 @@ const AIChatDetail: React.FC = () => {
           )}
 
           {/* 선택된 모델들 표시 */}
-          {selectedModels.length > 0 && isChatInputFocused && (
+          {finalSelectedModels.length > 0 && isChatInputFocused && (
             <div className={styles.selectedModels}>
-              {selectedModels.map((model) => (
+              {finalSelectedModels.map((model) => (
                 <div key={model.id} className={styles.selectedModelItem}>
                   <div className={styles.modelInfo}>
                     <img src={model.icon} alt={model.name} className={styles.selectedModelIcon} />

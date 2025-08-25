@@ -1159,10 +1159,13 @@ export const sendChatMessageStream = async (
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Connection': 'close', // keep-alive 비활성화
+            'Cache-Control': 'no-cache'
           },
           body: formData,
-          signal: combinedSignal
+          signal: combinedSignal,
+          keepalive: false // keep-alive 명시적 비활성화
         }
       );
 
@@ -1177,6 +1180,9 @@ export const sendChatMessageStream = async (
       if (!reader) {
         throw new Error('Response body is not readable');
       }
+      
+      // 연결 종료 처리를 위한 response 저장
+      let streamResponse = response;
 
       console.log(`🔗 [API-${provider.toUpperCase()}] Stream reader established`);
       const decoder = new TextDecoder();
@@ -1234,6 +1240,18 @@ export const sendChatMessageStream = async (
       }
       
       console.log(`✅ [API-${provider.toUpperCase()}] Stream completed naturally`);
+      
+      // 스트림 완료 시 명시적으로 reader를 닫고 연결 정리
+      try {
+        if (reader) {
+          console.log(`🔧 [API-${provider.toUpperCase()}] Closing reader on completion`);
+          await reader.cancel();
+          reader = null;
+        }
+      } catch (closeError) {
+        console.warn(`⚠️ [API-${provider.toUpperCase()}] Error closing reader on completion:`, closeError);
+      }
+      
       onComplete?.();
     } catch (error) {
       // Properly close reader on error
