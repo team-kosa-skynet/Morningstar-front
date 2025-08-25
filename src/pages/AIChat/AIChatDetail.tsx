@@ -30,9 +30,47 @@ const AIChatDetail: React.FC = () => {
   const [modelsData, setModelsData] = useState<ModelsInfoResponse | null>(null);
   const [streamingMessages, setStreamingMessages] = useState<Record<string, string>>({});
   const [isStreaming, setIsStreaming] = useState<Record<string, boolean>>({});
-  
-  
+  const [bufferedMessages, setBufferedMessages] = useState<Record<string, string>>({});
+  const [typingIntervals, setTypingIntervals] = useState<Record<string, NodeJS.Timeout>>({});
+
   const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
+
+  const startTypingAnimation = (modelName: string, fullText: string) => {
+    if (typingIntervals[modelName]) {
+      clearInterval(typingIntervals[modelName]);
+    }
+    
+    let currentIndex = streamingMessages[modelName]?.length || 0;
+    const typingSpeed = 25;
+    
+    if (currentIndex >= fullText.length) return;
+    
+    const interval = setInterval(() => {
+      if (currentIndex >= fullText.length) {
+        clearInterval(interval);
+        setTypingIntervals(prev => {
+          const updated = { ...prev };
+          delete updated[modelName];
+          return updated;
+        });
+        return;
+      }
+      
+      const textToShow = fullText.substring(0, currentIndex + 1);
+      
+      setStreamingMessages(prev => ({
+        ...prev,
+        [modelName]: textToShow
+      }));
+      
+      currentIndex++;
+    }, typingSpeed);
+    
+    setTypingIntervals(prev => ({
+      ...prev,
+      [modelName]: interval
+    }));
+  };
   
   
   const conversationId = parseInt(searchParams.get('conversationId') || '0');
@@ -126,14 +164,22 @@ const AIChatDetail: React.FC = () => {
 
     const streamingState: Record<string, boolean> = {};
     const messageState: Record<string, string> = {};
+    const bufferedState: Record<string, string> = {};
     
     finalSelectedModels.forEach(model => {
       streamingState[model.name] = true;
       messageState[model.name] = '';
+      bufferedState[model.name] = '';
+      
+      if (typingIntervals[model.name]) {
+        clearInterval(typingIntervals[model.name]);
+      }
     });
     
     setIsStreaming(streamingState);
     setStreamingMessages(messageState);
+    setBufferedMessages(bufferedState);
+    setTypingIntervals({});
     
 
     const streamingPromises = finalSelectedModels.map(model => {
@@ -147,16 +193,47 @@ const AIChatDetail: React.FC = () => {
         { content: questionText, model: model.id },
         token,
         (text: string) => {
-          setStreamingMessages(prev => ({
-            ...prev,
-            [model.name]: (prev[model.name] || '') + text
-          }));
+          setBufferedMessages(prev => {
+            const previousText = prev[model.name] || '';
+            const newBuffered = previousText + text;
+            
+            startTypingAnimation(model.name, newBuffered);
+            
+            return {
+              ...prev,
+              [model.name]: newBuffered
+            };
+          });
         },
         () => {
-          setIsStreaming(prev => ({ ...prev, [model.name]: false }));
           abortControllersRef.current.delete(model.name);
+          
+          setBufferedMessages(prev => {
+            const finalText = prev[model.name] || '';
+            
+            if (finalText) {
+              startTypingAnimation(model.name, finalText);
+              
+              setTimeout(() => {
+                setIsStreaming(streamState => ({ ...streamState, [model.name]: false }));
+              }, finalText.length * 25 + 100);
+            } else {
+              setIsStreaming(streamState => ({ ...streamState, [model.name]: false }));
+            }
+            
+            return prev;
+          });
         },
         (error) => {
+          if (typingIntervals[model.name]) {
+            clearInterval(typingIntervals[model.name]);
+            setTypingIntervals(prev => {
+              const updated = { ...prev };
+              delete updated[model.name];
+              return updated;
+            });
+          }
+          
           setIsStreaming(prev => ({ ...prev, [model.name]: false }));
           abortControllersRef.current.delete(model.name);
         },
@@ -260,14 +337,17 @@ const AIChatDetail: React.FC = () => {
     if (finalSelectedModels.length > 0) {
       const initialMessages: Record<string, string> = {};
       const initialStreaming: Record<string, boolean> = {};
+      const initialBuffered: Record<string, string> = {};
       
       finalSelectedModels.forEach(model => {
         initialMessages[model.name] = '응답을 기다리고 있습니다...';
         initialStreaming[model.name] = false;
+        initialBuffered[model.name] = '';
       });
       
       setStreamingMessages(initialMessages);
       setIsStreaming(initialStreaming);
+      setBufferedMessages(initialBuffered);
     }
   }, [finalSelectedModels]);
   
@@ -288,6 +368,12 @@ const AIChatDetail: React.FC = () => {
 
   useEffect(() => {
     return () => {
+      Object.values(typingIntervals).forEach(interval => {
+        if (interval) {
+          clearInterval(interval);
+        }
+      });
+      
       abortControllersRef.current.forEach(controller => {
         controller.abort();
       });
@@ -295,6 +381,7 @@ const AIChatDetail: React.FC = () => {
       
       setIsStreaming({});
       setStreamingMessages({});
+      setBufferedMessages({});
     };
   }, []);
 
