@@ -13,7 +13,7 @@ axios.interceptors.response.use(
       console.log('토큰 만료로 인한 401 에러 - 자동 로그아웃 처리');
       const authStore = useAuthStore.getState();
       authStore.logout();
-      window.location.href = '/login';
+      window.location.href = '#/login';
     }
     return Promise.reject(error);
   }

@@ -66,6 +66,9 @@ const AIChat: React.FC = () => {
     'Moonshot AI': '#9C27B0'
   };
 
+  // AI 모델 정보 로딩
+  const [modelInfoData, setModelInfoData] = useState<any>(null);
+
   // API 데이터를 기반으로 모델 세부 리스트 생성
   const getModelDetails = (): Record<string, Array<{id: string, name: string, icon: string}>> => {
     if (!modelInfoData) {
@@ -105,9 +108,6 @@ const AIChat: React.FC = () => {
   };
 
   const modelDetails = getModelDetails();
-
-  // AI 모델 정보 로딩
-  const [modelInfoData, setModelInfoData] = useState<any>(null);
   const [modelInfoLoading, setModelInfoLoading] = useState(false);
 
   // 데이터 로딩
