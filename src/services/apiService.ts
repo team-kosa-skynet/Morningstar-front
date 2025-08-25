@@ -1156,19 +1156,38 @@ export const sendChatMessageStream = async (
       buffer = lines.pop() || '';
       
       for (const line of lines) {
-        if (line.startsWith('data:')) {
-          const text = line.slice(5);
-          if (text.trim()) {
+        const trimmedLine = line.trim();
+        
+        // 디버깅 로그
+        if (trimmedLine) {
+          console.log('SSE Line:', trimmedLine);
+        }
+        
+        if (trimmedLine.startsWith('data:')) {
+          const text = trimmedLine.slice(5).trim();
+          if (text && text !== '[DONE]') {
+            console.log('Processing data:', text);
             onMessage(text);
+          }
+        } else if (trimmedLine.startsWith('event:')) {
+          const eventType = trimmedLine.slice(6).trim();
+          console.log('SSE Event:', eventType);
+          
+          if (eventType === 'done') {
+            console.log('Stream completed');
+            onComplete?.();
+            return;
           }
         }
       }
     }
     
     // Process any remaining data in buffer
-    if (buffer.startsWith('data:')) {
-      const text = buffer.slice(5);
-      if (text.trim()) {
+    const trimmedBuffer = buffer.trim();
+    if (trimmedBuffer.startsWith('data:')) {
+      const text = trimmedBuffer.slice(5).trim();
+      if (text && text !== '[DONE]') {
+        console.log('Processing final data:', text);
         onMessage(text);
       }
     }

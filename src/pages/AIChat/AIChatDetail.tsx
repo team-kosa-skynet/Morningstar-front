@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import styles from './AIChatDetail.module.scss';
 import FeedbackModal from '../../components/Modal/FeedbackModal';
 import openAILogo from '../../assets/images/openAI-Photoroom.png';
@@ -9,6 +10,7 @@ import { useAuthStore } from '../../stores/authStore';
 
 const AIChatDetail: React.FC = () => {
   const { token } = useAuthStore();
+  const [searchParams] = useSearchParams();
   const [message, setMessage] = useState('');
   const [isModelSelectionOpen, setIsModelSelectionOpen] = useState(false);
   const [isModelDetailOpen, setIsModelDetailOpen] = useState(false);
@@ -23,8 +25,12 @@ const AIChatDetail: React.FC = () => {
     'GPT-4o': false,
     'Claude Sonnet 4': false
   });
-  const [conversationId] = useState(23); // 임시 conversation ID
-  const [currentQuestion, setCurrentQuestion] = useState('각자 자신의 모델에 대해 소개한번만 부탁해');
+  
+  // URL 파라미터에서 conversationId와 질문 가져오기
+  const conversationId = parseInt(searchParams.get('conversationId') || '0');
+  const [currentQuestion, setCurrentQuestion] = useState(
+    searchParams.get('question') || '각자 자신의 모델에 대해 소개한번만 부탁해'
+  );
   const chatInputRef = useRef<HTMLDivElement>(null);
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean;
@@ -151,14 +157,13 @@ const AIChatDetail: React.FC = () => {
     setIsModelSelectionOpen(true);
   };
 
-  const handleSubmit = async () => {
-    if (!message.trim() || !token) {
+  const startStreaming = async (questionText: string) => {
+    if (!questionText.trim() || !token || !conversationId) {
+      console.log('Missing required data for streaming:', { questionText, token: !!token, conversationId });
       return;
     }
 
-    const currentMessage = message;
-    setCurrentQuestion(currentMessage);
-    setMessage('');
+    console.log('Starting streaming with:', { questionText, conversationId });
 
     // 두 모델 동시에 스트리밍 시작
     setIsStreaming({ 'GPT-4o': true, 'Claude Sonnet 4': true });
@@ -168,7 +173,7 @@ const AIChatDetail: React.FC = () => {
     const gptPromise = sendChatMessageStream(
       conversationId,
       'openai',
-      { content: currentMessage, model: 'gpt-4o' },
+      { content: questionText, model: 'gpt-4o' },
       token,
       (text: string) => {
         setStreamingMessages(prev => ({
@@ -192,7 +197,7 @@ const AIChatDetail: React.FC = () => {
     const claudePromise = sendChatMessageStream(
       conversationId,
       'claude',
-      { content: currentMessage, model: 'claude-sonnet-4' },
+      { content: questionText, model: 'claude-sonnet-4' },
       token,
       (text: string) => {
         setStreamingMessages(prev => ({
@@ -216,6 +221,18 @@ const AIChatDetail: React.FC = () => {
     Promise.allSettled([gptPromise, claudePromise]).then(() => {
       console.log('All streaming completed');
     });
+  };
+
+  const handleSubmit = async () => {
+    if (!message.trim() || !token) {
+      return;
+    }
+
+    const currentMessage = message;
+    setCurrentQuestion(currentMessage);
+    setMessage('');
+    
+    await startStreaming(currentMessage);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -242,6 +259,14 @@ const AIChatDetail: React.FC = () => {
   useEffect(() => {
     updateChatInputHeight();
   }, []);
+
+  // 페이지 로드 시 자동으로 스트리밍 시작
+  useEffect(() => {
+    if (conversationId && token && currentQuestion) {
+      console.log('Auto-starting stream with conversationId:', conversationId);
+      startStreaming(currentQuestion);
+    }
+  }, [conversationId, token, currentQuestion]);
 
   return (
     <div className={styles.container}>

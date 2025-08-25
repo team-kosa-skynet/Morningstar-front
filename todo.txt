@@ -219,3 +219,120 @@ data:!
 event:done
 data:스트리밍 완료
 
+=========
+
+react-dom_client.js?v=1f4075c3:17987 Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+authStore.ts:173 오늘은 이미 출석체크를 완료했습니다.
+authStore.ts:118 멤버 정보 새로고침 API 호출 시작...
+authStore.ts:120 멤버 정보 API 응답: Object
+authStore.ts:139 포인트 업데이트: 37100 → 37100
+authStore.ts:140 레벨 업데이트: 7 → 7
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+App.tsx:96 주기적 토큰 유효성 검사 중...
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+authStore.ts:173 오늘은 이미 출석체크를 완료했습니다.
+authStore.ts:118 멤버 정보 새로고침 API 호출 시작...
+authStore.ts:120 멤버 정보 API 응답: Object
+authStore.ts:139 포인트 업데이트: 37100 → 37100
+authStore.ts:140 레벨 업데이트: 7 → 7
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+apiService.ts:508 [getBoards] Calling API: /api/boards?page=0&size=7&sort=createdAt,desc
+apiService.ts:509 [getBoards] Using API_BASE_URL: /api
+apiService.ts:508 [getBoards] Calling API: /api/boards?page=0&size=7&sort=createdAt,desc
+apiService.ts:509 [getBoards] Using API_BASE_URL: /api
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Objectemail: "sp2877@naver.com"level: 7name: "안녕하세요"point: 37100role: "ROLE_USER"userId: 4[[Prototype]]: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: {email: 'sp2877@naver.com', name: '안녕하세요', userId: 4, role: 'ROLE_USER', point: 37100, …}email: "sp2877@naver.com"level: 7name: "안녕하세요"point: 37100role: "ROLE_USER"userId: 4[[Prototype]]: Object
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: {email: 'sp2877@naver.com', name: '안녕하세요', userId: 4, role: 'ROLE_USER', point: 37100, …}email: "sp2877@naver.com"level: 7name: "안녕하세요"point: 37100role: "ROLE_USER"userId: 4[[Prototype]]: Objectconstructor: ƒ Object()hasOwnProperty: ƒ hasOwnProperty()isPrototypeOf: ƒ isPrototypeOf()propertyIsEnumerable: ƒ propertyIsEnumerable()toLocaleString: ƒ toLocaleString()toString: ƒ toString()valueOf: ƒ valueOf()__defineGetter__: ƒ __defineGetter__()__defineSetter__: ƒ __defineSetter__()__lookupGetter__: ƒ __lookupGetter__()__lookupSetter__: ƒ __lookupSetter__()__proto__: (...)get __proto__: ƒ __proto__()set __proto__: ƒ __proto__()
+Header.tsx:17 Header - user.point: 37100
+
+=======================================
+

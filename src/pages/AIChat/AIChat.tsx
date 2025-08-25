@@ -303,8 +303,8 @@ const AIChat: React.FC = () => {
           }
         });
 
-        // 스트리밍을 기다리지 않고 즉시 상세 페이지로 이동
-        navigate('/ai-chat/detail');
+        // 스트리밍을 기다리지 않고 즉시 상세 페이지로 이동 (conversationId 포함)
+        navigate(`/ai-chat/detail?conversationId=${conversationId}&question=${encodeURIComponent(message)}`);
         
         // 백그라운드에서 스트리밍 처리 (결과는 무시)
         Promise.all(promises).catch(error => {
