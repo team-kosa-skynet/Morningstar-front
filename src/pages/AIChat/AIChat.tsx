@@ -290,7 +290,7 @@ const AIChat: React.FC = () => {
         
         const promises = selectedModels.map(async (model) => {
           try {
-            const provider = model.brand as 'openai' | 'claude' | 'gemini';
+            const provider = model.brand === 'gpt' ? 'openai' : model.brand as 'openai' | 'claude' | 'gemini';
             const chatData = {
               content: message,
               model: model.id

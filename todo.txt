@@ -49,7 +49,6 @@ curl --location 'https://gaebang.site/api/conversations/10/gemini/stream' \
 --form 'files=@"/C:/Users/USER/Desktop/고양이.jpg"'
 
 
-
 일단 ai chat 페이지에서
 모델을 선택하고 제출버튼을 눌렀을 때 api를 연동해줘. 리퀘스트 보내는거만 연동해주고
 리스폰스 받아서 상세 페이지 표시해주는거는 나중에 처리할거야.
