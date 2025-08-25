@@ -55,7 +55,7 @@ const AIChatDetail: React.FC = () => {
     }
     
     let currentIndex = streamingMessages[modelName]?.length || 0;
-    const typingSpeed = 50; // 50ms마다 한 글자씩 (디버깅을 위해 속도 느리게)
+    const typingSpeed = 25; // 25ms마다 한 글자씩
     
     console.log(`🔄 [TYPING] ${modelName} starting from index: ${currentIndex}, target length: ${fullText.length}`);
     
