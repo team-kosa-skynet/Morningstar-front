@@ -336,3 +336,423 @@ Header.tsx:17 Header - user.point: 37100
 
 =======================================
 
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: {email: 'sp2877@naver.com', name: '안녕하세요', userId: 4, role: 'ROLE_USER', point: 37100, …}
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: {email: 'sp2877@naver.com', name: '안녕하세요', userId: 4, role: 'ROLE_USER', point: 37100, …}
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: {email: 'sp2877@naver.com', name: '안녕하세요', userId: 4, role: 'ROLE_USER', point: 37100, …}
+Header.tsx:17 Header - user.point: 37100
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: {email: 'sp2877@naver.com', name: '안녕하세요', userId: 4, role: 'ROLE_USER', point: 37100, …}
+Header.tsx:17 Header - user.point: 37100
+AIChatDetail.tsx:266 Auto-starting stream with conversationId: 30
+AIChatDetail.tsx:166 Starting streaming with: {questionText: '안녕하세요!~~', conversationId: 30}
+AIChatDetail.tsx:266 Auto-starting stream with conversationId: 30
+AIChatDetail.tsx:166 Starting streaming with: {questionText: '안녕하세요!~~', conversationId: 30}
+apiService.ts:1163 SSE Line: event:error
+apiService.ts:1174 SSE Event: error
+apiService.ts:1163 SSE Line: data:AI 응답 생성 중 오류가 발생했습니다.
+apiService.ts:1169 Processing data: AI 응답 생성 중 오류가 발생했습니다.
+apiService.ts:1163 SSE Line: event:error
+apiService.ts:1174 SSE Event: error
+apiService.ts:1163 SSE Line: data:AI 응답 생성 중 오류가 발생했습니다.
+apiService.ts:1169 Processing data: AI 응답 생성 중 오류가 발생했습니다.
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data:안
+apiService.ts:1169 Processing data: 안
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data:녕하세요
+apiService.ts:1169 Processing data: 녕하세요
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data:!
+apiService.ts:1169 Processing data: !
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data: 어떻게
+apiService.ts:1169 Processing data: 어떻게
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data: 도
+apiService.ts:1169 Processing data: 도
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data:와
+apiService.ts:1169 Processing data: 와
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data:드
+apiService.ts:1169 Processing data: 드
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data:릴
+apiService.ts:1169 Processing data: 릴
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data:까요
+apiService.ts:1169 Processing data: 까요
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data:?
+apiService.ts:1169 Processing data: ?
+apiService.ts:1163 SSE Line: event:done
+apiService.ts:1174 SSE Event: done
+apiService.ts:1177 Stream completed
+AIChatDetail.tsx:222 All streaming completed
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data:안
+apiService.ts:1169 Processing data: 안
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data:녕하세요
+apiService.ts:1169 Processing data: 녕하세요
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data:!
+apiService.ts:1169 Processing data: !
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data: 어떻게
+apiService.ts:1169 Processing data: 어떻게
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data: 도
+apiService.ts:1169 Processing data: 도
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data:와
+apiService.ts:1169 Processing data: 와
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data:드
+apiService.ts:1169 Processing data: 드
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data:릴
+apiService.ts:1169 Processing data: 릴
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data:까요
+apiService.ts:1169 Processing data: 까요
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1174 SSE Event: message
+apiService.ts:1163 SSE Line: data:?
+apiService.ts:1169 Processing data: ?
+apiService.ts:1163 SSE Line: event:done
+apiService.ts:1174 SSE Event: done
+apiService.ts:1177 Stream completed
+AIChatDetail.tsx:222 All streaming completed
+
+Request URL
+http://localhost:8081/api/conversations/30/openai/stream
+Request Method
+POST
+Status Code
+200 OK
+Remote Address
+[::1]:8081
+Referrer Policy
+strict-origin-when-cross-origin
+
+Request URL
+http://localhost:8081/api/conversations/30/claude/stream
+Request Method
+POST
+Status Code
+200 OK
+Remote Address
+[::1]:8081
+Referrer Policy
+strict-origin-when-cross-origin
+
+Request URL
+http://localhost:8081/api/conversations/30/openai/stream
+Request Method
+POST
+Status Code
+200 OK
+Remote Address
+[::1]:8081
+Referrer Policy
+strict-origin-when-cross-origin
+
+Request URL
+http://localhost:8081/api/conversations/30/claude/stream
+Request Method
+POST
+Status Code
+200 OK
+Remote Address
+[::1]:8081
+Referrer Policy
+strict-origin-when-cross-origin
+
+
+GPT-4o
+안녕하세요!어떻게도와드릴까요?안녕하세요!어떻게도와드릴까요?
+
+
+
+Claude Sonnet 4
+AI 응답 생성 중 오류가 발생했습니다.AI 응답 생성 중 오류가 발생했습니다.
+
+====================================
+
+Request URL
+https://yupp.ai/chat/c9afac77-069c-4ad1-a930-f21182b078f2
+Request Method
+POST
+Status Code
+200 OK
+Remote Address
+76.76.21.21:443
+Referrer Policy
+strict-origin-when-cross-origin
+
+3:"$Sui.streamable.value"
+0:{"a":"$@1","f":"","b":"2hQ_29mCiNJx8s2BJk2OF","c":["","chat","c9afac77-069c-4ad1-a930-f21182b078f2"]}
+1:{"leftStream":{"curr":"$undefined","next":"$@2","type":"$3"},"rightStream":{"curr":"$undefined","next":"$@4","type":"$3"},"leftMetadata":"$@5","rightMetadata":"$@6","quickResponse":{"serverId":"$@7","stream":{"curr":"$undefined","next":"$@8","type":"$3"}},"persistedTurn":{"curr":"$undefined","next":"$@9","type":"$3"},"pendingRewardActionResult":"$@a","turnId":{"curr":"$undefined","next":"$@b","type":"$3"},"leftMessageId":{"curr":"$undefined","next":"$@c","type":"$3"},"rightMessageId":{"curr":"$undefined","next":"$@d","type":"$3"},"routingResultPromise":"$@e","nudgeNewChatPromise":"$@f"}
+8:{"curr":"키보드가 무작위로 눌린 것 같아요!"}
+e:{"modelSelections":[{"modelNameForReviews":"$undefined","obfuscatedModelName":"fAgDWFYcVkxgWUNWQURXUxRVGnobUAUVfRV8DBFDFkxTEUwjKU1MTmw3PQ==","label":"Llama 4 Maverick (Azure)","shortLabel":"Llama 4 Maverick","isPro":false,"isMax":false,"isLive":false,"isNew":false,"isInternal":false,"isReasoning":false,"isFast":false,"isImageGeneration":false,"isAgent":false,"iconURL":"https://7s8qtap8fabg3zyw.public.blob.vercel-storage.com/dark%20mode%20icons/llama-dark-mode-X37idbRgajK6LGUKN9hF9Xqunu9QYZ.svg","iconURLDark":"https://7s8qtap8fabg3zyw.public.blob.vercel-storage.com/dark%20mode%20icons/llama-dark-mode-X37idbRgajK6LGUKN9hF9Xqunu9QYZ.svg","externalUrl":"https://ai.meta.com/blog/llama-4-multimodal-intelligence/","timeAddedMillis":1749100210911,"brandColorDark":"#0082fb","brandColorLight":"#0082fb","brandContrastColorDark":"#64b3fe","brandContrastColorLight":"#00417c","styleModifierId":"$undefined","routingReason":"","selectionSource":"ROUTER_SELECTED","obfuscatedFallbackModelName":"XQEWVBpdDgBAWRp/X0xZWRRXAwsbVgdvFXFbERZFEVpESDUQCxcfTBM5Li0=","supportsStyleChange":true,"cardBorderOpacity":0.2,"cardOpacityLight":0.1,"cardOpacityDark":0.1,"modelChipColorLight":"#0082fb","modelChipColorDark":"#0082fb","isBlind":false,"fontOverride":"$undefined","description":"Llama 4 Maverick is a model in the Llama 4 ecosystem, the first open-weight natively multimodal model built using a mixture-of-experts (MoE) architecture, with 17 billion active parameter model and 128 experts."},{"modelNameForReviews":"$undefined","obfuscatedModelName":"XQ0RQUVQDgBEF1haQFlGWVVJQF1SCEJAFQsbU14JK2li","label":"Mistral Medium 3.1 (OpenRouter)","shortLabel":"Mistral Medium 3.1","isPro":false,"isMax":false,"isLive":false,"isNew":false,"isInternal":false,"isReasoning":false,"isFast":false,"isImageGeneration":false,"isAgent":false,"iconURL":"https://7s8qtap8fabg3zyw.public.blob.vercel-storage.com/mistral-cIgeIEH6DUd9DlLlYdAn9wMFMQ81s4.svg","iconURLDark":"https://7s8qtap8fabg3zyw.public.blob.vercel-storage.com/mistral-cIgeIEH6DUd9DlLlYdAn9wMFMQ81s4.svg","externalUrl":"https://docs.mistral.ai/getting-started/models/models_overview/","timeAddedMillis":1755098375572,"brandColorDark":"#ee7930","brandColorLight":"#ee7930","brandContrastColorDark":"#ff8d45","brandContrastColorLight":"#70230b","styleModifierId":"$undefined","routingReason":"","selectionSource":"ROUTER_SELECTED","obfuscatedFallbackModelName":"URYMD1ZGEVtPXVFBXE5fAkwXAF1XEkMACQIPBA1CCl1REQgKF1gdH0kIA0sIBV4aEwwJAx4IFABfU1wfDUhTABheXxEVX01WRx5bBAIIWBN6cyU=","supportsStyleChange":true,"cardBorderOpacity":0.2,"cardOpacityLight":0.1,"cardOpacityDark":0.1,"modelChipColorLight":"#ee7930","modelChipColorDark":"#ee7930","isBlind":false,"fontOverride":"$undefined","description":"$undefined"}],"blindTurn":false,"canShowMore":true,"debugInfo":"$undefined"}
+b:{"curr":"0db571ba-8533-489d-86a7-885bb7d90eae"}
+7:"c6e66084-b040-4435-9294-41e0233ad5ac"
+c:{"curr":"c0d66455-a1d7-4d94-8e45-ed9bf2764297"}
+d:{"curr":"691f9b1c-85cf-4f1c-a517-e5a315d8411b"}
+4:{"curr":"네","next":"$@10"}
+10:{"curr":",","next":"$@11"}
+11:{"curr":" 혹시","next":"$@12"}
+12:{"curr":" 실","next":"$@13"}
+13:{"curr":"수로","next":"$@14"}
+14:{"curr":" 입력","next":"$@15"}
+15:{"curr":"하","next":"$@16"}
+16:{"curr":"신","next":"$@17"}
+17:{"curr":" 건가","next":"$@18"}
+18:{"curr":"요","next":"$@19"}
+19:{"curr":"?","next":"$@1a"}
+1a:{"curr":" 😊","next":"$@1b"}
+1b:{"curr":"\n","next":"$@1c"}
+1c:{"curr":"저","next":"$@1d"}
+1d:{"curr":"녁","next":"$@1e"}
+1e:{"curr":" 메","next":"$@1f"}
+1f:{"curr":"뉴","next":"$@20"}
+20:{"curr":" 추","next":"$@21"}
+21:{"curr":"천","next":"$@22"}
+22:{"curr":"이","next":"$@23"}
+23:{"curr":" 필요","next":"$@24"}
+24:{"curr":"하","next":"$@25"}
+25:{"curr":"시","next":"$@26"}
+26:{"curr":"다면","next":"$@27"}
+27:{"curr":",","next":"$@28"}
+28:{"curr":" 다음과","next":"$@29"}
+29:{"curr":" 같은","next":"$@2a"}
+2a:{"curr":" 추가","next":"$@2b"}
+2b:{"curr":" 질문","next":"$@2c"}
+2c:{"curr":"에","next":"$@2d"}
+2d:{"curr":" 답","next":"$@2e"}
+2e:{"curr":"변","next":"$@2f"}
+2f:{"curr":"해","next":"$@30"}
+30:{"curr":"주","next":"$@31"}
+31:{"curr":"시","next":"$@32"}
+32:{"curr":"면","next":"$@33"}
+33:{"curr":" 더","next":"$@34"}
+34:{"curr":" 구체","next":"$@35"}
+35:{"curr":"적으로","next":"$@36"}
+36:{"curr":" 도와","next":"$@37"}
+37:{"curr":"드","next":"$@38"}
+38:{"curr":"릴","next":"$@39"}
+39:{"curr":" 수","next":"$@3a"}
+3a:{"curr":" 있어요","next":"$@3b"}
+3b:{"curr":"!\n\n","next":"$@3c"}
+3c:{"curr":"1","next":"$@3d"}
+3d:{"curr":".","next":"$@3e"}
+3e:{"curr":" **","next":"$@3f"}
+3f:{"curr":"몇","next":"$@40"}
+40:{"curr":" 분","next":"$@41"}
+41:{"curr":"께서","next":"$@42"}
+42:{"curr":" 드","next":"$@43"}
+43:{"curr":"실","next":"$@44"}
+44:{"curr":" 건가","next":"$@45"}
+45:{"curr":"요","next":"$@46"}
+46:{"curr":"?**","next":"$@47"}
+47:{"curr":" (","next":"$@48"}
+48:{"curr":"1","next":"$@49"}
+49:{"curr":"인","next":"$@4a"}
+4a:{"curr":"분","next":"$@4b"}
+4b:{"curr":" /","next":"$@4c"}
+4c:{"curr":" ","next":"$@4d"}
+4d:{"curr":"2","next":"$@4e"}
+4e:{"curr":"인","next":"$@4f"}
+4f:{"curr":"분","next":"$@50"}
+50:{"curr":" 이상","next":"$@51"}
+51:{"curr":")\n","next":"$@52"}
+52:{"curr":"2","next":"$@53"}
+53:{"curr":".","next":"$@54"}
+54:{"curr":" **","next":"$@55"}
+55:{"curr":"선","next":"$@56"}
+56:{"curr":"호","next":"$@57"}
+57:{"curr":"하는","next":"$@58"}
+58:{"curr":" 음식","next":"$@59"}
+59:{"curr":" 스타","next":"$@5a"}
+5a:{"curr":"일","next":"$@5b"}
+5b:{"curr":"은","next":"$@5c"}
+5c:{"curr":"?**","next":"$@5d"}
+5d:{"curr":" (","next":"$@5e"}
+5e:{"curr":"한","next":"$@5f"}
+5f:{"curr":"식","next":"$@60"}
+60:{"curr":" /","next":"$@61"}
+61:{"curr":" 양","next":"$@62"}
+62:{"curr":"식","next":"$@63"}
+63:{"curr":" /","next":"$@64"}
+64:{"curr":" 중","next":"$@65"}
+65:{"curr":"식","next":"$@66"}
+66:{"curr":" /","next":"$@67"}
+67:{"curr":" 일","next":"$@68"}
+68:{"curr":"식","next":"$@69"}
+69:{"curr":" /","next":"$@6a"}
+6a:{"curr":" 채","next":"$@6b"}
+6b:{"curr":"식","next":"$@6c"}
+6c:{"curr":" 등","next":"$@6d"}
+6d:{"curr":")\n","next":"$@6e"}
+6e:{"curr":"3","next":"$@6f"}
+6f:{"curr":".","next":"$@70"}
+70:{"curr":" **","next":"$@71"}
+71:{"curr":"조","next":"$@72"}
+72:{"curr":"리","next":"$@73"}
+73:{"curr":" 시간","next":"$@74"}
+74:{"curr":"은","next":"$@75"}
+75:{"curr":" 얼마","next":"$@76"}
+76:{"curr":" 정도","next":"$@77"}
+77:{"curr":" 원","next":"$@78"}
+78:{"curr":"하","next":"$@79"}
+79:{"curr":"시","next":"$@7a"}
+7a:{"curr":"나요","next":"$@7b"}
+7b:{"curr":"?**","next":"$@7c"}
+7c:{"curr":" (","next":"$@7d"}
+7d:{"curr":"5","next":"$@7e"}
+7e:{"curr":"분","next":"$@7f"}
+7f:{"curr":" 이내","next":"$@80"}
+80:{"curr":" /","next":"$@81"}
+81:{"curr":" ","next":"$@82"}
+82:{"curr":"1","next":"$@83"}
+83:{"curr":"0","next":"$@84"}
+84:{"curr":"분","next":"$@85"}
+85:{"curr":" 이내","next":"$@86"}
+86:{"curr":" /","next":"$@87"}
+87:{"curr":" ","next":"$@88"}
+88:{"curr":"3","next":"$@89"}
+89:{"curr":"0","next":"$@8a"}
+8a:{"curr":"분","next":"$@8b"}
+8b:{"curr":" 이상","next":"$@8c"}
+8c:{"curr":" 등","next":"$@8d"}
+8d:{"curr":")\n","next":"$@8e"}
+8e:{"curr":"4","next":"$@8f"}
+8f:{"curr":".","next":"$@90"}
+90:{"curr":" **","next":"$@91"}
+91:{"curr":"특","next":"$@92"}
+92:{"curr":"별","next":"$@93"}
+93:{"curr":"히","next":"$@94"}
+94:{"curr":" 피","next":"$@95"}
+95:{"curr":"하고","next":"$@96"}
+96:{"curr":" 싶은","next":"$@97"}
+97:{"curr":" 재","next":"$@98"}
+98:{"curr":"료","next":"$@99"}
+99:{"curr":"가","next":"$@9a"}
+9a:{"curr":" 있","next":"$@9b"}
+9b:{"curr":"나요","next":"$@9c"}
+9c:{"curr":"?**","next":"$@9d"}
+9d:{"curr":" (","next":"$@9e"}
+9e:{"curr":"예","next":"$@9f"}
+9f:{"curr":":","next":"$@a0"}
+a0:{"curr":" 고","next":"$@a1"}
+a1:{"curr":"추","next":"$@a2"}
+a2:{"curr":",","next":"$@a3"}
+a3:{"curr":" 우","next":"$@a4"}
+a4:{"curr":"유","next":"$@a5"}
+a5:{"curr":",","next":"$@a6"}
+a6:{"curr":" 해","next":"$@a7"}
+a7:{"curr":"산","next":"$@a8"}
+a8:{"curr":"물","next":"$@a9"}
+a9:{"curr":" 등","next":"$@aa"}
+aa:{"curr":")\n\n","next":"$@ab"}
+ab:{"curr":"혹","next":"$@ac"}
+ac:{"curr":"은","next":"$@ad"}
+ad:{"curr":" 다른","next":"$@ae"}
+ae:{"curr":" 질문","next":"$@af"}
+af:{"curr":"이나","next":"$@b0"}
+b0:{"curr":" 요청","next":"$@b1"}
+b1:{"curr":"이","next":"$@b2"}
+b2:{"curr":" 있으","next":"$@b3"}
+b3:{"curr":"신","next":"$@b4"}
+b4:{"curr":"가","next":"$@b5"}
+b5:{"curr":"요","next":"$@b6"}
+b6:{"curr":"?","next":"$@b7"}
+b7:{"curr":" 😊","next":"$@b8"}
+6:{}
+b8:{}
+2:{"curr":"\n\\<streaming stopped unexpectedly\\>","next":"$@b9"}
+5:{}
+b9:{}
+f:false
+9:{}
+a:{"isRewarded":true,"unclaimedRewardInfo":{"rewardId":"1f6cac70-af3c-432e-9082-b55db9e20136","comment":"Model feedback reward boost.","creditDelta":368},"highValueTurnRewardInfo":"$a:unclaimedRewardInfo"}
+
+==================
+
+Request URL
+https://claude.ai/api/organizations/ade7860f-ac9b-4de5-9f8d-741d2263fe9e/chat_conversations/6c0ed308-ca07-4a22-b490-c764a88dd24d/completion
+Request Method
+POST
+Status Code
+200 OK
+Remote Address
+160.79.104.10:443
+Referrer Policy
+strict-origin-when-cross-origin
+
+event: message_start
+data: {"type":"message_start","message":{"id":"chatcompl_014zup39HDLVTzdGZkFwJQS4","type":"message","role":"assistant","model":"","parent_uuid":"c0655724-5988-410f-b772-7820da571182","uuid":"d8d3fb2c-0172-4665-abec-56b62247422e","content":[],"stop_reason":null,"stop_sequence":null}   }
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"start_timestamp":"2025-08-25T05:31:30.417759Z","stop_timestamp":null,"type":"text","text":"","citations":[]}  }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" "}     }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"오늘 "}  }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"저녁 "}    }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"메뉴로"}           }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" "}       }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"몇 가지 추"}            }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"천드"}              }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"릴게요!"}  }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n\n**간"}              }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"단"}      }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"하고 맛있"}       }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"는 "}    }

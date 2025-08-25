@@ -1099,6 +1099,8 @@ export const sendChatMessage = async (
   }
 };
 
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export const sendChatMessageStream = async (
   conversationId: number,
   provider: 'openai' | 'claude' | 'gemini',
@@ -1106,96 +1108,184 @@ export const sendChatMessageStream = async (
   token: string,
   onMessage: (text: string) => void,
   onComplete?: () => void,
-  onError?: (error: any) => void
+  onError?: (error: any) => void,
+  abortController?: AbortController,
+  maxRetries: number = 3
 ) => {
-  try {
-    const formData = new FormData();
-    formData.append('content', chatData.content);
+  let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+  let retryCount = 0;
+  
+  const attemptStream = async (): Promise<void> => {
+    const streamId = `${provider}-${conversationId}-${Date.now()}`;
+    console.log(`🔄 [API-${provider.toUpperCase()}] Starting stream attempt ${retryCount + 1}/${maxRetries + 1} (ID: ${streamId})`);
     
-    if (chatData.model) {
-      formData.append('model', chatData.model);
-    }
-    
-    if (chatData.files && chatData.files.length > 0) {
-      chatData.files.forEach((file) => {
-        formData.append('files', file);
-      });
-    }
-
-    const response = await fetch(
-      `${API_BASE_URL}/conversations/${conversationId}/${provider}/stream`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
+    try {
+      const formData = new FormData();
+      formData.append('content', chatData.content);
+      
+      if (chatData.model) {
+        formData.append('model', chatData.model);
       }
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const reader = response.body?.getReader();
-    if (!reader) {
-      throw new Error('Response body is not readable');
-    }
-
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
       
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      
-      // Keep the last incomplete line in buffer
-      buffer = lines.pop() || '';
-      
-      for (const line of lines) {
-        const trimmedLine = line.trim();
-        
-        // 디버깅 로그
-        if (trimmedLine) {
-          console.log('SSE Line:', trimmedLine);
+      if (chatData.files && chatData.files.length > 0) {
+        chatData.files.forEach((file) => {
+          formData.append('files', file);
+        });
+      }
+
+      // 요청 타임아웃 30초
+      const timeoutController = new AbortController();
+      const timeoutId = setTimeout(() => {
+        console.log(`⏰ [API-${provider.toUpperCase()}] Request timeout (30s) - aborting`);
+        timeoutController.abort();
+      }, 30000);
+
+      // AbortController 조합 (더 호환성이 좋은 방식)
+      let combinedSignal = timeoutController.signal;
+      if (abortController) {
+        // 외부 AbortController가 있으면 그것을 우선 사용
+        if (abortController.signal.aborted) {
+          console.log(`🚫 [API-${provider.toUpperCase()}] Request already aborted before fetch`);
+          clearTimeout(timeoutId);
+          throw new Error('Request was aborted');
+        }
+        combinedSignal = abortController.signal;
+      }
+
+      console.log(`📡 [API-${provider.toUpperCase()}] Sending fetch request...`);
+      const response = await fetch(
+        `${API_BASE_URL}/conversations/${conversationId}/${provider}/stream`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData,
+          signal: combinedSignal
+        }
+      );
+
+      clearTimeout(timeoutId);
+      console.log(`✅ [API-${provider.toUpperCase()}] Fetch response received: ${response.status} ${response.statusText}`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('Response body is not readable');
+      }
+
+      console.log(`🔗 [API-${provider.toUpperCase()}] Stream reader established`);
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let chunkCount = 0;
+
+      while (true) {
+        // Check if aborted before reading
+        if (abortController?.signal.aborted) {
+          console.log(`🚫 [API-${provider.toUpperCase()}] Stream aborted during read`);
+          throw new Error('Request was aborted');
         }
         
-        if (trimmedLine.startsWith('data:')) {
-          const text = trimmedLine.slice(5).trim();
-          if (text && text !== '[DONE]') {
-            console.log('Processing data:', text);
-            onMessage(text);
-          }
-        } else if (trimmedLine.startsWith('event:')) {
-          const eventType = trimmedLine.slice(6).trim();
-          console.log('SSE Event:', eventType);
+        const { done, value } = await reader.read();
+        if (done) {
+          console.log(`🏁 [API-${provider.toUpperCase()}] Stream ended, total chunks: ${chunkCount}`);
+          break;
+        }
+        
+        chunkCount++;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        
+        // Keep the last incomplete line in buffer
+        buffer = lines.pop() || '';
+        
+        for (const line of lines) {
+          const trimmedLine = line.trim();
           
-          if (eventType === 'done') {
-            console.log('Stream completed');
-            onComplete?.();
-            return;
+          if (trimmedLine.startsWith('data:')) {
+            const text = trimmedLine.slice(5).trim();
+            if (text && text !== '[DONE]') {
+              onMessage(text);
+            }
+          } else if (trimmedLine.startsWith('event:')) {
+            const eventType = trimmedLine.slice(6).trim();
+            console.log(`📋 [API-${provider.toUpperCase()}] SSE Event: ${eventType}`);
+            
+            if (eventType === 'done') {
+              console.log(`✅ [API-${provider.toUpperCase()}] Stream completed via event signal`);
+              onComplete?.();
+              return;
+            }
           }
         }
       }
-    }
-    
-    // Process any remaining data in buffer
-    const trimmedBuffer = buffer.trim();
-    if (trimmedBuffer.startsWith('data:')) {
-      const text = trimmedBuffer.slice(5).trim();
-      if (text && text !== '[DONE]') {
-        console.log('Processing final data:', text);
-        onMessage(text);
+      
+      // Process any remaining data in buffer
+      const trimmedBuffer = buffer.trim();
+      if (trimmedBuffer.startsWith('data:')) {
+        const text = trimmedBuffer.slice(5).trim();
+        if (text && text !== '[DONE]') {
+          onMessage(text);
+        }
       }
+      
+      console.log(`✅ [API-${provider.toUpperCase()}] Stream completed naturally`);
+      onComplete?.();
+    } catch (error) {
+      // Properly close reader on error
+      try {
+        if (reader) {
+          console.log(`🔧 [API-${provider.toUpperCase()}] Closing reader due to error`);
+          await reader.cancel();
+          reader = null;
+        }
+      } catch (closeError) {
+        console.warn(`⚠️ [API-${provider.toUpperCase()}] Error closing reader:`, closeError);
+      }
+      
+      if (error instanceof Error && (error.name === 'AbortError' || error.message === 'Request was aborted')) {
+        console.log(`🚫 [API-${provider.toUpperCase()}] Stream was aborted`);
+        return;
+      }
+      
+      // 재시도 로직
+      if (retryCount < maxRetries && !abortController?.signal.aborted) {
+        retryCount++;
+        const backoffDelay = Math.pow(2, retryCount - 1) * 1000; // 1초, 2초, 4초
+        console.group(`🔄 [API-${provider.toUpperCase()}] Retry attempt ${retryCount}/${maxRetries}`);
+        console.log(`❌ Previous error:`, error instanceof Error ? error.message : error);
+        console.log(`⏱️ Waiting ${backoffDelay}ms before retry...`);
+        console.groupEnd();
+        
+        await delay(backoffDelay);
+        
+        if (!abortController?.signal.aborted) {
+          return attemptStream();
+        }
+      }
+      
+      console.error(`❌ [API-${provider.toUpperCase()}] Streaming failed after all retries:`, error);
+      onError?.(error);
+      throw error;
     }
-    
-    onComplete?.();
-  } catch (error) {
-    console.error('Streaming error:', error);
-    onError?.(error);
-    throw error;
+  };
+
+  try {
+    console.log(`🚀 [API-${provider.toUpperCase()}] Starting streaming service`);
+    await attemptStream();
+  } finally {
+    // Ensure reader is always cleaned up
+    try {
+      if (reader) {
+        console.log(`🔧 [API-${provider.toUpperCase()}] Final cleanup: closing reader`);
+        await reader.cancel();
+      }
+    } catch (closeError) {
+      console.warn(`⚠️ [API-${provider.toUpperCase()}] Error in final reader cleanup:`, closeError);
+    }
+    console.log(`🏁 [API-${provider.toUpperCase()}] Stream service ended`);
   }
 };

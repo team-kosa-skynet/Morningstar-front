@@ -26,6 +26,9 @@ const AIChatDetail: React.FC = () => {
     'Claude Sonnet 4': false
   });
   
+  // AbortController 관리
+  const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
+  
   // URL 파라미터에서 conversationId와 질문 가져오기
   const conversationId = parseInt(searchParams.get('conversationId') || '0');
   const [currentQuestion, setCurrentQuestion] = useState(
@@ -157,69 +160,157 @@ const AIChatDetail: React.FC = () => {
     setIsModelSelectionOpen(true);
   };
 
+  // 기존 스트림 연결 모두 취소
+  const cancelAllStreams = () => {
+    const activeConnections = Array.from(abortControllersRef.current.keys());
+    
+    if (activeConnections.length > 0) {
+      console.group('🚫 [CONNECTION MANAGER] Cancelling all active streams');
+      console.log(`📊 Active connections: ${activeConnections.length}`);
+      console.log(`🔗 Models: [${activeConnections.join(', ')}]`);
+      
+      abortControllersRef.current.forEach((controller, key) => {
+        console.log(`❌ Aborting stream: ${key}`);
+        controller.abort();
+      });
+      
+      abortControllersRef.current.clear();
+      console.log('✅ All streams cancelled and controllers cleared');
+      console.groupEnd();
+    } else {
+      console.log('ℹ️ [CONNECTION MANAGER] No active streams to cancel');
+    }
+    
+    setIsStreaming({ 'GPT-4o': false, 'Claude Sonnet 4': false });
+  };
+
   const startStreaming = async (questionText: string) => {
     if (!questionText.trim() || !token || !conversationId) {
-      console.log('Missing required data for streaming:', { questionText, token: !!token, conversationId });
+      console.warn('⚠️ [STREAMING] Missing required data:', { 
+        hasQuestion: !!questionText.trim(), 
+        hasToken: !!token, 
+        conversationId 
+      });
       return;
     }
 
-    console.log('Starting streaming with:', { questionText, conversationId });
+    console.group('🚀 [STREAMING] Starting new streaming session');
+    console.log(`📝 Question: "${questionText.substring(0, 100)}${questionText.length > 100 ? '...' : ''}"`);
+    console.log(`🆔 Conversation ID: ${conversationId}`);
+    console.log(`⏰ Timestamp: ${new Date().toLocaleTimeString()}`);
+
+    // 기존 스트림 연결 취소
+    cancelAllStreams();
+
+    // 새로운 AbortController 생성
+    const gptController = new AbortController();
+    const claudeController = new AbortController();
+    
+    console.log('🔧 Created new AbortControllers for both models');
+    
+    abortControllersRef.current.set('GPT-4o', gptController);
+    abortControllersRef.current.set('Claude Sonnet 4', claudeController);
+    
+    console.log(`📋 Active controllers registered: ${Array.from(abortControllersRef.current.keys()).join(', ')}`);
 
     // 두 모델 동시에 스트리밍 시작
     setIsStreaming({ 'GPT-4o': true, 'Claude Sonnet 4': true });
     setStreamingMessages({ 'GPT-4o': '', 'Claude Sonnet 4': '' });
+    
+    console.log('🟢 Both models set to streaming state');
+    console.groupEnd();
 
     // GPT-4o 스트리밍
+    console.log('📡 [GPT-4o] Initiating stream connection...');
     const gptPromise = sendChatMessageStream(
       conversationId,
       'openai',
       { content: questionText, model: 'gpt-4o' },
       token,
       (text: string) => {
+        console.log(`📨 [GPT-4o] Received chunk: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`);
         setStreamingMessages(prev => ({
           ...prev,
           'GPT-4o': prev['GPT-4o'] + text
         }));
       },
       () => {
+        console.log('✅ [GPT-4o] Stream completed successfully');
         setIsStreaming(prev => ({ ...prev, 'GPT-4o': false }));
+        abortControllersRef.current.delete('GPT-4o');
+        console.log(`🗑️ [GPT-4o] Controller removed, remaining: ${Array.from(abortControllersRef.current.keys()).join(', ') || 'none'}`);
       },
       (error) => {
-        console.error('GPT-4o streaming error:', error);
+        console.error('❌ [GPT-4o] Streaming error:', error);
         setIsStreaming(prev => ({ ...prev, 'GPT-4o': false }));
-      }
+        abortControllersRef.current.delete('GPT-4o');
+        console.log(`🗑️ [GPT-4o] Controller removed due to error, remaining: ${Array.from(abortControllersRef.current.keys()).join(', ') || 'none'}`);
+      },
+      gptController
     ).catch(error => {
-      console.error('GPT-4o error:', error);
-      setIsStreaming(prev => ({ ...prev, 'GPT-4o': false }));
+      if (error.name !== 'AbortError') {
+        console.error('❌ [GPT-4o] Promise error:', error);
+        setIsStreaming(prev => ({ ...prev, 'GPT-4o': false }));
+      } else {
+        console.log('🚫 [GPT-4o] Stream aborted by user');
+      }
+      abortControllersRef.current.delete('GPT-4o');
     });
 
     // Claude Sonnet 4 스트리밍
+    console.log('📡 [Claude] Initiating stream connection...');
     const claudePromise = sendChatMessageStream(
       conversationId,
       'claude',
       { content: questionText, model: 'claude-sonnet-4' },
       token,
       (text: string) => {
+        console.log(`📨 [Claude] Received chunk: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`);
         setStreamingMessages(prev => ({
           ...prev,
           'Claude Sonnet 4': prev['Claude Sonnet 4'] + text
         }));
       },
       () => {
+        console.log('✅ [Claude] Stream completed successfully');
         setIsStreaming(prev => ({ ...prev, 'Claude Sonnet 4': false }));
+        abortControllersRef.current.delete('Claude Sonnet 4');
+        console.log(`🗑️ [Claude] Controller removed, remaining: ${Array.from(abortControllersRef.current.keys()).join(', ') || 'none'}`);
       },
       (error) => {
-        console.error('Claude Sonnet 4 streaming error:', error);
+        console.error('❌ [Claude] Streaming error:', error);
         setIsStreaming(prev => ({ ...prev, 'Claude Sonnet 4': false }));
-      }
+        abortControllersRef.current.delete('Claude Sonnet 4');
+        console.log(`🗑️ [Claude] Controller removed due to error, remaining: ${Array.from(abortControllersRef.current.keys()).join(', ') || 'none'}`);
+      },
+      claudeController
     ).catch(error => {
-      console.error('Claude Sonnet 4 error:', error);
-      setIsStreaming(prev => ({ ...prev, 'Claude Sonnet 4': false }));
+      if (error.name !== 'AbortError') {
+        console.error('❌ [Claude] Promise error:', error);
+        setIsStreaming(prev => ({ ...prev, 'Claude Sonnet 4': false }));
+      } else {
+        console.log('🚫 [Claude] Stream aborted by user');
+      }
+      abortControllersRef.current.delete('Claude Sonnet 4');
     });
 
     // 백그라운드에서 스트리밍 처리 (페이지는 즉시 사용 가능)
-    Promise.allSettled([gptPromise, claudePromise]).then(() => {
-      console.log('All streaming completed');
+    Promise.allSettled([gptPromise, claudePromise]).then((results) => {
+      console.group('🏁 [STREAMING] Session completed');
+      console.log(`⏰ Completion time: ${new Date().toLocaleTimeString()}`);
+      
+      results.forEach((result, index) => {
+        const modelName = index === 0 ? 'GPT-4o' : 'Claude';
+        if (result.status === 'fulfilled') {
+          console.log(`✅ ${modelName}: Successfully completed`);
+        } else {
+          console.log(`❌ ${modelName}: Failed -`, result.reason?.message || result.reason);
+        }
+      });
+      
+      const remainingControllers = Array.from(abortControllersRef.current.keys());
+      console.log(`📊 Final state - Active controllers: ${remainingControllers.length > 0 ? remainingControllers.join(', ') : 'none'}`);
+      console.groupEnd();
     });
   };
 
@@ -267,6 +358,18 @@ const AIChatDetail: React.FC = () => {
       startStreaming(currentQuestion);
     }
   }, [conversationId, token, currentQuestion]);
+
+  // 컴포넌트 언마운트 시 모든 스트림 연결 취소
+  useEffect(() => {
+    return () => {
+      console.group('🔄 [COMPONENT] AIChatDetail unmounting');
+      console.log(`⏰ Unmount time: ${new Date().toLocaleTimeString()}`);
+      console.log('🧹 Cleaning up all active streams...');
+      cancelAllStreams();
+      console.log('✅ Component cleanup completed');
+      console.groupEnd();
+    };
+  }, []);
 
   return (
     <div className={styles.container}>
