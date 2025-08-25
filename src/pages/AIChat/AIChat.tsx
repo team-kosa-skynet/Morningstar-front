@@ -7,7 +7,7 @@ import Banner from '../../components/Banner/Banner';
 import openAILogo from '../../assets/images/openAI-Photoroom.png';
 import geminiLogo from '../../assets/images/gemini-1336519698502187930_128px.png';
 import claudeLogo from '../../assets/images/클로드-Photoroom.png';
-import { createConversation, sendChatMessage, sendChatMessageStream } from '../../services/apiService';
+import { createConversation } from '../../services/apiService';
 import { useAuthStore } from '../../stores/authStore';
 
 Chart.register(...registerables);

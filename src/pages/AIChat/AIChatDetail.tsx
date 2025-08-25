@@ -5,7 +5,7 @@ import FeedbackModal from '../../components/Modal/FeedbackModal';
 import openAILogo from '../../assets/images/openAI-Photoroom.png';
 import geminiLogo from '../../assets/images/gemini-1336519698502187930_128px.png';
 import claudeLogo from '../../assets/images/클로드-Photoroom.png';
-import { sendChatMessageStream } from '../../services/apiService';
+import { sendChatMessageStream, getModelsInfo, type ModelsInfoResponse, type ModelInfo } from '../../services/apiService';
 import { useAuthStore } from '../../stores/authStore';
 
 const AIChatDetail: React.FC = () => {
@@ -17,14 +17,9 @@ const AIChatDetail: React.FC = () => {
   const [selectedModelBrand, setSelectedModelBrand] = useState('');
   const [isImageMode, setIsImageMode] = useState(false);
   const [isChatInputFocused, setIsChatInputFocused] = useState(false);
-  const [streamingMessages, setStreamingMessages] = useState<Record<string, string>>({
-    'GPT-4o': '응답을 기다리고 있습니다...',
-    'Claude Sonnet 4': '응답을 기다리고 있습니다...'
-  });
-  const [isStreaming, setIsStreaming] = useState<Record<string, boolean>>({
-    'GPT-4o': false,
-    'Claude Sonnet 4': false
-  });
+  const [modelsData, setModelsData] = useState<ModelsInfoResponse | null>(null);
+  const [streamingMessages, setStreamingMessages] = useState<Record<string, string>>({});
+  const [isStreaming, setIsStreaming] = useState<Record<string, boolean>>({});
   
   // AbortController 관리
   const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
@@ -45,67 +40,49 @@ const AIChatDetail: React.FC = () => {
     unselectedModel: { name: '', icon: '' }
   });
 
-  const [selectedModels, setSelectedModels] = useState<Array<{id: string, name: string, icon: string, brand: string}>>([
-    {
-      id: 'gpt-4o',
-      name: 'GPT-4o',
-      icon: openAILogo,
-      brand: 'gpt'
-    },
-    {
-      id: 'claude-sonnet-4',
-      name: 'Claude Sonnet 4',
-      icon: claudeLogo,
-      brand: 'claude'
+  // 기본 선택 모델들 (데이터 로드 후 설정)
+  const [selectedModels, setSelectedModels] = useState<Array<{id: string, name: string, icon: string, brand: string}>>([])
+
+  // 모델 아이콘 매핑
+  const getModelIcon = (provider: string) => {
+    switch (provider.toLowerCase()) {
+      case 'openai':
+      case 'gpt':
+        return openAILogo;
+      case 'gemini':
+        return geminiLogo;
+      case 'claude':
+        return claudeLogo;
+      default:
+        return openAILogo;
     }
-  ]);
-
-  const models = [
-    { id: 'gpt', name: 'GPT by OpenAI', icon: openAILogo },
-    { id: 'gemini', name: 'Gemini by Google', icon: geminiLogo },
-    { id: 'claude', name: 'Claude by Anthropic', icon: claudeLogo }
-  ];
-
-  const modelDetails: Record<string, Array<{id: string, name: string, icon: string}>> = {
-    gpt: [
-      { id: 'gpt-4o', name: 'GPT-4o', icon: openAILogo },
-      { id: 'gpt-4o-mini', name: 'GPT-4o mini', icon: openAILogo },
-      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', icon: openAILogo },
-      { id: 'gpt-4', name: 'GPT-4', icon: openAILogo },
-      { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', icon: openAILogo },
-      { id: 'o1-preview', name: 'OpenAI o1-preview', icon: openAILogo },
-      { id: 'o1-mini', name: 'OpenAI o1-mini', icon: openAILogo },
-      { id: 'gpt-oss-120b', name: 'gpt-oss-120b', icon: openAILogo },
-      { id: 'o3-pro', name: 'OpenAI o3-pro', icon: openAILogo },
-      { id: 'gpt-4.1', name: 'GPT-4.1', icon: openAILogo },
-      { id: 'o1', name: 'OpenAI o1', icon: openAILogo },
-      { id: 'gpt-5', name: 'GPT-5', icon: openAILogo }
-    ],
-    gemini: [
-      { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', icon: geminiLogo },
-      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', icon: geminiLogo },
-      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', icon: geminiLogo },
-      { id: 'gemini-pro', name: 'Gemini Pro', icon: geminiLogo },
-      { id: 'gemini-ultra', name: 'Gemini Ultra', icon: geminiLogo },
-      { id: 'gemini-nano', name: 'Gemini Nano', icon: geminiLogo },
-      { id: 'gemini-experimental', name: 'Gemini Experimental', icon: geminiLogo },
-      { id: 'gemini-code', name: 'Gemini Code', icon: geminiLogo },
-      { id: 'gemini-vision', name: 'Gemini Vision', icon: geminiLogo },
-      { id: 'gemini-thinking', name: 'Gemini Thinking', icon: geminiLogo }
-    ],
-    claude: [
-      { id: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', icon: claudeLogo },
-      { id: 'claude-3.5-haiku', name: 'Claude 3.5 Haiku', icon: claudeLogo },
-      { id: 'claude-3-opus', name: 'Claude 3 Opus', icon: claudeLogo },
-      { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', icon: claudeLogo },
-      { id: 'claude-3-haiku', name: 'Claude 3 Haiku', icon: claudeLogo },
-      { id: 'claude-2.1', name: 'Claude 2.1', icon: claudeLogo },
-      { id: 'claude-2', name: 'Claude 2', icon: claudeLogo },
-      { id: 'claude-instant', name: 'Claude Instant', icon: claudeLogo },
-      { id: 'claude-4', name: 'Claude 4', icon: claudeLogo },
-      { id: 'claude-computer-use', name: 'Claude Computer Use', icon: claudeLogo }
-    ]
   };
+
+  // 동적 모델 목록 생성
+  const models = modelsData ? [
+    { id: 'openai', name: 'GPT by OpenAI', icon: getModelIcon('openai') },
+    { id: 'gemini', name: 'Gemini by Google', icon: getModelIcon('gemini') },
+    { id: 'claude', name: 'Claude by Anthropic', icon: getModelIcon('claude') }
+  ] : [];
+
+  // 동적 모델 세부 정보 생성
+  const modelDetails: Record<string, Array<{id: string, name: string, icon: string}>> = modelsData ? {
+    openai: modelsData.data.openai.models.map(model => ({
+      id: model.name,
+      name: model.name,
+      icon: getModelIcon('openai')
+    })),
+    gemini: modelsData.data.gemini.models.map(model => ({
+      id: model.name,
+      name: model.name,
+      icon: getModelIcon('gemini')
+    })),
+    claude: modelsData.data.claude.models.map(model => ({
+      id: model.name,
+      name: model.name,
+      icon: getModelIcon('claude')
+    }))
+  } : {};
 
   const handleLike = (selectedModelName: string) => {
     // 선택한 모델과 선택하지 않은 모델 찾기
@@ -181,7 +158,14 @@ const AIChatDetail: React.FC = () => {
       console.log('ℹ️ [CONNECTION MANAGER] No active streams to cancel');
     }
     
-    setIsStreaming({ 'GPT-4o': false, 'Claude Sonnet 4': false });
+    // 모든 모델의 스트리밍 상태 비활성화
+    setIsStreaming(prev => {
+      const newState = { ...prev };
+      Object.keys(newState).forEach(key => {
+        newState[key] = false;
+      });
+      return newState;
+    });
   };
 
   const startStreaming = async (questionText: string) => {
@@ -202,105 +186,79 @@ const AIChatDetail: React.FC = () => {
     // 기존 스트림 연결 취소
     cancelAllStreams();
 
-    // 새로운 AbortController 생성
-    const gptController = new AbortController();
-    const claudeController = new AbortController();
+    // 선택된 모델들에 대해 AbortController 생성
+    selectedModels.forEach(model => {
+      const controller = new AbortController();
+      abortControllersRef.current.set(model.name, controller);
+    });
     
-    console.log('🔧 Created new AbortControllers for both models');
-    
-    abortControllersRef.current.set('GPT-4o', gptController);
-    abortControllersRef.current.set('Claude Sonnet 4', claudeController);
-    
+    console.log('🔧 Created new AbortControllers for selected models');
     console.log(`📋 Active controllers registered: ${Array.from(abortControllersRef.current.keys()).join(', ')}`);
 
-    // 두 모델 동시에 스트리밍 시작
-    setIsStreaming({ 'GPT-4o': true, 'Claude Sonnet 4': true });
-    setStreamingMessages({ 'GPT-4o': '', 'Claude Sonnet 4': '' });
+    // 선택된 모델들의 스트리밍 상태 설정
+    const streamingState: Record<string, boolean> = {};
+    const messageState: Record<string, string> = {};
+    selectedModels.forEach(model => {
+      streamingState[model.name] = true;
+      messageState[model.name] = '';
+    });
+    setIsStreaming(streamingState);
+    setStreamingMessages(messageState);
     
-    console.log('🟢 Both models set to streaming state');
+    console.log(`🟢 ${selectedModels.length} models set to streaming state`);
     console.groupEnd();
 
-    // GPT-4o 스트리밍
-    console.log('📡 [GPT-4o] Initiating stream connection...');
-    const gptPromise = sendChatMessageStream(
-      conversationId,
-      'openai',
-      { content: questionText, model: 'gpt-4o' },
-      token,
-      (text: string) => {
-        console.log(`📨 [GPT-4o] Received chunk: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`);
-        setStreamingMessages(prev => ({
-          ...prev,
-          'GPT-4o': prev['GPT-4o'] + text
-        }));
-      },
-      () => {
-        console.log('✅ [GPT-4o] Stream completed successfully');
-        setIsStreaming(prev => ({ ...prev, 'GPT-4o': false }));
-        abortControllersRef.current.delete('GPT-4o');
-        console.log(`🗑️ [GPT-4o] Controller removed, remaining: ${Array.from(abortControllersRef.current.keys()).join(', ') || 'none'}`);
-      },
-      (error) => {
-        console.error('❌ [GPT-4o] Streaming error:', error);
-        setIsStreaming(prev => ({ ...prev, 'GPT-4o': false }));
-        abortControllersRef.current.delete('GPT-4o');
-        console.log(`🗑️ [GPT-4o] Controller removed due to error, remaining: ${Array.from(abortControllersRef.current.keys()).join(', ') || 'none'}`);
-      },
-      gptController
-    ).catch(error => {
-      if (error.name !== 'AbortError') {
-        console.error('❌ [GPT-4o] Promise error:', error);
-        setIsStreaming(prev => ({ ...prev, 'GPT-4o': false }));
-      } else {
-        console.log('🚫 [GPT-4o] Stream aborted by user');
-      }
-      abortControllersRef.current.delete('GPT-4o');
-    });
+    // 선택된 모델들에 대해 동시 스트리밍 시작
+    const streamingPromises = selectedModels.map(model => {
+      const controller = abortControllersRef.current.get(model.name);
+      if (!controller) return Promise.reject(new Error(`Controller not found for ${model.name}`));
 
-    // Claude Sonnet 4 스트리밍
-    console.log('📡 [Claude] Initiating stream connection...');
-    const claudePromise = sendChatMessageStream(
-      conversationId,
-      'claude',
-      { content: questionText, model: 'claude-sonnet-4' },
-      token,
-      (text: string) => {
-        console.log(`📨 [Claude] Received chunk: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`);
-        setStreamingMessages(prev => ({
-          ...prev,
-          'Claude Sonnet 4': prev['Claude Sonnet 4'] + text
-        }));
-      },
-      () => {
-        console.log('✅ [Claude] Stream completed successfully');
-        setIsStreaming(prev => ({ ...prev, 'Claude Sonnet 4': false }));
-        abortControllersRef.current.delete('Claude Sonnet 4');
-        console.log(`🗑️ [Claude] Controller removed, remaining: ${Array.from(abortControllersRef.current.keys()).join(', ') || 'none'}`);
-      },
-      (error) => {
-        console.error('❌ [Claude] Streaming error:', error);
-        setIsStreaming(prev => ({ ...prev, 'Claude Sonnet 4': false }));
-        abortControllersRef.current.delete('Claude Sonnet 4');
-        console.log(`🗑️ [Claude] Controller removed due to error, remaining: ${Array.from(abortControllersRef.current.keys()).join(', ') || 'none'}`);
-      },
-      claudeController
-    ).catch(error => {
-      if (error.name !== 'AbortError') {
-        console.error('❌ [Claude] Promise error:', error);
-        setIsStreaming(prev => ({ ...prev, 'Claude Sonnet 4': false }));
-      } else {
-        console.log('🚫 [Claude] Stream aborted by user');
-      }
-      abortControllersRef.current.delete('Claude Sonnet 4');
+      console.log(`📡 [${model.name}] Initiating stream connection...`);
+      
+      return sendChatMessageStream(
+        conversationId,
+        model.brand as 'openai' | 'claude' | 'gemini',
+        { content: questionText, model: model.id },
+        token,
+        (text: string) => {
+          console.log(`📨 [${model.name}] Received chunk: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`);
+          setStreamingMessages(prev => ({
+            ...prev,
+            [model.name]: prev[model.name] + text
+          }));
+        },
+        () => {
+          console.log(`✅ [${model.name}] Stream completed successfully`);
+          setIsStreaming(prev => ({ ...prev, [model.name]: false }));
+          abortControllersRef.current.delete(model.name);
+          console.log(`🗑️ [${model.name}] Controller removed, remaining: ${Array.from(abortControllersRef.current.keys()).join(', ') || 'none'}`);
+        },
+        (error) => {
+          console.error(`❌ [${model.name}] Streaming error:`, error);
+          setIsStreaming(prev => ({ ...prev, [model.name]: false }));
+          abortControllersRef.current.delete(model.name);
+          console.log(`🗑️ [${model.name}] Controller removed due to error, remaining: ${Array.from(abortControllersRef.current.keys()).join(', ') || 'none'}`);
+        },
+        controller
+      ).catch(error => {
+        if (error.name !== 'AbortError') {
+          console.error(`❌ [${model.name}] Promise error:`, error);
+          setIsStreaming(prev => ({ ...prev, [model.name]: false }));
+        } else {
+          console.log(`🚫 [${model.name}] Stream aborted by user`);
+        }
+        abortControllersRef.current.delete(model.name);
+        throw error;
+      });
     });
 
     // 백그라운드에서 스트리밍 처리 (페이지는 즉시 사용 가능)
-    Promise.allSettled([gptPromise, claudePromise]).then((results) => {
+    Promise.allSettled(streamingPromises).then((results) => {
       console.group('🏁 [STREAMING] Session completed');
       console.log(`⏰ Completion time: ${new Date().toLocaleTimeString()}`);
       
       results.forEach((result, index) => {
-        const modelName = index === 0 ? 'GPT-4o' : 'Claude';
+        const modelName = selectedModels[index]?.name || `Model ${index}`;
         if (result.status === 'fulfilled') {
           console.log(`✅ ${modelName}: Successfully completed`);
         } else {
@@ -351,13 +309,54 @@ const AIChatDetail: React.FC = () => {
     updateChatInputHeight();
   }, []);
 
-  // 페이지 로드 시 자동으로 스트리밍 시작
+  // 모델 데이터 로드
   useEffect(() => {
-    if (conversationId && token && currentQuestion) {
+    const loadModelsData = async () => {
+      try {
+        const data = await getModelsInfo();
+        setModelsData(data);
+        
+        // 기본 선택 모델 설정 (OpenAI와 Claude의 기본 모델)
+        const defaultModels = [
+          {
+            id: data.data.openai.defaultModel,
+            name: data.data.openai.defaultModel,
+            icon: getModelIcon('openai'),
+            brand: 'openai'
+          },
+          {
+            id: data.data.claude.defaultModel,
+            name: data.data.claude.defaultModel,
+            icon: getModelIcon('claude'),
+            brand: 'claude'
+          }
+        ];
+        setSelectedModels(defaultModels);
+        
+        // 초기 스트리밍 메시지 상태 설정
+        const initialMessages: Record<string, string> = {};
+        const initialStreaming: Record<string, boolean> = {};
+        defaultModels.forEach(model => {
+          initialMessages[model.name] = '응답을 기다리고 있습니다...';
+          initialStreaming[model.name] = false;
+        });
+        setStreamingMessages(initialMessages);
+        setIsStreaming(initialStreaming);
+      } catch (error) {
+        console.error('모델 데이터 로드 실패:', error);
+      }
+    };
+    
+    loadModelsData();
+  }, []);
+
+  // 모델 데이터와 선택된 모델이 준비되면 자동 스트리밍 시작
+  useEffect(() => {
+    if (conversationId && token && currentQuestion && modelsData && selectedModels.length > 0) {
       console.log('Auto-starting stream with conversationId:', conversationId);
       startStreaming(currentQuestion);
     }
-  }, [conversationId, token, currentQuestion]);
+  }, [conversationId, token, currentQuestion, modelsData, selectedModels]);
 
   // 컴포넌트 언마운트 시 모든 스트림 연결 취소
   useEffect(() => {
@@ -385,69 +384,38 @@ const AIChatDetail: React.FC = () => {
 
         {/* AI 답변들 */}
         <div className={styles.aiResponsesContainer}>
-          {/* GPT-4o 답변 */}
-          <div className={styles.aiResponse}>
-            <div className={styles.responseContent}>
-              {/* 모델 정보 헤더 */}
-              <div className={styles.modelHeader}>
-                <img 
-                  src={openAILogo} 
-                  alt="GPT-4o" 
-                  className={styles.modelIcon}
-                />
-                <span className={styles.modelName}>GPT-4o</span>
-              </div>
+          {selectedModels.map((model) => (
+            <div key={model.id} className={styles.aiResponse}>
+              <div className={styles.responseContent}>
+                {/* 모델 정보 헤더 */}
+                <div className={styles.modelHeader}>
+                  <img 
+                    src={model.icon} 
+                    alt={model.name} 
+                    className={styles.modelIcon}
+                  />
+                  <span className={styles.modelName}>{model.name}</span>
+                </div>
 
-              {/* 답변 내용 */}
-              <div className={styles.responseText}>
-                {streamingMessages['GPT-4o']}
-                {isStreaming['GPT-4o'] && <span className={styles.cursor}>|</span>}
-              </div>
+                {/* 답변 내용 */}
+                <div className={styles.responseText}>
+                  {streamingMessages[model.name]}
+                  {isStreaming[model.name] && <span className={styles.cursor}>|</span>}
+                </div>
 
-              {/* 피드백 버튼 */}
-              <div className={styles.feedbackSection}>
-                <button 
-                  className={styles.likeButton}
-                  onClick={() => handleLike('GPT-4o')}
-                >
-                  <i className="bi bi-hand-thumbs-up"></i>
-                  마음에 들어요
-                </button>
+                {/* 피드백 버튼 */}
+                <div className={styles.feedbackSection}>
+                  <button 
+                    className={styles.likeButton}
+                    onClick={() => handleLike(model.name)}
+                  >
+                    <i className="bi bi-hand-thumbs-up"></i>
+                    마음에 들어요
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Claude Sonnet 4 답변 */}
-          <div className={styles.aiResponse}>
-            <div className={styles.responseContent}>
-              {/* 모델 정보 헤더 */}
-              <div className={styles.modelHeader}>
-                <img 
-                  src={claudeLogo} 
-                  alt="Claude Sonnet 4" 
-                  className={styles.modelIcon}
-                />
-                <span className={styles.modelName}>Claude Sonnet 4</span>
-              </div>
-
-              {/* 답변 내용 */}
-              <div className={styles.responseText}>
-                {streamingMessages['Claude Sonnet 4']}
-                {isStreaming['Claude Sonnet 4'] && <span className={styles.cursor}>|</span>}
-              </div>
-
-              {/* 피드백 버튼 */}
-              <div className={styles.feedbackSection}>
-                <button 
-                  className={styles.likeButton}
-                  onClick={() => handleLike('Claude Sonnet 4')}
-                >
-                  <i className="bi bi-hand-thumbs-up"></i>
-                  마음에 들어요
-                </button>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* 채팅 입력창 */}

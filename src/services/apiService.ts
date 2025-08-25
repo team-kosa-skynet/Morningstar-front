@@ -1019,6 +1019,7 @@ export const paymentReady = async (paymentData: PaymentReadyRequest, token: stri
   }
 };
 
+// AI Chat 대화 관련 인터페이스들
 interface CreateConversationRequest {
   title: string;
 }
@@ -1287,5 +1288,42 @@ export const sendChatMessageStream = async (
       console.warn(`⚠️ [API-${provider.toUpperCase()}] Error in final reader cleanup:`, closeError);
     }
     console.log(`🏁 [API-${provider.toUpperCase()}] Stream service ended`);
+  }
+};
+
+// AI 모델 관련 인터페이스들
+export interface ModelInfo {
+  name: string;
+  supportsFiles: boolean;
+  isCreateImage: boolean;
+}
+
+export interface ProviderModelInfo {
+  defaultModel: string;
+  models: ModelInfo[];
+}
+
+export interface ModelsInfoResponse {
+  code: number;
+  message: string;
+  data: {
+    claude: ProviderModelInfo;
+    gemini: ProviderModelInfo;
+    openai: ProviderModelInfo;
+  };
+}
+
+// AI 모델 정보 조회
+export const getModelsInfo = async (): Promise<ModelsInfoResponse> => {
+  try {
+    const response = await axios.get<ModelsInfoResponse>(
+      `${API_BASE_URL}/models/info`
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
   }
 };
