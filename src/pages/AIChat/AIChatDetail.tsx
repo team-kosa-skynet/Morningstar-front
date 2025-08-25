@@ -21,8 +21,47 @@ const AIChatDetail: React.FC = () => {
   const [streamingMessages, setStreamingMessages] = useState<Record<string, string>>({});
   const [isStreaming, setIsStreaming] = useState<Record<string, boolean>>({});
   
+  // 타이핑 애니메이션을 위한 상태
+  const [bufferedMessages, setBufferedMessages] = useState<Record<string, string>>({});
+  const [typingIntervals, setTypingIntervals] = useState<Record<string, NodeJS.Timeout>>({});
+  
   // AbortController 관리
   const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
+  
+  // 타이핑 애니메이션 함수
+  const startTypingAnimation = (modelName: string, fullText: string) => {
+    // 기존 인터벌 제거
+    if (typingIntervals[modelName]) {
+      clearInterval(typingIntervals[modelName]);
+    }
+    
+    let currentIndex = 0;
+    const typingSpeed = 30; // 30ms마다 한 글자씩
+    
+    const interval = setInterval(() => {
+      if (currentIndex >= fullText.length) {
+        clearInterval(interval);
+        setTypingIntervals(prev => {
+          const updated = { ...prev };
+          delete updated[modelName];
+          return updated;
+        });
+        return;
+      }
+      
+      setStreamingMessages(prev => ({
+        ...prev,
+        [modelName]: fullText.substring(0, currentIndex + 1)
+      }));
+      
+      currentIndex++;
+    }, typingSpeed);
+    
+    setTypingIntervals(prev => ({
+      ...prev,
+      [modelName]: interval
+    }));
+  };
   
   // URL 파라미터에서 conversationId와 질문, 선택된 모델 가져오기
   const conversationId = parseInt(searchParams.get('conversationId') || '0');
@@ -199,12 +238,23 @@ const AIChatDetail: React.FC = () => {
     // 선택된 모델들의 스트리밍 상태 설정
     const streamingState: Record<string, boolean> = {};
     const messageState: Record<string, string> = {};
+    const bufferedState: Record<string, string> = {};
+    
     selectedModels.forEach(model => {
       streamingState[model.name] = true;
       messageState[model.name] = '';
+      bufferedState[model.name] = '';
+      
+      // 기존 타이핑 인터벌 정리
+      if (typingIntervals[model.name]) {
+        clearInterval(typingIntervals[model.name]);
+      }
     });
+    
     setIsStreaming(streamingState);
     setStreamingMessages(messageState);
+    setBufferedMessages(bufferedState);
+    setTypingIntervals({});
     
     console.log(`🟢 ${selectedModels.length} models set to streaming state`);
     console.groupEnd();
@@ -223,19 +273,56 @@ const AIChatDetail: React.FC = () => {
         token,
         (text: string) => {
           console.log(`📨 [${model.name}] Received chunk: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`);
-          setStreamingMessages(prev => ({
-            ...prev,
-            [model.name]: prev[model.name] + text
-          }));
+          
+          // 버퍼에 텍스트 축적
+          setBufferedMessages(prev => {
+            const newBuffered = prev[model.name] + text;
+            
+            // 타이핑 애니메이션 시작
+            startTypingAnimation(model.name, newBuffered);
+            
+            return {
+              ...prev,
+              [model.name]: newBuffered
+            };
+          });
         },
         () => {
           console.log(`✅ [${model.name}] Stream completed successfully`);
+          
+          // 최종 텍스트로 타이핑 애니메이션 완료
+          setBufferedMessages(prev => {
+            if (prev[model.name]) {
+              startTypingAnimation(model.name, prev[model.name]);
+            }
+            return prev;
+          });
+          
           setIsStreaming(prev => ({ ...prev, [model.name]: false }));
           abortControllersRef.current.delete(model.name);
           console.log(`🗑️ [${model.name}] Controller removed, remaining: ${Array.from(abortControllersRef.current.keys()).join(', ') || 'none'}`);
         },
         (error) => {
           console.error(`❌ [${model.name}] Streaming error:`, error);
+          
+          // 에러 시도 현재까지 받은 텍스트 표시
+          setBufferedMessages(prev => {
+            if (prev[model.name]) {
+              startTypingAnimation(model.name, prev[model.name]);
+            }
+            return prev;
+          });
+          
+          // 타이핑 인터벌 정리
+          if (typingIntervals[model.name]) {
+            clearInterval(typingIntervals[model.name]);
+            setTypingIntervals(prev => {
+              const updated = { ...prev };
+              delete updated[model.name];
+              return updated;
+            });
+          }
+          
           setIsStreaming(prev => ({ ...prev, [model.name]: false }));
           abortControllersRef.current.delete(model.name);
           console.log(`🗑️ [${model.name}] Controller removed due to error, remaining: ${Array.from(abortControllersRef.current.keys()).join(', ') || 'none'}`);
@@ -282,6 +369,7 @@ const AIChatDetail: React.FC = () => {
     setCurrentQuestion(currentMessage);
     setMessage('');
     
+    // 수동 스트리밍 시작 (자동 시작 플래그 리셋 안 함)
     await startStreaming(currentMessage);
   };
 
@@ -362,12 +450,15 @@ const AIChatDetail: React.FC = () => {
         
         // 초기 스트리밍 메시지 상태 설정
         const initialMessages: Record<string, string> = {};
+        const initialBuffered: Record<string, string> = {};
         const initialStreaming: Record<string, boolean> = {};
-        defaultModels.forEach(model => {
+        modelsToUse.forEach(model => {
           initialMessages[model.name] = '응답을 기다리고 있습니다...';
+          initialBuffered[model.name] = '';
           initialStreaming[model.name] = false;
         });
         setStreamingMessages(initialMessages);
+        setBufferedMessages(initialBuffered);
         setIsStreaming(initialStreaming);
       } catch (error) {
         console.error('모델 데이터 로드 실패:', error);
@@ -377,25 +468,35 @@ const AIChatDetail: React.FC = () => {
     loadModelsData();
   }, []);
 
-  // 모델 데이터와 선택된 모델이 준비되면 자동 스트리밍 시작
+  // 자동 스트리밍 시작 여부 추적 (useRef로 리렌더링 방지)
+  const hasAutoStartedRef = useRef(false);
+  
+  // 모델 데이터와 선택된 모델이 준비되면 한 번만 자동 스트리밍 시작
   useEffect(() => {
-    if (conversationId && token && currentQuestion && modelsData && selectedModels.length > 0) {
+    if (!hasAutoStartedRef.current && conversationId && token && currentQuestion && modelsData && selectedModels.length > 0) {
       console.log('Auto-starting stream with conversationId:', conversationId);
+      hasAutoStartedRef.current = true;
       startStreaming(currentQuestion);
     }
   }, [conversationId, token, currentQuestion, modelsData, selectedModels]);
 
-  // 컴포넌트 언마운트 시 모든 스트림 연결 취소
+  // 컴포넌트 언마운트 시 모든 스트림 연결 취소 및 타이핑 인터벌 정리
   useEffect(() => {
     return () => {
       console.group('🔄 [COMPONENT] AIChatDetail unmounting');
       console.log(`⏰ Unmount time: ${new Date().toLocaleTimeString()}`);
-      console.log('🧹 Cleaning up all active streams...');
+      console.log('🧹 Cleaning up all active streams and typing intervals...');
+      
+      // 모든 타이핑 인터벌 정리
+      Object.values(typingIntervals).forEach(interval => {
+        if (interval) clearInterval(interval);
+      });
+      
       cancelAllStreams();
       console.log('✅ Component cleanup completed');
       console.groupEnd();
     };
-  }, []);
+  }, [typingIntervals]);
 
   return (
     <div className={styles.container}>
