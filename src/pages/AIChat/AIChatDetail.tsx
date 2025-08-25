@@ -19,11 +19,11 @@ const AIChatDetail: React.FC = () => {
   const [isChatInputFocused, setIsChatInputFocused] = useState(false);
   const [streamingMessages, setStreamingMessages] = useState<Record<string, string>>({});
   const [isStreaming, setIsStreaming] = useState<Record<string, boolean>>({});
-  const [textBuffers, setTextBuffers] = useState<Record<string, string>>({});
   const [displayedMessages, setDisplayedMessages] = useState<Record<string, string>>({});
   const [typingAnimationIds, setTypingAnimationIds] = useState<Record<string, number>>({});
   const displayedMessagesRef = useRef<Record<string, string>>({});
   const typingStateRef = useRef<Record<string, { isTyping: boolean; currentIndex: number; targetText: string }>>({});
+  const textBuffersRef = useRef<Record<string, string>>({});
   
   // URL 파라미터에서 conversationId와 질문 가져오기
   const conversationId = parseInt(searchParams.get('conversationId') || '0');
@@ -293,11 +293,11 @@ const AIChatDetail: React.FC = () => {
       // ref 초기화
       displayedMessagesRef.current[model.name] = '';
       typingStateRef.current[model.name] = { isTyping: false, currentIndex: 0, targetText: '' };
+      textBuffersRef.current[model.name] = '';
     });
 
     setIsStreaming(initialStreaming);
     setStreamingMessages(initialMessages);
-    setTextBuffers(initialBuffers);
     setDisplayedMessages(initialDisplayed);
 
     // 선택된 모델들에 대해 동시에 스트리밍 시작
@@ -312,17 +312,12 @@ const AIChatDetail: React.FC = () => {
           token,
           (text: string) => {
             console.log(`[${model.name}] SSE 수신:`, text);
-            // 버퍼에 텍스트 누적
-            setTextBuffers(prev => {
-              const newBuffer = prev[model.name] + text;
-              console.log(`[${model.name}] 버퍼 업데이트:`, newBuffer.length, '글자');
-              // 타이핑 효과로 표시
-              typeWriter(model.name, newBuffer);
-              return {
-                ...prev,
-                [model.name]: newBuffer
-              };
-            });
+            // ref를 직접 업데이트 (동기적, 경쟁 조건 방지)
+            textBuffersRef.current[model.name] = (textBuffersRef.current[model.name] || '') + text;
+            const newBuffer = textBuffersRef.current[model.name];
+            console.log(`[${model.name}] 버퍼 업데이트:`, newBuffer.length, '글자');
+            // 타이핑 효과로 표시
+            typeWriter(model.name, newBuffer);
           },
           () => {
             console.log(`[${model.name}] SSE 스트림 완료`);
@@ -425,11 +420,11 @@ const AIChatDetail: React.FC = () => {
           // ref 초기화
           displayedMessagesRef.current[model.name] = '응답을 기다리고 있습니다...';
           typingStateRef.current[model.name] = { isTyping: false, currentIndex: 0, targetText: '' };
+          textBuffersRef.current[model.name] = '';
         });
         
         setStreamingMessages(initialMessages);
         setIsStreaming(initialStreaming);
-        setTextBuffers(initialBuffers);
         setDisplayedMessages(initialDisplayed);
       } catch (error) {
         console.error('Error parsing models from URL:', error);
@@ -457,10 +452,6 @@ const AIChatDetail: React.FC = () => {
           'GPT-4o': false,
           'Claude 3.5 Sonnet': false
         });
-        setTextBuffers({
-          'GPT-4o': '',
-          'Claude 3.5 Sonnet': ''
-        });
         setDisplayedMessages({
           'GPT-4o': '응답을 기다리고 있습니다...',
           'Claude 3.5 Sonnet': '응답을 기다리고 있습니다...'
@@ -473,6 +464,10 @@ const AIChatDetail: React.FC = () => {
         typingStateRef.current = {
           'GPT-4o': { isTyping: false, currentIndex: 0, targetText: '' },
           'Claude 3.5 Sonnet': { isTyping: false, currentIndex: 0, targetText: '' }
+        };
+        textBuffersRef.current = {
+          'GPT-4o': '',
+          'Claude 3.5 Sonnet': ''
         };
       }
     }
