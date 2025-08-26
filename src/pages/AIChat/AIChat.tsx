@@ -388,14 +388,14 @@ const AIChat: React.FC = () => {
               <div className={styles.buttonGroup}>
                 <div className={styles.leftButtonGroup}>
                   <button
-                    className={styles.modelSelectButton}
+                    className={`${styles.modelSelectButton} ${isModelSelectionOpen || isModelDetailOpen ? styles.active : ''}`}
                     onClick={() => setIsModelSelectionOpen(!isModelSelectionOpen)}
                   >
                     모델 선택
                   </button>
                   
                   <button
-                    className={styles.modelSelectButton}
+                    className={`${styles.modelSelectButton} ${isHistoryOpen ? styles.active : ''}`}
                     onClick={handleHistoryToggle}
                   >
                     이전 대화
