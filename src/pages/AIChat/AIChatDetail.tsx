@@ -280,21 +280,26 @@ const AIChatDetail: React.FC = () => {
 
     console.log('Starting streaming with:', { questionText, conversationId });
 
-    // 현재 최대 messageOrder 계산
-    const currentMaxOrder = Math.max(...allMessages.map(m => m.messageOrder), 0);
+    // 스트리밍 시작 시간을 기록하여 고유 식별자로 사용
+    const streamingStartTime = Date.now();
     
     // AI 메시지들을 allMessages에 추가
-    const newAIMessages: Message[] = selectedModels.map((model, index) => ({
-      messageId: Date.now() + index, // 임시 ID
-      content: '',
-      role: 'assistant' as const,
-      aiModel: model.id,
-      messageOrder: currentMaxOrder + 1,
-      createdAt: new Date().toISOString(),
-      attachments: []
-    }));
-    
-    setAllMessages(prev => [...prev, ...newAIMessages]);
+    setAllMessages(prevMessages => {
+      // 현재 최대 messageOrder 계산 (최신 상태 기준)
+      const currentMaxOrder = Math.max(...prevMessages.map(m => m.messageOrder), 0);
+      
+      const newAIMessages: Message[] = selectedModels.map((model, index) => ({
+        messageId: streamingStartTime + index, // 스트리밍 시작 시간 + 인덱스로 고유 ID
+        content: '',
+        role: 'assistant' as const,
+        aiModel: model.id,
+        messageOrder: currentMaxOrder, // 현재 유저 메시지와 같은 messageOrder
+        createdAt: new Date().toISOString(),
+        attachments: []
+      }));
+      
+      return [...prevMessages, ...newAIMessages];
+    });
 
     // 선택된 모델들로 스트리밍 상태 초기화
     const initialStreaming: Record<string, boolean> = {};
@@ -345,9 +350,10 @@ const AIChatDetail: React.FC = () => {
             const newBuffer = textBuffersRef.current[model.name];
             console.log(`[${model.name}] 버퍼 업데이트:`, newBuffer.length, '글자');
             
-            // allMessages 배열의 해당 AI 메시지 업데이트
+            // allMessages 배열의 해당 AI 메시지 업데이트 (고유 ID로 찾기)
+            const targetMessageId = streamingStartTime + selectedModels.findIndex(m => m.id === model.id);
             setAllMessages(prev => prev.map(msg => 
-              msg.role === 'assistant' && msg.aiModel === model.id && msg.messageOrder === currentMaxOrder + 1
+              msg.messageId === targetMessageId
                 ? { ...msg, content: newBuffer }
                 : msg
             ));
