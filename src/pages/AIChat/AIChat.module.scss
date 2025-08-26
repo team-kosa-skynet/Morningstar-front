@@ -206,7 +206,8 @@
 
 .modelList {
   display: flex;
-  gap: 15px;
+  flex-direction: column;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
