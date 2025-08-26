@@ -25,6 +25,14 @@ interface ModelData {
   medianTimeToFirstTokenSeconds?: number;
 }
 
+interface Conversation {
+  conversationId: number;
+  title: string;
+  lastModifiedAt: number[];
+  messageCount: number;
+  lastMessagePreview: string;
+}
+
 const AIChat: React.FC = () => {
   const navigate = useNavigate();
   const { token } = useAuthStore();
@@ -36,6 +44,11 @@ const AIChat: React.FC = () => {
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  // 이전 대화 관련 상태
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   
   // 차트 관련 상태
   const [modelData, setModelData] = useState<ModelData[]>([]);
@@ -319,6 +332,36 @@ const AIChat: React.FC = () => {
     e.target.style.height = `${newHeight}px`;
   };
 
+  // 이전 대화 목록 가져오기
+  const fetchConversations = async () => {
+    if (!token) return;
+    
+    try {
+      setHistoryLoading(true);
+      const response = await axios.get('https://gaebang.site/api/conversations', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.data.code === 200 && response.data.data?.conversations) {
+        setConversations(response.data.data.conversations);
+      }
+    } catch (error) {
+      console.error('이전 대화 목록 조회 오류:', error);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  // 이전 대화 버튼 클릭 핸들러
+  const handleHistoryToggle = () => {
+    if (!isHistoryOpen && conversations.length === 0) {
+      fetchConversations();
+    }
+    setIsHistoryOpen(!isHistoryOpen);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.content}>
@@ -349,6 +392,13 @@ const AIChat: React.FC = () => {
                     onClick={() => setIsModelSelectionOpen(!isModelSelectionOpen)}
                   >
                     모델 선택
+                  </button>
+                  
+                  <button
+                    className={styles.modelSelectButton}
+                    onClick={handleHistoryToggle}
+                  >
+                    이전 대화
                   </button>
                   
                   <button
@@ -439,6 +489,38 @@ const AIChat: React.FC = () => {
                     >
                       <img src={model.icon} alt={model.name} className={styles.modelIcon} />
                       <span>{model.name}</span>
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isHistoryOpen && (
+          <div className={styles.modelSelection}>
+            <div className={styles.modelSelectionBox}>
+              <div className={styles.modelSelectionHeader}>
+                <span>이전 대화</span>
+              </div>
+              
+              <div className={styles.modelList}>
+                {historyLoading ? (
+                  <div className={styles.loadingMessage}>대화 목록을 불러오는 중...</div>
+                ) : conversations.length === 0 ? (
+                  <div className={styles.loadingMessage}>대화 내역이 없습니다.</div>
+                ) : (
+                  conversations.map((conversation) => (
+                    <button
+                      key={conversation.conversationId}
+                      className={styles.modelOption}
+                      onClick={() => {
+                        // TODO: 나중에 대화 상세 페이지로 이동하는 기능 구현
+                        console.log('대화 선택:', conversation.conversationId);
+                        setIsHistoryOpen(false);
+                      }}
+                    >
+                      <span>{conversation.lastMessagePreview}</span>
                     </button>
                   ))
                 )}
