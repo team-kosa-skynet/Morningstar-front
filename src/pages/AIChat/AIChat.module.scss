@@ -257,6 +257,63 @@
   }
 }
 
+.conversationItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  background-color: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 10px;
+  padding: 0;
+  
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+.conversationButton {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+  padding: 10px 15px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #333333;
+  cursor: pointer;
+  text-align: left;
+  
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.deleteConversationButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-right: 5px;
+  
+  i {
+    color: #999999;
+    font-size: 12px;
+  }
+
+}
+
 .modelIcon {
   width: 22px;
   height: 22px;

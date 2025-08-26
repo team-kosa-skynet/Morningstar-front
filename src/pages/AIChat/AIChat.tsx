@@ -362,6 +362,33 @@ const AIChat: React.FC = () => {
     setIsHistoryOpen(!isHistoryOpen);
   };
 
+  // 대화 삭제 핸들러
+  const handleDeleteConversation = async (conversationId: number) => {
+    if (!token) return;
+    
+    if (!confirm('이 대화를 삭제하시겠습니까?')) {
+      return;
+    }
+    
+    try {
+      const response = await axios.delete(`https://gaebang.site/api/conversations/${conversationId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.data.code === 200) {
+        // 삭제 성공 시 목록에서 제거
+        setConversations(prev => prev.filter(conv => conv.conversationId !== conversationId));
+      } else {
+        alert('대화 삭제에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('대화 삭제 오류:', error);
+      alert('대화 삭제 중 오류가 발생했습니다.');
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.content}>
@@ -511,17 +538,27 @@ const AIChat: React.FC = () => {
                   <div className={styles.loadingMessage}>대화 내역이 없습니다.</div>
                 ) : (
                   conversations.map((conversation) => (
-                    <button
-                      key={conversation.conversationId}
-                      className={styles.modelOption}
-                      onClick={() => {
-                        // TODO: 나중에 대화 상세 페이지로 이동하는 기능 구현
-                        console.log('대화 선택:', conversation.conversationId);
-                        setIsHistoryOpen(false);
-                      }}
-                    >
-                      <span>{conversation.lastMessagePreview}</span>
-                    </button>
+                    <div key={conversation.conversationId} className={styles.conversationItem}>
+                      <button
+                        className={styles.conversationButton}
+                        onClick={() => {
+                          // TODO: 나중에 대화 상세 페이지로 이동하는 기능 구현
+                          console.log('대화 선택:', conversation.conversationId);
+                          setIsHistoryOpen(false);
+                        }}
+                      >
+                        <span>{conversation.lastMessagePreview}</span>
+                      </button>
+                      <button
+                        className={styles.deleteConversationButton}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteConversation(conversation.conversationId);
+                        }}
+                      >
+                        <i className="bi bi-x-lg"></i>
+                      </button>
+                    </div>
                   ))
                 )}
               </div>
