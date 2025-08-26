@@ -19,9 +19,8 @@ const AIChatDetail: React.FC = () => {
   const [isChatInputFocused, setIsChatInputFocused] = useState(false);
   const [, setStreamingMessages] = useState<Record<string, string>>({});
   const [isStreaming, setIsStreaming] = useState<Record<string, boolean>>({});
-  const [typingAnimationIds] = useState<Record<string, number>>({});
   const displayedMessagesRef = useRef<Record<string, string>>({});
-  const typingStateRef = useRef<Record<string, { isTyping: boolean; currentIndex: number; targetText: string }>>({});
+  const typingStateRef = useRef<Record<string, { isTyping: boolean; currentIndex: number; targetText: string; lastUpdateTime: number; animationId: NodeJS.Timeout | number | null }>>({});
   const [, setForceUpdateCounter] = useState(0);
   const forceUpdate = () => setForceUpdateCounter(prev => prev + 1);
   const textBuffersRef = useRef<Record<string, string>>({});
@@ -33,7 +32,16 @@ const AIChatDetail: React.FC = () => {
     searchParams.get('question') || '각자 자신의 모델에 대해 소개한번만 부탁해'
   );
   const [isLoadingExistingConversation, setIsLoadingExistingConversation] = useState(false);
-  const [existingMessages, setExistingMessages] = useState<any[]>([]);
+  interface Message {
+    messageId: number;
+    content: string;
+    role: 'user' | 'assistant';
+    aiModel?: string;
+    messageOrder: number;
+    createdAt: string;
+    attachments: unknown[];
+  }
+  const [existingMessages, setExistingMessages] = useState<Message[]>([]);
   const chatInputRef = useRef<HTMLDivElement>(null);
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean;
@@ -155,7 +163,7 @@ const AIChatDetail: React.FC = () => {
     
     // 코드 블록 처리 (```language\ncontent\n```)
     const codeBlockPattern = /```([\s\S]*?)```/g;
-    formattedText = formattedText.replace(codeBlockPattern, (match, content) => {
+    formattedText = formattedText.replace(codeBlockPattern, (_, content) => {
       // 코드 내용에서 언어와 실제 코드 분리
       const lines = content.trim().split('\n');
       lines[0].trim();
@@ -264,7 +272,7 @@ const AIChatDetail: React.FC = () => {
     }, 5000);
   }, []);
 
-  const startStreaming = async (questionText: string) => {
+  const startStreaming = useCallback(async (questionText: string) => {
     if (!questionText.trim() || !token || !conversationId) {
       console.log('Missing required data for streaming:', { questionText, token: !!token, conversationId });
       return;
@@ -365,7 +373,7 @@ const AIChatDetail: React.FC = () => {
     Promise.allSettled(promises).then(() => {
       console.log('All streaming completed');
     });
-  };
+  }, [conversationId, token, selectedModels, typeWriter]);
 
   const handleSubmit = async () => {
     if (!message.trim() || !token) {
@@ -407,14 +415,17 @@ const AIChatDetail: React.FC = () => {
   // 컴포넌트 언마운트 시 타이핑 애니메이션 정리
   useEffect(() => {
     return () => {
-      Object.values(typingAnimationIds).forEach(id => {
-        if (id) clearTimeout(id);
+      Object.keys(typingStateRef.current).forEach(modelName => {
+        const state = typingStateRef.current[modelName];
+        if (state?.animationId) {
+          clearTimeout(state.animationId);
+        }
       });
     };
-  }, [typingAnimationIds]);
+  }, []);
 
   // 기존 대화 로드 함수
-  const loadExistingConversation = async () => {
+  const loadExistingConversation = useCallback(async () => {
     if (!conversationId || !token) return;
 
     try {
@@ -427,12 +438,12 @@ const AIChatDetail: React.FC = () => {
         
         // 메시지 정렬 및 중복 제거
         const sortedMessages = (data.messages || [])
-          .sort((a: any, b: any) => a.messageOrder - b.messageOrder)
-          .filter((message: any, index: number, arr: any[]) => {
+          .sort((a: Message, b: Message) => a.messageOrder - b.messageOrder)
+          .filter((message: Message, index: number, arr: Message[]) => {
             // 사용자 메시지가 중복인 경우 첫 번째만 유지
             if (message.role === 'user') {
               const firstUserMessageIndex = arr.findIndex(
-                (msg: any) => msg.role === 'user' && msg.content === message.content
+                (msg: Message) => msg.role === 'user' && msg.content === message.content
               );
               return firstUserMessageIndex === index;
             }
@@ -446,7 +457,7 @@ const AIChatDetail: React.FC = () => {
           const usedModels = new Map();
           
           // 메시지에서 실제 사용된 AI 모델들을 추출
-          data.messages.forEach((msg: any) => {
+          data.messages.forEach((msg: Message) => {
             if (msg.role === 'assistant' && msg.aiModel) {
               const modelId = msg.aiModel;
               let brand = 'openai';
@@ -500,7 +511,7 @@ const AIChatDetail: React.FC = () => {
     } finally {
       setIsLoadingExistingConversation(false);
     }
-  };
+  }, [conversationId, token]);
 
   // URL 파라미터에서 선택된 모델들 가져오기 또는 기존 대화 로드
   useEffect(() => {
@@ -609,7 +620,7 @@ const AIChatDetail: React.FC = () => {
         'Claude 3.5 Sonnet': ''
       };
     }
-  }, [searchParams, conversationId, token]);
+  }, [searchParams, conversationId, token, loadExistingConversation]);
 
   // 페이지 로드 시 자동으로 스트리밍 시작 (새로운 대화인 경우에만)
   useEffect(() => {
@@ -621,7 +632,7 @@ const AIChatDetail: React.FC = () => {
       console.log('Auto-starting stream with conversationId:', conversationId);
       startStreaming(currentQuestion);
     }
-  }, [conversationId, token, currentQuestion, selectedModels, searchParams]);
+  }, [conversationId, token, currentQuestion, selectedModels, searchParams, startStreaming]);
 
   // 컴포넌트 언마운트 시 타이핑 애니메이션 정리
   useEffect(() => {
@@ -638,12 +649,7 @@ const AIChatDetail: React.FC = () => {
         }
       });
       
-      // 모든 setTimeout 정리
-      Object.values(typingAnimationIds).forEach(id => {
-        if (id) {
-          clearTimeout(id);
-        }
-      });
+      // 추가 정리는 위에서 이미 처리됨
     };
   }, []);
 
@@ -672,8 +678,8 @@ const AIChatDetail: React.FC = () => {
         {!isLoadingExistingConversation && existingMessages.length > 0 && (
           <div className={styles.aiResponsesContainer}>
             {existingMessages
-              .filter((message: any) => message.role === 'assistant')
-              .map((message: any, index: number) => (
+              .filter((message: Message) => message.role === 'assistant')
+              .map((message: Message, index: number) => (
                 <div key={`${message.messageId}-${index}`} className={styles.aiResponse}>
                   <div className={styles.responseContent}>
                     {/* 모델 정보 헤더 */}
@@ -740,7 +746,7 @@ const AIChatDetail: React.FC = () => {
                         __html: formatText(displayedMessagesRef.current[model.name] || '') 
                       }} 
                     />
-                    {(isStreaming[model.name] || typingAnimationIds[model.name]) && <span className={styles.cursor}>|</span>}
+                    {(isStreaming[model.name] || typingStateRef.current[model.name]?.isTyping) && <span className={styles.cursor}>|</span>}
                   </div>
 
                   {/* 피드백 버튼 */}
