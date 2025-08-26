@@ -474,12 +474,13 @@ const AIChatDetail: React.FC = () => {
     const sortedMessages = [...messages].sort((a, b) => a.messageOrder - b.messageOrder);
     
     let currentGroup: {userMessage: Message | null, aiMessages: Message[]} | null = null;
-    let seenUserMessageIds = new Set<number>(); // messageId로 중복 체크
+    let seenUserMessages = new Set<string>(); // messageOrder + content로 중복 체크
     
     sortedMessages.forEach(message => {
       if (message.role === 'user') {
-        // 같은 messageId의 유저 메시지가 이미 처리되었으면 무시 (중복 방지)
-        if (seenUserMessageIds.has(message.messageId)) {
+        // 같은 messageOrder와 content의 유저 메시지가 이미 처리되었으면 무시 (중복 방지)
+        const userKey = `${message.messageOrder}-${message.content}`;
+        if (seenUserMessages.has(userKey)) {
           return;
         }
         
@@ -488,7 +489,7 @@ const AIChatDetail: React.FC = () => {
           groups.push(currentGroup);
         }
         
-        seenUserMessageIds.add(message.messageId);
+        seenUserMessages.add(userKey);
         currentGroup = {
           userMessage: message,
           aiMessages: []
