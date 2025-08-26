@@ -26,11 +26,9 @@ const AIChatDetail: React.FC = () => {
   const textBuffersRef = useRef<Record<string, string>>({});
   const streamStartTimeRef = useRef<Record<string, number>>({});
   
-  // URL 파라미터에서 conversationId와 질문 가져오기
+  // URL 파라미터에서 conversationId 가져오기
   const conversationId = parseInt(searchParams.get('conversationId') || '0');
-  const [currentQuestion, setCurrentQuestion] = useState(
-    searchParams.get('question') || '각자 자신의 모델에 대해 소개한번만 부탁해'
-  );
+  const [currentQuestion, setCurrentQuestion] = useState('각자 자신의 모델에 대해 소개한번만 부탁해');
   const [isLoadingExistingConversation, setIsLoadingExistingConversation] = useState(false);
   interface Message {
     messageId: number;
@@ -504,6 +502,23 @@ const AIChatDetail: React.FC = () => {
             ];
             setSelectedModels(defaultModels);
           }
+        } else {
+          // 메시지가 없는 새로운 대화인 경우 기본 모델 설정
+          const defaultModels = [
+            {
+              id: 'gpt-4o',
+              name: 'GPT-4o',
+              icon: openAILogo,
+              brand: 'gpt'
+            },
+            {
+              id: 'claude-3.5-sonnet',
+              name: 'Claude 3.5 Sonnet',
+              icon: claudeLogo,
+              brand: 'claude'
+            }
+          ];
+          setSelectedModels(defaultModels);
         }
       }
     } catch (error) {
@@ -513,126 +528,21 @@ const AIChatDetail: React.FC = () => {
     }
   }, [conversationId, token]);
 
-  // URL 파라미터에서 선택된 모델들 가져오기 또는 기존 대화 로드
+  // 기존 대화 로드
   useEffect(() => {
-    const questionParam = searchParams.get('question');
-    const titleParam = searchParams.get('title');
-    const modelsParam = searchParams.get('models');
-    
-    // 새로운 대화인 경우 (question이 있고 models이 있는 경우)
-    if (questionParam && modelsParam) {
-      try {
-        const decodedModels = decodeURIComponent(modelsParam);
-        const parsedModels = decodedModels.split(',').map(modelStr => {
-          const [id, name, brand] = modelStr.split(':');
-          
-          // 브랜드에 따른 아이콘 설정
-          let icon = openAILogo;
-          if (brand === 'claude') icon = claudeLogo;
-          else if (brand === 'gemini') icon = geminiLogo;
-          
-          return { id, name, icon, brand };
-        });
-        
-        setSelectedModels(parsedModels);
-        
-        // 초기 스트리밍 상태 설정
-        const initialMessages: Record<string, string> = {};
-        const initialStreaming: Record<string, boolean> = {};
-        const initialBuffers: Record<string, string> = {};
-        const initialDisplayed: Record<string, string> = {};
-        
-        parsedModels.forEach(model => {
-          initialMessages[model.name] = '';
-          initialStreaming[model.name] = false;
-          initialBuffers[model.name] = '';
-          initialDisplayed[model.name] = '응답을 기다리고 있습니다...';
-          // ref 초기화
-          displayedMessagesRef.current[model.name] = '응답을 기다리고 있습니다...';
-          typingStateRef.current[model.name] = { 
-            isTyping: false, 
-            currentIndex: 0, 
-            targetText: '',
-            lastUpdateTime: Date.now(),
-            animationId: null
-          };
-          textBuffersRef.current[model.name] = '';
-        });
-        
-        setStreamingMessages(initialMessages);
-        setIsStreaming(initialStreaming);
-      } catch (error) {
-        console.error('Error parsing models from URL:', error);
-      }
-    }
-    // 기존 대화인 경우 (title이 있지만 question이 없는 경우)
-    else if (titleParam && !questionParam) {
+    if (conversationId && token) {
       loadExistingConversation();
     }
-    // 기본값 설정
-    else {
-      const defaultModels = [
-        {
-          id: 'gpt-4o',
-          name: 'GPT-4o',
-          icon: openAILogo,
-          brand: 'gpt'
-        },
-        {
-          id: 'claude-3.5-sonnet',
-          name: 'Claude 3.5 Sonnet',
-          icon: claudeLogo,
-          brand: 'claude'
-        }
-      ];
-      setSelectedModels(defaultModels);
-      setStreamingMessages({
-        'GPT-4o': '',
-        'Claude 3.5 Sonnet': ''
-      });
-      setIsStreaming({
-        'GPT-4o': false,
-        'Claude 3.5 Sonnet': false
-      });
-      // ref 초기화
-      displayedMessagesRef.current = {
-        'GPT-4o': '응답을 기다리고 있습니다...',
-        'Claude 3.5 Sonnet': '응답을 기다리고 있습니다...'
-      };
-      typingStateRef.current = {
-        'GPT-4o': { 
-          isTyping: false, 
-          currentIndex: 0, 
-          targetText: '',
-          lastUpdateTime: Date.now(),
-          animationId: null
-        },
-        'Claude 3.5 Sonnet': { 
-          isTyping: false, 
-          currentIndex: 0, 
-          targetText: '',
-          lastUpdateTime: Date.now(),
-          animationId: null
-        }
-      };
-      textBuffersRef.current = {
-        'GPT-4o': '',
-        'Claude 3.5 Sonnet': ''
-      };
-    }
-  }, [searchParams, conversationId, token, loadExistingConversation]);
+  }, [conversationId, token, loadExistingConversation]);
 
-  // 페이지 로드 시 자동으로 스트리밍 시작 (새로운 대화인 경우에만)
+  // 자동 스트리밍 시작 (새로운 대화인 경우에만)
   useEffect(() => {
-    const questionParam = searchParams.get('question');
-    const titleParam = searchParams.get('title');
-    
-    // 새로운 대화인 경우에만 자동 스트리밍 시작
-    if (conversationId && token && currentQuestion && selectedModels.length > 0 && questionParam && !titleParam) {
-      console.log('Auto-starting stream with conversationId:', conversationId);
+    // 기존 메시지가 없고 모델이 선택되어 있으면 자동 스트리밍 시작
+    if (conversationId && token && currentQuestion && selectedModels.length > 0 && existingMessages.length === 0 && !isLoadingExistingConversation) {
+      console.log('Auto-starting stream for new conversation:', conversationId);
       startStreaming(currentQuestion);
     }
-  }, [conversationId, token, currentQuestion, selectedModels, searchParams, startStreaming]);
+  }, [conversationId, token, currentQuestion, selectedModels, existingMessages, isLoadingExistingConversation, startStreaming]);
 
   // 컴포넌트 언마운트 시 타이핑 애니메이션 정리
   useEffect(() => {

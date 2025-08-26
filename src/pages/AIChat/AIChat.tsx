@@ -301,10 +301,8 @@ const AIChat: React.FC = () => {
       if (conversationResponse.code === 200) {
         const conversationId = conversationResponse.data.conversationId;
         
-        // 선택된 모델들을 URL 파라미터로 전달하고 즉시 페이지 이동
-        // 실제 스트리밍은 AIChatDetail 페이지에서 처리
-        const modelsParam = selectedModels.map(model => `${model.id}:${model.name}:${model.brand}`).join(',');
-        navigate(`/ai-chat/detail?conversationId=${conversationId}&question=${encodeURIComponent(message)}&models=${encodeURIComponent(modelsParam)}`);
+        // 대화 생성 후 상세페이지로 이동 (conversationId만 전달)
+        navigate(`/ai-chat/detail?conversationId=${conversationId}`);
       } else {
         alert('세션 생성에 실패했습니다.');
       }
@@ -541,15 +539,9 @@ const AIChat: React.FC = () => {
                     <div key={conversation.conversationId} className={styles.conversationItem}>
                       <button
                         className={styles.conversationButton}
-                        onClick={async () => {
-                          try {
-                            const conversationDetail = await getConversationDetail(conversation.conversationId, token!);
-                            setIsHistoryOpen(false);
-                            navigate(`/ai-chat/detail?conversationId=${conversation.conversationId}&title=${encodeURIComponent(conversationDetail.data.title)}`);
-                          } catch (error) {
-                            console.error('대화 상세 조회 오류:', error);
-                            alert('대화를 불러올 수 없습니다.');
-                          }
+                        onClick={() => {
+                          setIsHistoryOpen(false);
+                          navigate(`/ai-chat/detail?conversationId=${conversation.conversationId}`);
                         }}
                       >
                         <span>{conversation.lastMessagePreview}</span>
