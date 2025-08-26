@@ -654,6 +654,20 @@ const AIChatDetail: React.FC = () => {
     // 새로운 대화인 경우에만 자동 스트리밍 시작
     if (conversationId && token && currentQuestion && selectedModels.length > 0 && questionParam && allMessages.length === 0 && !isLoadingExistingConversation) {
       console.log('Auto-starting stream with conversationId:', conversationId);
+      
+      // 유저 메시지를 먼저 allMessages에 추가
+      const newUserMessage: Message = {
+        messageId: Date.now(), // 임시 ID
+        content: currentQuestion,
+        role: 'user',
+        messageOrder: 1, // 새로운 대화이므로 1부터 시작
+        createdAt: new Date().toISOString(),
+        attachments: []
+      };
+      
+      setAllMessages(prev => [...prev, newUserMessage]);
+      
+      // 스트리밍 시작
       startStreaming(currentQuestion);
     }
   }, [conversationId, token, currentQuestion, selectedModels, searchParams, allMessages, isLoadingExistingConversation, startStreaming]);
