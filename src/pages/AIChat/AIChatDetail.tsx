@@ -154,7 +154,7 @@ const AIChatDetail: React.FC = () => {
     return text.replace(boldPattern, '<strong>$1</strong>');
   };
 
-  // 타이핑 효과 함수 - 안전한 복구 메커니즘 포함
+  // 타이핑 효과 함수 - requestAnimationFrame 사용하여 개선
   const typeWriter = useCallback((modelName: string, newFullText: string) => {
     const speed = 30; // 타이핑 속도 (ms)
     
@@ -165,7 +165,9 @@ const AIChatDetail: React.FC = () => {
       typingStateRef.current[modelName] = {
         isTyping: false,
         currentIndex: 0,
-        targetText: ''
+        targetText: '',
+        lastUpdateTime: Date.now(),
+        animationId: null
       };
     }
     
@@ -173,6 +175,7 @@ const AIChatDetail: React.FC = () => {
     
     // 타겟 텍스트만 업데이트 (타이핑은 중단하지 않음)
     currentState.targetText = newFullText;
+    currentState.lastUpdateTime = Date.now();
     
     // 이미 타이핑 중이라면 새로운 타이핑을 시작하지 않음
     if (currentState.isTyping) {
@@ -183,8 +186,6 @@ const AIChatDetail: React.FC = () => {
     // 타이핑 시작
     currentState.isTyping = true;
     console.log(`[${modelName}] 새 타이핑 시작 - 현재:`, currentState.currentIndex, '목표:', newFullText.length);
-    
-    let stuckCounter = 0; // 무한루프 방지용 카운터
     
     const type = () => {
       const state = typingStateRef.current[modelName];
@@ -197,7 +198,6 @@ const AIChatDetail: React.FC = () => {
       console.log(`[${modelName}] 타이핑 진행 - 현재: ${state.currentIndex}, 타겟: ${targetText.length}`);
       
       if (state.currentIndex < targetText.length) {
-        stuckCounter = 0; // 진행되면 카운터 리셋
         const nextChar = targetText.slice(0, state.currentIndex + 1);
         
         // ref 업데이트 및 강제 리렌더링
@@ -206,47 +206,22 @@ const AIChatDetail: React.FC = () => {
         
         state.currentIndex++;
         
+        // 다음 타이핑을 위한 타이머 설정
         const timeoutId = setTimeout(type, speed);
-        setTypingAnimationIds(prev => ({
-          ...prev,
-          [modelName]: timeoutId
-        }));
+        // 타이핑 상태에 타이머 ID 저장 (취소를 위해)
+        state.animationId = timeoutId;
       } else {
-        // 현재 타겟까지 완료했지만, 더 긴 타겟이 있는지 확인
-        console.log(`[${modelName}] 타이핑 체크 - 현재 인덱스: ${state.currentIndex}, 타겟 길이: ${state.targetText.length}`);
-        if (state.targetText.length > state.currentIndex) {
-          stuckCounter++;
-          if (stuckCounter > 10) {
-            console.error(`[${modelName}] 타이핑이 계속 멈춰있음 - 강제 완료`);
-            state.isTyping = false;
-            setTypingAnimationIds(prev => {
-              const newIds = { ...prev };
-              delete newIds[modelName];
-              return newIds;
-            });
-            return;
-          }
-          // 더 타이핑할 게 있음
-          console.log(`[${modelName}] 더 타이핑할 내용 있음 - 계속 진행`);
-          const timeoutId = setTimeout(type, speed);
-          setTypingAnimationIds(prev => ({
-            ...prev,
-            [modelName]: timeoutId
-          }));
-        } else {
-          // 타이핑 완료
-          console.log(`[${modelName}] 타이핑 완료 - 최종 텍스트: "${state.targetText}"`);
-          state.isTyping = false;
-          setTypingAnimationIds(prev => {
-            const newIds = { ...prev };
-            delete newIds[modelName];
-            return newIds;
-          });
+        // 타이핑 완료
+        console.log(`[${modelName}] 타이핑 완료 - 최종 텍스트: "${state.targetText}"`);
+        state.isTyping = false;
+        if (state.animationId) {
+          clearTimeout(state.animationId);
+          state.animationId = null;
         }
       }
     };
     
-    // 즉시 시작
+    // 타이핑 시작
     type();
     
     // 5초 후에도 타이핑이 완료되지 않으면 강제 완료 (안전장치)
@@ -258,11 +233,10 @@ const AIChatDetail: React.FC = () => {
         forceUpdate();
         state.isTyping = false;
         state.currentIndex = state.targetText.length;
-        setTypingAnimationIds(prev => {
-          const newIds = { ...prev };
-          delete newIds[modelName];
-          return newIds;
-        });
+        if (state.animationId) {
+          clearTimeout(state.animationId);
+          state.animationId = null;
+        }
       }
     }, 5000);
   }, []);
@@ -288,7 +262,13 @@ const AIChatDetail: React.FC = () => {
       initialDisplayed[model.name] = '';
       // ref 초기화
       displayedMessagesRef.current[model.name] = '';
-      typingStateRef.current[model.name] = { isTyping: false, currentIndex: 0, targetText: '' };
+      typingStateRef.current[model.name] = { 
+        isTyping: false, 
+        currentIndex: 0, 
+        targetText: '',
+        lastUpdateTime: Date.now(),
+        animationId: null
+      };
       textBuffersRef.current[model.name] = '';
     });
 
@@ -313,7 +293,8 @@ const AIChatDetail: React.FC = () => {
             const elapsed = Date.now() - streamStartTimeRef.current[model.name];
             console.log(`[${model.name}] SSE 수신 (${elapsed}ms):`, text);
             // ref를 직접 업데이트 (동기적, 경쟁 조건 방지)
-            textBuffersRef.current[model.name] = (textBuffersRef.current[model.name] || '') + text;
+            const currentBuffer = textBuffersRef.current[model.name] || '';
+            textBuffersRef.current[model.name] = currentBuffer + text;
             const newBuffer = textBuffersRef.current[model.name];
             console.log(`[${model.name}] 버퍼 업데이트:`, newBuffer.length, '글자');
             // 타이핑 효과로 표시
@@ -342,6 +323,10 @@ const AIChatDetail: React.FC = () => {
                 typingState.isTyping = false;
                 typingState.targetText = currentBuffer;
                 typingState.currentIndex = currentBuffer.length;
+                if (typingState.animationId) {
+                  clearTimeout(typingState.animationId);
+                  typingState.animationId = null;
+                }
               }
             }
           }
@@ -437,7 +422,13 @@ const AIChatDetail: React.FC = () => {
           initialDisplayed[model.name] = '응답을 기다리고 있습니다...';
           // ref 초기화
           displayedMessagesRef.current[model.name] = '응답을 기다리고 있습니다...';
-          typingStateRef.current[model.name] = { isTyping: false, currentIndex: 0, targetText: '' };
+          typingStateRef.current[model.name] = { 
+            isTyping: false, 
+            currentIndex: 0, 
+            targetText: '',
+            lastUpdateTime: Date.now(),
+            animationId: null
+          };
           textBuffersRef.current[model.name] = '';
         });
         
@@ -475,8 +466,20 @@ const AIChatDetail: React.FC = () => {
           'Claude 3.5 Sonnet': '응답을 기다리고 있습니다...'
         };
         typingStateRef.current = {
-          'GPT-4o': { isTyping: false, currentIndex: 0, targetText: '' },
-          'Claude 3.5 Sonnet': { isTyping: false, currentIndex: 0, targetText: '' }
+          'GPT-4o': { 
+            isTyping: false, 
+            currentIndex: 0, 
+            targetText: '',
+            lastUpdateTime: Date.now(),
+            animationId: null
+          },
+          'Claude 3.5 Sonnet': { 
+            isTyping: false, 
+            currentIndex: 0, 
+            targetText: '',
+            lastUpdateTime: Date.now(),
+            animationId: null
+          }
         };
         textBuffersRef.current = {
           'GPT-4o': '',
@@ -493,6 +496,30 @@ const AIChatDetail: React.FC = () => {
       startStreaming(currentQuestion);
     }
   }, [conversationId, token, currentQuestion, selectedModels]);
+
+  // 컴포넌트 언마운트 시 타이핑 애니메이션 정리
+  useEffect(() => {
+    return () => {
+      // 모든 모델의 애니메이션 정리
+      Object.keys(typingStateRef.current).forEach(modelName => {
+        const state = typingStateRef.current[modelName];
+        if (state?.animationId) {
+          clearTimeout(state.animationId);
+          state.animationId = null;
+        }
+        if (state) {
+          state.isTyping = false;
+        }
+      });
+      
+      // 모든 setTimeout 정리
+      Object.values(typingAnimationIds).forEach(id => {
+        if (id) {
+          clearTimeout(id);
+        }
+      });
+    };
+  }, []);
 
   return (
     <div className={styles.container}>
