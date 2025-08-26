@@ -26,9 +26,11 @@ const AIChatDetail: React.FC = () => {
   const textBuffersRef = useRef<Record<string, string>>({});
   const streamStartTimeRef = useRef<Record<string, number>>({});
   
-  // URL 파라미터에서 conversationId 가져오기
+  // URL 파라미터에서 conversationId와 질문 가져오기
   const conversationId = parseInt(searchParams.get('conversationId') || '0');
-  const [currentQuestion, setCurrentQuestion] = useState('각자 자신의 모델에 대해 소개한번만 부탁해');
+  const [currentQuestion, setCurrentQuestion] = useState(
+    searchParams.get('question') || '각자 자신의 모델에 대해 소개한번만 부탁해'
+  );
   const [isLoadingExistingConversation, setIsLoadingExistingConversation] = useState(false);
   interface Message {
     messageId: number;
@@ -528,21 +530,52 @@ const AIChatDetail: React.FC = () => {
     }
   }, [conversationId, token]);
 
-  // 기존 대화 로드
+  // URL 파라미터에서 선택된 모델들 가져오기 또는 기존 대화 로드
   useEffect(() => {
-    if (conversationId && token) {
+    const questionParam = searchParams.get('question');
+    const modelsParam = searchParams.get('models');
+    
+    // 새로운 대화인 경우 (question이 있고 models이 있는 경우)
+    if (questionParam && modelsParam) {
+      try {
+        const decodedModels = decodeURIComponent(modelsParam);
+        const parsedModels = decodedModels.split(',').map(modelStr => {
+          const [id, name, brand] = modelStr.split(':');
+          
+          // 브랜드에 따른 아이콘 설정
+          let icon = openAILogo;
+          if (brand === 'claude') icon = claudeLogo;
+          else if (brand === 'gemini') icon = geminiLogo;
+          
+          return { id, name, icon, brand };
+        });
+        
+        setSelectedModels(parsedModels);
+      } catch (error) {
+        console.error('Error parsing models from URL:', error);
+        // 파싱 실패 시 기본 모델 설정
+        setSelectedModels([
+          { id: 'gpt-4o', name: 'GPT-4o', icon: openAILogo, brand: 'gpt' },
+          { id: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', icon: claudeLogo, brand: 'claude' }
+        ]);
+      }
+    }
+    // 기존 대화인 경우 (question과 models가 없는 경우)
+    else if (conversationId && token) {
       loadExistingConversation();
     }
-  }, [conversationId, token, loadExistingConversation]);
+  }, [searchParams, conversationId, token, loadExistingConversation]);
 
-  // 자동 스트리밍 시작 (새로운 대화인 경우에만)
+  // 페이지 로드 시 자동으로 스트리밍 시작 (새로운 대화인 경우에만)
   useEffect(() => {
-    // 기존 메시지가 없고 모델이 선택되어 있으면 자동 스트리밍 시작
-    if (conversationId && token && currentQuestion && selectedModels.length > 0 && existingMessages.length === 0 && !isLoadingExistingConversation) {
-      console.log('Auto-starting stream for new conversation:', conversationId);
+    const questionParam = searchParams.get('question');
+    
+    // 새로운 대화인 경우에만 자동 스트리밍 시작
+    if (conversationId && token && currentQuestion && selectedModels.length > 0 && questionParam && existingMessages.length === 0 && !isLoadingExistingConversation) {
+      console.log('Auto-starting stream with conversationId:', conversationId);
       startStreaming(currentQuestion);
     }
-  }, [conversationId, token, currentQuestion, selectedModels, existingMessages, isLoadingExistingConversation, startStreaming]);
+  }, [conversationId, token, currentQuestion, selectedModels, searchParams, existingMessages, isLoadingExistingConversation, startStreaming]);
 
   // 컴포넌트 언마운트 시 타이핑 애니메이션 정리
   useEffect(() => {

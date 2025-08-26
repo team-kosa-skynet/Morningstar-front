@@ -301,8 +301,9 @@ const AIChat: React.FC = () => {
       if (conversationResponse.code === 200) {
         const conversationId = conversationResponse.data.conversationId;
         
-        // 대화 생성 후 상세페이지로 이동 (conversationId만 전달)
-        navigate(`/ai-chat/detail?conversationId=${conversationId}`);
+        // 선택된 모델들과 질문을 URL 파라미터로 전달
+        const modelsParam = selectedModels.map(model => `${model.id}:${model.name}:${model.brand}`).join(',');
+        navigate(`/ai-chat/detail?conversationId=${conversationId}&question=${encodeURIComponent(message)}&models=${encodeURIComponent(modelsParam)}`);
       } else {
         alert('세션 생성에 실패했습니다.');
       }
