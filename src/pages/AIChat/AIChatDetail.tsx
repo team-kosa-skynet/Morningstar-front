@@ -17,12 +17,12 @@ const AIChatDetail: React.FC = () => {
   const [selectedModelBrand, setSelectedModelBrand] = useState('');
   const [isImageMode, setIsImageMode] = useState(false);
   const [isChatInputFocused, setIsChatInputFocused] = useState(false);
-  const [streamingMessages, setStreamingMessages] = useState<Record<string, string>>({});
+  const [, setStreamingMessages] = useState<Record<string, string>>({});
   const [isStreaming, setIsStreaming] = useState<Record<string, boolean>>({});
-  const [typingAnimationIds, setTypingAnimationIds] = useState<Record<string, number>>({});
+  const [typingAnimationIds] = useState<Record<string, number>>({});
   const displayedMessagesRef = useRef<Record<string, string>>({});
   const typingStateRef = useRef<Record<string, { isTyping: boolean; currentIndex: number; targetText: string }>>({});
-  const [forceUpdateCounter, setForceUpdateCounter] = useState(0);
+  const [, setForceUpdateCounter] = useState(0);
   const forceUpdate = () => setForceUpdateCounter(prev => prev + 1);
   const textBuffersRef = useRef<Record<string, string>>({});
   const streamStartTimeRef = useRef<Record<string, number>>({});
@@ -145,13 +145,34 @@ const AIChatDetail: React.FC = () => {
     setIsModelSelectionOpen(true);
   };
 
-  // 텍스트 포맷팅 함수 (** ** -> bold)
+  // 텍스트 포맷팅 함수 (코드 블록 및 bold 처리)
   const formatText = (text: string) => {
     if (!text) return text;
     
+    let formattedText = text;
+    
+    // 코드 블록 처리 (```language\ncontent\n```)
+    const codeBlockPattern = /```([\s\S]*?)```/g;
+    formattedText = formattedText.replace(codeBlockPattern, (match, content) => {
+      // 코드 내용에서 언어와 실제 코드 분리
+      const lines = content.trim().split('\n');
+      lines[0].trim();
+      const codeContent = lines.length > 1 ? lines.slice(1).join('\n') : lines[0];
+      
+      return `<div class="code-block">
+        <pre><code>${codeContent}</code></pre>
+      </div>`;
+    });
+    
+    // 인라인 코드 처리 (`code`)
+    const inlineCodePattern = /`([^`]+)`/g;
+    formattedText = formattedText.replace(inlineCodePattern, '<code class="inline-code">$1</code>');
+    
     // **텍스트** 패턴을 찾아서 <strong> 태그로 변환
     const boldPattern = /\*\*(.*?)\*\*/g;
-    return text.replace(boldPattern, '<strong>$1</strong>');
+    formattedText = formattedText.replace(boldPattern, '<strong>$1</strong>');
+    
+    return formattedText;
   };
 
   // 타이핑 효과 함수 - requestAnimationFrame 사용하여 개선
