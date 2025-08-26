@@ -5,7 +5,7 @@ import FeedbackModal from '../../components/Modal/FeedbackModal';
 import openAILogo from '../../assets/images/openAI-Photoroom.png';
 import geminiLogo from '../../assets/images/gemini-1336519698502187930_128px.png';
 import claudeLogo from '../../assets/images/클로드-Photoroom.png';
-import { sendChatMessageStream } from '../../services/apiService';
+import { sendChatMessageStream, getConversationDetail } from '../../services/apiService';
 import { useAuthStore } from '../../stores/authStore';
 
 const AIChatDetail: React.FC = () => {
@@ -32,6 +32,8 @@ const AIChatDetail: React.FC = () => {
   const [currentQuestion, setCurrentQuestion] = useState(
     searchParams.get('question') || '각자 자신의 모델에 대해 소개한번만 부탁해'
   );
+  const [isLoadingExistingConversation, setIsLoadingExistingConversation] = useState(false);
+  const [existingMessages, setExistingMessages] = useState<any[]>([]);
   const chatInputRef = useRef<HTMLDivElement>(null);
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean;
@@ -411,10 +413,103 @@ const AIChatDetail: React.FC = () => {
     };
   }, [typingAnimationIds]);
 
-  // URL 파라미터에서 선택된 모델들 가져오기
+  // 기존 대화 로드 함수
+  const loadExistingConversation = async () => {
+    if (!conversationId || !token) return;
+
+    try {
+      setIsLoadingExistingConversation(true);
+      const response = await getConversationDetail(conversationId, token);
+      
+      if (response.code === 200) {
+        const { data } = response;
+        setCurrentQuestion(data.title);
+        
+        // 메시지 정렬 및 중복 제거
+        const sortedMessages = (data.messages || [])
+          .sort((a: any, b: any) => a.messageOrder - b.messageOrder)
+          .filter((message: any, index: number, arr: any[]) => {
+            // 사용자 메시지가 중복인 경우 첫 번째만 유지
+            if (message.role === 'user') {
+              const firstUserMessageIndex = arr.findIndex(
+                (msg: any) => msg.role === 'user' && msg.content === message.content
+              );
+              return firstUserMessageIndex === index;
+            }
+            return true;
+          });
+        
+        setExistingMessages(sortedMessages);
+        
+        // 메시지가 있는 경우 실제 사용된 모델들을 추출하여 selectedModels 설정
+        if (data.messages && data.messages.length > 0) {
+          const usedModels = new Map();
+          
+          // 메시지에서 실제 사용된 AI 모델들을 추출
+          data.messages.forEach((msg: any) => {
+            if (msg.role === 'assistant' && msg.aiModel) {
+              const modelId = msg.aiModel;
+              let brand = 'openai';
+              let name = modelId;
+              let icon = openAILogo;
+              
+              // 모델 이름으로 브랜드 판별
+              if (modelId.toLowerCase().includes('claude')) {
+                brand = 'claude';
+                icon = claudeLogo;
+                name = modelId.replace(/claude-/g, 'Claude ').replace(/\b\w/g, l => l.toUpperCase());
+              } else if (modelId.toLowerCase().includes('gemini')) {
+                brand = 'gemini';
+                icon = geminiLogo;
+                name = modelId.replace(/gemini-/g, 'Gemini ').replace(/\b\w/g, l => l.toUpperCase());
+              } else if (modelId.toLowerCase().includes('gpt')) {
+                brand = 'gpt';
+                icon = openAILogo;
+                name = modelId.toUpperCase();
+              }
+              
+              usedModels.set(modelId, {
+                id: modelId,
+                name: name,
+                icon: icon,
+                brand: brand
+              });
+            }
+          });
+          
+          // 추출된 모델들을 selectedModels로 설정
+          const extractedModels = Array.from(usedModels.values());
+          if (extractedModels.length > 0) {
+            setSelectedModels(extractedModels);
+          } else {
+            // 추출된 모델이 없는 경우 기본 모델 설정
+            const defaultModels = [
+              {
+                id: 'gpt-4o',
+                name: 'GPT-4o',
+                icon: openAILogo,
+                brand: 'gpt'
+              }
+            ];
+            setSelectedModels(defaultModels);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('기존 대화 로드 오류:', error);
+    } finally {
+      setIsLoadingExistingConversation(false);
+    }
+  };
+
+  // URL 파라미터에서 선택된 모델들 가져오기 또는 기존 대화 로드
   useEffect(() => {
+    const questionParam = searchParams.get('question');
+    const titleParam = searchParams.get('title');
     const modelsParam = searchParams.get('models');
-    if (modelsParam) {
+    
+    // 새로운 대화인 경우 (question이 있고 models이 있는 경우)
+    if (questionParam && modelsParam) {
       try {
         const decodedModels = decodeURIComponent(modelsParam);
         const parsedModels = decodedModels.split(',').map(modelStr => {
@@ -457,66 +552,76 @@ const AIChatDetail: React.FC = () => {
         setIsStreaming(initialStreaming);
       } catch (error) {
         console.error('Error parsing models from URL:', error);
-        // 파싱 실패 시 기본값 설정
-        const defaultModels = [
-          {
-            id: 'gpt-4o',
-            name: 'GPT-4o',
-            icon: openAILogo,
-            brand: 'gpt'
-          },
-          {
-            id: 'claude-3.5-sonnet',
-            name: 'Claude 3.5 Sonnet',
-            icon: claudeLogo,
-            brand: 'claude'
-          }
-        ];
-        setSelectedModels(defaultModels);
-        setStreamingMessages({
-          'GPT-4o': '',
-          'Claude 3.5 Sonnet': ''
-        });
-        setIsStreaming({
-          'GPT-4o': false,
-          'Claude 3.5 Sonnet': false
-        });
-        // ref 초기화
-        displayedMessagesRef.current = {
-          'GPT-4o': '응답을 기다리고 있습니다...',
-          'Claude 3.5 Sonnet': '응답을 기다리고 있습니다...'
-        };
-        typingStateRef.current = {
-          'GPT-4o': { 
-            isTyping: false, 
-            currentIndex: 0, 
-            targetText: '',
-            lastUpdateTime: Date.now(),
-            animationId: null
-          },
-          'Claude 3.5 Sonnet': { 
-            isTyping: false, 
-            currentIndex: 0, 
-            targetText: '',
-            lastUpdateTime: Date.now(),
-            animationId: null
-          }
-        };
-        textBuffersRef.current = {
-          'GPT-4o': '',
-          'Claude 3.5 Sonnet': ''
-        };
       }
     }
-  }, [searchParams]);
+    // 기존 대화인 경우 (title이 있지만 question이 없는 경우)
+    else if (titleParam && !questionParam) {
+      loadExistingConversation();
+    }
+    // 기본값 설정
+    else {
+      const defaultModels = [
+        {
+          id: 'gpt-4o',
+          name: 'GPT-4o',
+          icon: openAILogo,
+          brand: 'gpt'
+        },
+        {
+          id: 'claude-3.5-sonnet',
+          name: 'Claude 3.5 Sonnet',
+          icon: claudeLogo,
+          brand: 'claude'
+        }
+      ];
+      setSelectedModels(defaultModels);
+      setStreamingMessages({
+        'GPT-4o': '',
+        'Claude 3.5 Sonnet': ''
+      });
+      setIsStreaming({
+        'GPT-4o': false,
+        'Claude 3.5 Sonnet': false
+      });
+      // ref 초기화
+      displayedMessagesRef.current = {
+        'GPT-4o': '응답을 기다리고 있습니다...',
+        'Claude 3.5 Sonnet': '응답을 기다리고 있습니다...'
+      };
+      typingStateRef.current = {
+        'GPT-4o': { 
+          isTyping: false, 
+          currentIndex: 0, 
+          targetText: '',
+          lastUpdateTime: Date.now(),
+          animationId: null
+        },
+        'Claude 3.5 Sonnet': { 
+          isTyping: false, 
+          currentIndex: 0, 
+          targetText: '',
+          lastUpdateTime: Date.now(),
+          animationId: null
+        }
+      };
+      textBuffersRef.current = {
+        'GPT-4o': '',
+        'Claude 3.5 Sonnet': ''
+      };
+    }
+  }, [searchParams, conversationId, token]);
 
-  // 페이지 로드 시 자동으로 스트리밍 시작
+  // 페이지 로드 시 자동으로 스트리밍 시작 (새로운 대화인 경우에만)
   useEffect(() => {
-    if (conversationId && token && currentQuestion && selectedModels.length > 0) {
+    const questionParam = searchParams.get('question');
+    const titleParam = searchParams.get('title');
+    
+    // 새로운 대화인 경우에만 자동 스트리밍 시작
+    if (conversationId && token && currentQuestion && selectedModels.length > 0 && questionParam && !titleParam) {
       console.log('Auto-starting stream with conversationId:', conversationId);
       startStreaming(currentQuestion);
     }
-  }, [conversationId, token, currentQuestion, selectedModels]);
+  }, [conversationId, token, currentQuestion, selectedModels, searchParams]);
 
   // 컴포넌트 언마운트 시 타이핑 애니메이션 정리
   useEffect(() => {
@@ -554,45 +659,105 @@ const AIChatDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* AI 답변들 */}
-        <div className={styles.aiResponsesContainer}>
-          {selectedModels.map((model) => (
-            <div key={model.id} className={styles.aiResponse}>
-              <div className={styles.responseContent}>
-                {/* 모델 정보 헤더 */}
-                <div className={styles.modelHeader}>
-                  <img 
-                    src={model.icon} 
-                    alt={model.name} 
-                    className={styles.modelIcon}
-                  />
-                  <span className={styles.modelName}>{model.name}</span>
-                </div>
+        {/* 로딩 상태 표시 */}
+        {isLoadingExistingConversation && (
+          <div className={styles.messageHistory}>
+            <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+              대화를 불러오는 중...
+            </div>
+          </div>
+        )}
 
-                {/* 답변 내용 */}
-                <div className={styles.responseText}>
-                  <span 
-                    dangerouslySetInnerHTML={{ 
-                      __html: formatText(displayedMessagesRef.current[model.name] || '') 
-                    }} 
-                  />
-                  {(isStreaming[model.name] || typingAnimationIds[model.name]) && <span className={styles.cursor}>|</span>}
-                </div>
+        {/* 기존 대화 메시지들 표시 (AI 답변만) - 기존 스타일 재사용 */}
+        {!isLoadingExistingConversation && existingMessages.length > 0 && (
+          <div className={styles.aiResponsesContainer}>
+            {existingMessages
+              .filter((message: any) => message.role === 'assistant')
+              .map((message: any, index: number) => (
+                <div key={`${message.messageId}-${index}`} className={styles.aiResponse}>
+                  <div className={styles.responseContent}>
+                    {/* 모델 정보 헤더 */}
+                    <div className={styles.modelHeader}>
+                      <img 
+                        src={message.aiModel?.toLowerCase().includes('claude') ? claudeLogo :
+                             message.aiModel?.toLowerCase().includes('gemini') ? geminiLogo :
+                             openAILogo} 
+                        alt={message.aiModel} 
+                        className={styles.modelIcon}
+                      />
+                      <span className={styles.modelName}>
+                        {message.aiModel ? 
+                          (message.aiModel.toLowerCase().includes('claude') ? 
+                            message.aiModel.replace(/claude-/g, 'Claude ').replace(/\b\w/g, (l: string) => l.toUpperCase()) :
+                           message.aiModel.toLowerCase().includes('gemini') ? 
+                            message.aiModel.replace(/gemini-/g, 'Gemini ').replace(/\b\w/g, (l: string) => l.toUpperCase()) :
+                           message.aiModel.toUpperCase()) : 
+                          'AI Assistant'}
+                      </span>
+                    </div>
 
-                {/* 피드백 버튼 */}
-                <div className={styles.feedbackSection}>
-                  <button 
-                    className={styles.likeButton}
-                    onClick={() => handleLike(model.name)}
-                  >
-                    <i className="bi bi-hand-thumbs-up"></i>
-                    마음에 들어요
-                  </button>
+                    {/* 답변 내용 */}
+                    <div className={styles.responseText}>
+                      <span dangerouslySetInnerHTML={{ __html: formatText(message.content) }} />
+                    </div>
+
+                    {/* 피드백 버튼 */}
+                    <div className={styles.feedbackSection}>
+                      <button 
+                        className={styles.likeButton}
+                        onClick={() => handleLike(message.aiModel || 'AI Assistant')}
+                      >
+                        <i className="bi bi-hand-thumbs-up"></i>
+                        마음에 들어요
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
+
+        {/* AI 답변들 (새로운 대화 또는 스트리밍 중인 경우) */}
+        {(!existingMessages.length || Object.values(isStreaming).some(streaming => streaming)) && (
+          <div className={styles.aiResponsesContainer}>
+            {selectedModels.map((model) => (
+              <div key={model.id} className={styles.aiResponse}>
+                <div className={styles.responseContent}>
+                  {/* 모델 정보 헤더 */}
+                  <div className={styles.modelHeader}>
+                    <img 
+                      src={model.icon} 
+                      alt={model.name} 
+                      className={styles.modelIcon}
+                    />
+                    <span className={styles.modelName}>{model.name}</span>
+                  </div>
+
+                  {/* 답변 내용 */}
+                  <div className={styles.responseText}>
+                    <span 
+                      dangerouslySetInnerHTML={{ 
+                        __html: formatText(displayedMessagesRef.current[model.name] || '') 
+                      }} 
+                    />
+                    {(isStreaming[model.name] || typingAnimationIds[model.name]) && <span className={styles.cursor}>|</span>}
+                  </div>
+
+                  {/* 피드백 버튼 */}
+                  <div className={styles.feedbackSection}>
+                    <button 
+                      className={styles.likeButton}
+                      onClick={() => handleLike(model.name)}
+                    >
+                      <i className="bi bi-hand-thumbs-up"></i>
+                      마음에 들어요
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* 채팅 입력창 */}
         <div 

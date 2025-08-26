@@ -7,7 +7,7 @@ import Banner from '../../components/Banner/Banner';
 import openAILogo from '../../assets/images/openAI-Photoroom.png';
 import geminiLogo from '../../assets/images/gemini-1336519698502187930_128px.png';
 import claudeLogo from '../../assets/images/클로드-Photoroom.png';
-import { createConversation, sendChatMessage, sendChatMessageStream } from '../../services/apiService';
+import { createConversation, sendChatMessage, sendChatMessageStream, getConversationDetail } from '../../services/apiService';
 import { useAuthStore } from '../../stores/authStore';
 
 Chart.register(...registerables);
@@ -541,10 +541,15 @@ const AIChat: React.FC = () => {
                     <div key={conversation.conversationId} className={styles.conversationItem}>
                       <button
                         className={styles.conversationButton}
-                        onClick={() => {
-                          // TODO: 나중에 대화 상세 페이지로 이동하는 기능 구현
-                          console.log('대화 선택:', conversation.conversationId);
-                          setIsHistoryOpen(false);
+                        onClick={async () => {
+                          try {
+                            const conversationDetail = await getConversationDetail(conversation.conversationId, token!);
+                            setIsHistoryOpen(false);
+                            navigate(`/ai-chat/detail?conversationId=${conversation.conversationId}&title=${encodeURIComponent(conversationDetail.data.title)}`);
+                          } catch (error) {
+                            console.error('대화 상세 조회 오류:', error);
+                            alert('대화를 불러올 수 없습니다.');
+                          }
                         }}
                       >
                         <span>{conversation.lastMessagePreview}</span>

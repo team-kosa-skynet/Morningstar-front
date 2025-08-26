@@ -1219,3 +1219,45 @@ export const sendChatMessageStream = async (
     throw error;
   }
 };
+
+interface ConversationMessage {
+  messageId: number;
+  role: 'user' | 'assistant';
+  content: string;
+  aiModel?: string;
+  messageOrder: number;
+  createdAt: string;
+  attachments: any[];
+}
+
+interface ConversationDetailResponse {
+  code: number;
+  message: string;
+  data: {
+    conversationId: number;
+    title: string;
+    createdAt: string;
+    lastModifiedAt: string;
+    messages: ConversationMessage[];
+    totalMessageCount: number;
+  };
+}
+
+export const getConversationDetail = async (conversationId: number, token: string): Promise<ConversationDetailResponse> => {
+  try {
+    const response = await axios.get<ConversationDetailResponse>(
+      `${API_BASE_URL}/conversations/${conversationId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
