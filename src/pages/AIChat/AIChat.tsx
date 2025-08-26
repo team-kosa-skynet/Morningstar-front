@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Chart, registerables } from 'chart.js';
@@ -96,7 +96,12 @@ const AIChat: React.FC = () => {
 
     // OpenAI 모델들
     if (modelInfoData.openai) {
-      details.gpt = modelInfoData.openai.models.map((model: any) => ({
+      let openaiModels = modelInfoData.openai.models;
+      // 이미지 모드일 때 isCreateImage가 true인 모델만 필터링
+      if (isImageMode) {
+        openaiModels = openaiModels.filter((model: any) => model.isCreateImage === true);
+      }
+      details.gpt = openaiModels.map((model: any) => ({
         id: model.name,
         name: model.name.toUpperCase(),
         icon: openAILogo
@@ -105,7 +110,12 @@ const AIChat: React.FC = () => {
 
     // Gemini 모델들
     if (modelInfoData.gemini) {
-      details.gemini = modelInfoData.gemini.models.map((model: any) => ({
+      let geminiModels = modelInfoData.gemini.models;
+      // 이미지 모드일 때 isCreateImage가 true인 모델만 필터링
+      if (isImageMode) {
+        geminiModels = geminiModels.filter((model: any) => model.isCreateImage === true);
+      }
+      details.gemini = geminiModels.map((model: any) => ({
         id: model.name,
         name: model.name.charAt(0).toUpperCase() + model.name.slice(1).replace(/-/g, ' '),
         icon: geminiLogo
@@ -114,7 +124,12 @@ const AIChat: React.FC = () => {
 
     // Claude 모델들
     if (modelInfoData.claude) {
-      details.claude = modelInfoData.claude.models.map((model: any) => ({
+      let claudeModels = modelInfoData.claude.models;
+      // 이미지 모드일 때 isCreateImage가 true인 모델만 필터링
+      if (isImageMode) {
+        claudeModels = claudeModels.filter((model: any) => model.isCreateImage === true);
+      }
+      details.claude = claudeModels.map((model: any) => ({
         id: model.name,
         name: model.name.charAt(0).toUpperCase() + model.name.slice(1).replace(/-/g, ' '),
         icon: claudeLogo
@@ -124,7 +139,7 @@ const AIChat: React.FC = () => {
     return details;
   };
 
-  const modelDetails = getModelDetails();
+  const modelDetails = useMemo(() => getModelDetails(), [modelInfoData, isImageMode]);
   const [modelInfoLoading, setModelInfoLoading] = useState(false);
 
   // 데이터 로딩
@@ -478,16 +493,25 @@ const AIChat: React.FC = () => {
               </div>
               
               <div className={styles.modelList}>
-                {models.map((model) => (
-                  <button
-                    key={model.id}
-                    className={styles.modelOption}
-                    onClick={() => handleModelSelect(model.id)}
-                  >
-                    <img src={model.icon} alt={model.name} className={styles.modelIcon} />
-                    <span>{model.name}</span>
-                  </button>
-                ))}
+                {models.map((model) => {
+                  // 이미지 모드일 때 해당 브랜드에 이미지 생성 가능한 모델이 있는지 확인
+                  const hasImageModels = isImageMode ? (modelDetails[model.id]?.length > 0) : true;
+                  
+                  return (
+                    <button
+                      key={model.id}
+                      className={`${styles.modelOption} ${!hasImageModels ? styles.disabled : ''}`}
+                      onClick={() => hasImageModels && handleModelSelect(model.id)}
+                      disabled={!hasImageModels}
+                    >
+                      <img src={model.icon} alt={model.name} className={styles.modelIcon} />
+                      <span>{model.name}</span>
+                      {!hasImageModels && isImageMode && (
+                        <span className={styles.noImageSupport}>(이미지 생성 미지원)</span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
