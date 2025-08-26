@@ -289,7 +289,7 @@ const AIChatDetail: React.FC = () => {
       const currentMaxOrder = Math.max(...prevMessages.map(m => m.messageOrder), 0);
       
       const newAIMessages: Message[] = selectedModels.map((model, index) => ({
-        messageId: streamingStartTime + index, // 스트리밍 시작 시간 + 인덱스로 고유 ID
+        messageId: streamingStartTime * 1000 + index, // 더 큰 범위로 고유 ID 생성 (밀리초 * 1000 + 인덱스)
         content: '',
         role: 'assistant' as const,
         aiModel: model.id,
@@ -351,11 +351,11 @@ const AIChatDetail: React.FC = () => {
             console.log(`[${model.name}] 버퍼 업데이트:`, newBuffer.length, '글자');
             
             // allMessages 배열의 해당 AI 메시지 업데이트 (고유 ID로 찾기)
-            const targetMessageId = streamingStartTime + selectedModels.findIndex(m => m.id === model.id);
+            const targetMessageId = streamingStartTime * 1000 + selectedModels.findIndex(m => m.id === model.id);
             setAllMessages(prev => prev.map(msg => 
               msg.messageId === targetMessageId
                 ? { ...msg, content: newBuffer }
-                : { ...msg } // 다른 메시지들도 새로운 객체로 복사하여 참조 문제 방지
+                : msg // 다른 메시지들은 기존 객체 참조를 유지하여 불필요한 리렌더링 방지
             ));
             
             // 타이핑 효과로 표시
