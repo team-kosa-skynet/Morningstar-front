@@ -468,13 +468,23 @@ const AIChatDetail: React.FC = () => {
     const sortedMessages = messages.sort((a, b) => a.messageOrder - b.messageOrder);
     
     let currentGroup: {userMessage: Message | null, aiMessages: Message[]} | null = null;
+    let processedUserMessages = new Set<string>(); // messageOrder + content 조합으로 중복 체크
     
     sortedMessages.forEach(message => {
       if (message.role === 'user') {
+        const userKey = `${message.messageOrder}-${message.content}`;
+        
+        // 중복된 유저 메시지인 경우 무시
+        if (processedUserMessages.has(userKey)) {
+          return;
+        }
+        
         // 새로운 유저 메시지를 만나면 이전 그룹을 완료하고 새 그룹 시작
         if (currentGroup) {
           groups.push(currentGroup);
         }
+        
+        processedUserMessages.add(userKey);
         currentGroup = {
           userMessage: message,
           aiMessages: []
