@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import styles from './AIChatDetail.module.scss';
 import FeedbackModal from '../../components/Modal/FeedbackModal';
@@ -293,7 +293,7 @@ const AIChatDetail: React.FC = () => {
         content: '',
         role: 'assistant' as const,
         aiModel: model.id,
-        messageOrder: currentMaxOrder, // 현재 유저 메시지와 같은 messageOrder
+        messageOrder: currentMaxOrder + 1 + index, // 각 AI 메시지마다 다른 messageOrder
         createdAt: new Date().toISOString(),
         attachments: []
       }));
@@ -355,7 +355,7 @@ const AIChatDetail: React.FC = () => {
             setAllMessages(prev => prev.map(msg => 
               msg.messageId === targetMessageId
                 ? { ...msg, content: newBuffer }
-                : msg
+                : { ...msg } // 다른 메시지들도 새로운 객체로 복사하여 참조 문제 방지
             ));
             
             // 타이핑 효과로 표시
@@ -471,17 +471,15 @@ const AIChatDetail: React.FC = () => {
     const groups: Array<{userMessage: Message | null, aiMessages: Message[]}> = [];
     
     // messageOrder로 정렬
-    const sortedMessages = messages.sort((a, b) => a.messageOrder - b.messageOrder);
+    const sortedMessages = [...messages].sort((a, b) => a.messageOrder - b.messageOrder);
     
     let currentGroup: {userMessage: Message | null, aiMessages: Message[]} | null = null;
-    let processedUserMessages = new Set<string>(); // messageOrder + content 조합으로 중복 체크
+    let seenUserMessageIds = new Set<number>(); // messageId로 중복 체크
     
     sortedMessages.forEach(message => {
       if (message.role === 'user') {
-        const userKey = `${message.messageOrder}-${message.content}`;
-        
-        // 중복된 유저 메시지인 경우 무시
-        if (processedUserMessages.has(userKey)) {
+        // 같은 messageId의 유저 메시지가 이미 처리되었으면 무시 (중복 방지)
+        if (seenUserMessageIds.has(message.messageId)) {
           return;
         }
         
@@ -490,7 +488,7 @@ const AIChatDetail: React.FC = () => {
           groups.push(currentGroup);
         }
         
-        processedUserMessages.add(userKey);
+        seenUserMessageIds.add(message.messageId);
         currentGroup = {
           userMessage: message,
           aiMessages: []
@@ -498,6 +496,12 @@ const AIChatDetail: React.FC = () => {
       } else if (message.role === 'assistant' && currentGroup) {
         // 현재 그룹에 AI 답변 추가
         currentGroup.aiMessages.push(message);
+      } else if (message.role === 'assistant' && !currentGroup) {
+        // 유저 메시지 없이 AI 답변만 있는 경우 (첫 번째 그룹에서 발생할 수 있음)
+        currentGroup = {
+          userMessage: null,
+          aiMessages: [message]
+        };
       }
     });
     
@@ -506,6 +510,7 @@ const AIChatDetail: React.FC = () => {
       groups.push(currentGroup);
     }
     
+    // console.log('Grouped messages:', groups.length, 'groups'); // 디버깅용
     return groups;
   };
 
@@ -671,6 +676,11 @@ const AIChatDetail: React.FC = () => {
     };
   }, []);
 
+  // 메시지 그룹핑 결과를 메모이제이션
+  const messageGroups = useMemo(() => {
+    return groupMessagesByOrder(allMessages);
+  }, [allMessages]);
+
   return (
     <div className={styles.container}>
       <div className={styles.content}>
@@ -686,8 +696,8 @@ const AIChatDetail: React.FC = () => {
         {/* 모든 대화 메시지들을 그룹별로 통합 표시 */}
         {!isLoadingExistingConversation && (
           <div className={styles.messageHistory}>
-            {groupMessagesByOrder(allMessages).map((group, groupIndex) => {
-              const isLastGroup = groupIndex === groupMessagesByOrder(allMessages).length - 1;
+            {messageGroups.map((group, groupIndex) => {
+              const isLastGroup = groupIndex === messageGroups.length - 1;
               
               return (
                 <div key={`group-${groupIndex}`} className={styles.messageGroup}>
@@ -706,10 +716,12 @@ const AIChatDetail: React.FC = () => {
                   {group.aiMessages.length > 0 && (
                     <div className={styles.aiResponsesContainer}>
                       {group.aiMessages.map((message: Message, index: number) => {
-                        // 마지막 그룹이고 스트리밍 중인 메시지인지 확인
-                        const isStreamingMessage = isLastGroup && selectedModels.some(model => 
-                          model.id === message.aiModel && (isStreaming[model.name] || typingStateRef.current[model.name]?.isTyping)
-                        );
+                        // 마지막 그룹이고 AI 메시지이며 스트리밍 중인 메시지인지 확인
+                        const isStreamingMessage = isLastGroup && 
+                          message.role === 'assistant' && 
+                          selectedModels.some(model => 
+                            model.id === message.aiModel && (isStreaming[model.name] || typingStateRef.current[model.name]?.isTyping)
+                          );
                         
                         const modelInfo = selectedModels.find(model => model.id === message.aiModel);
                         
