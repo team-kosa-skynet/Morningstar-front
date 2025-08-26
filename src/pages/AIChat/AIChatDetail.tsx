@@ -424,6 +424,39 @@ const AIChatDetail: React.FC = () => {
     };
   }, []);
 
+  // 메시지를 그룹핑하는 함수 (유저 메시지 + 연속된 AI 답변들)
+  const groupMessagesByOrder = (messages: Message[]) => {
+    const groups: Array<{userMessage: Message | null, aiMessages: Message[]}> = [];
+    
+    // messageOrder로 정렬
+    const sortedMessages = messages.sort((a, b) => a.messageOrder - b.messageOrder);
+    
+    let currentGroup: {userMessage: Message | null, aiMessages: Message[]} | null = null;
+    
+    sortedMessages.forEach(message => {
+      if (message.role === 'user') {
+        // 새로운 유저 메시지를 만나면 이전 그룹을 완료하고 새 그룹 시작
+        if (currentGroup) {
+          groups.push(currentGroup);
+        }
+        currentGroup = {
+          userMessage: message,
+          aiMessages: []
+        };
+      } else if (message.role === 'assistant' && currentGroup) {
+        // 현재 그룹에 AI 답변 추가
+        currentGroup.aiMessages.push(message);
+      }
+    });
+    
+    // 마지막 그룹 추가
+    if (currentGroup) {
+      groups.push(currentGroup);
+    }
+    
+    return groups;
+  };
+
   // 기존 대화 로드 함수
   const loadExistingConversation = useCallback(async () => {
     if (!conversationId || !token) return;
@@ -436,19 +469,9 @@ const AIChatDetail: React.FC = () => {
         const { data } = response;
         setCurrentQuestion(data.title);
         
-        // 메시지 정렬 및 중복 제거
+        // 메시지 정렬
         const sortedMessages = (data.messages || [])
-          .sort((a: Message, b: Message) => a.messageOrder - b.messageOrder)
-          .filter((message: Message, index: number, arr: Message[]) => {
-            // 사용자 메시지가 중복인 경우 첫 번째만 유지
-            if (message.role === 'user') {
-              const firstUserMessageIndex = arr.findIndex(
-                (msg: Message) => msg.role === 'user' && msg.content === message.content
-              );
-              return firstUserMessageIndex === index;
-            }
-            return true;
-          });
+          .sort((a: Message, b: Message) => a.messageOrder - b.messageOrder);
         
         setExistingMessages(sortedMessages);
         
@@ -599,15 +622,6 @@ const AIChatDetail: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        {/* 질문 말풍선 */}
-        <div className={styles.messageSection}>
-          <div className={styles.userMessageContainer}>
-            <div className={styles.userMessage}>
-              {currentQuestion}
-            </div>
-          </div>
-        </div>
-
         {/* 로딩 상태 표시 */}
         {isLoadingExistingConversation && (
           <div className={styles.messageHistory}>
@@ -617,52 +631,81 @@ const AIChatDetail: React.FC = () => {
           </div>
         )}
 
-        {/* 기존 대화 메시지들 표시 (AI 답변만) - 기존 스타일 재사용 */}
+        {/* 기존 대화 메시지들을 그룹별로 표시 */}
         {!isLoadingExistingConversation && existingMessages.length > 0 && (
-          <div className={styles.aiResponsesContainer}>
-            {existingMessages
-              .filter((message: Message) => message.role === 'assistant')
-              .map((message: Message, index: number) => (
-                <div key={`${message.messageId}-${index}`} className={styles.aiResponse}>
-                  <div className={styles.responseContent}>
-                    {/* 모델 정보 헤더 */}
-                    <div className={styles.modelHeader}>
-                      <img 
-                        src={message.aiModel?.toLowerCase().includes('claude') ? claudeLogo :
-                             message.aiModel?.toLowerCase().includes('gemini') ? geminiLogo :
-                             openAILogo} 
-                        alt={message.aiModel} 
-                        className={styles.modelIcon}
-                      />
-                      <span className={styles.modelName}>
-                        {message.aiModel ? 
-                          (message.aiModel.toLowerCase().includes('claude') ? 
-                            message.aiModel.replace(/claude-/g, 'Claude ').replace(/\b\w/g, (l: string) => l.toUpperCase()) :
-                           message.aiModel.toLowerCase().includes('gemini') ? 
-                            message.aiModel.replace(/gemini-/g, 'Gemini ').replace(/\b\w/g, (l: string) => l.toUpperCase()) :
-                           message.aiModel.toUpperCase()) : 
-                          'AI Assistant'}
-                      </span>
-                    </div>
-
-                    {/* 답변 내용 */}
-                    <div className={styles.responseText}>
-                      <span dangerouslySetInnerHTML={{ __html: formatText(message.content) }} />
-                    </div>
-
-                    {/* 피드백 버튼 */}
-                    <div className={styles.feedbackSection}>
-                      <button 
-                        className={styles.likeButton}
-                        onClick={() => handleLike(message.aiModel || 'AI Assistant')}
-                      >
-                        <i className="bi bi-hand-thumbs-up"></i>
-                        마음에 들어요
-                      </button>
+          <div className={styles.messageHistory}>
+            {groupMessagesByOrder(existingMessages).map((group, groupIndex) => (
+              <div key={`group-${groupIndex}`} className={styles.messageGroup}>
+                {/* 유저 메시지 */}
+                {group.userMessage && (
+                  <div className={styles.messageSection}>
+                    <div className={styles.userMessageContainer}>
+                      <div className={styles.userMessage}>
+                        {group.userMessage.content}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )}
+
+                {/* 해당 그룹의 AI 답변들 */}
+                {group.aiMessages.length > 0 && (
+                  <div className={styles.aiResponsesContainer}>
+                    {group.aiMessages.map((message: Message, index: number) => (
+                      <div key={`${message.messageId}-${index}`} className={styles.aiResponse}>
+                        <div className={styles.responseContent}>
+                          {/* 모델 정보 헤더 */}
+                          <div className={styles.modelHeader}>
+                            <img 
+                              src={message.aiModel?.toLowerCase().includes('claude') ? claudeLogo :
+                                   message.aiModel?.toLowerCase().includes('gemini') ? geminiLogo :
+                                   openAILogo} 
+                              alt={message.aiModel} 
+                              className={styles.modelIcon}
+                            />
+                            <span className={styles.modelName}>
+                              {message.aiModel ? 
+                                (message.aiModel.toLowerCase().includes('claude') ? 
+                                  message.aiModel.replace(/claude-/g, 'Claude ').replace(/\b\w/g, (l: string) => l.toUpperCase()) :
+                                 message.aiModel.toLowerCase().includes('gemini') ? 
+                                  message.aiModel.replace(/gemini-/g, 'Gemini ').replace(/\b\w/g, (l: string) => l.toUpperCase()) :
+                                 message.aiModel.toUpperCase()) : 
+                                'AI Assistant'}
+                            </span>
+                          </div>
+
+                          {/* 답변 내용 */}
+                          <div className={styles.responseText}>
+                            <span dangerouslySetInnerHTML={{ __html: formatText(message.content) }} />
+                          </div>
+
+                          {/* 피드백 버튼 */}
+                          <div className={styles.feedbackSection}>
+                            <button 
+                              className={styles.likeButton}
+                              onClick={() => handleLike(message.aiModel || 'AI Assistant')}
+                            >
+                              <i className="bi bi-hand-thumbs-up"></i>
+                              마음에 들어요
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 새로운 질문이 있는 경우만 질문 말풍선 표시 */}
+        {(!existingMessages.length || Object.values(isStreaming).some(streaming => streaming)) && (
+          <div className={styles.messageSection}>
+            <div className={styles.userMessageContainer}>
+              <div className={styles.userMessage}>
+                {currentQuestion}
+              </div>
+            </div>
           </div>
         )}
 

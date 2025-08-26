@@ -59,6 +59,24 @@
   color: #000000;
 }
 
+// 메시지 히스토리 컨테이너
+.messageHistory {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 40px; // 그룹 간 간격
+  padding: 0 20px;
+  margin-bottom: 60px;
+}
+
+// 메시지 그룹 (유저 메시지 + AI 답변들)
+.messageGroup {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; // 유저 메시지와 AI 답변들 사이 간격
+}
+
 // AI 답변들 컨테이너
 .aiResponsesContainer {
   display: flex;
