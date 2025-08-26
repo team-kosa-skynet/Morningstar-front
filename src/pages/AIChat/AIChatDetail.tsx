@@ -5,7 +5,7 @@ import FeedbackModal from '../../components/Modal/FeedbackModal';
 import openAILogo from '../../assets/images/openAI-Photoroom.png';
 import geminiLogo from '../../assets/images/gemini-1336519698502187930_128px.png';
 import claudeLogo from '../../assets/images/클로드-Photoroom.png';
-import { sendChatMessageStream, getConversationDetail } from '../../services/apiService';
+import { sendChatMessageStream, getConversationDetail, generateImageStream } from '../../services/apiService';
 import { useAuthStore } from '../../stores/authStore';
 
 const AIChatDetail: React.FC = () => {
@@ -15,7 +15,7 @@ const AIChatDetail: React.FC = () => {
   const [isModelSelectionOpen, setIsModelSelectionOpen] = useState(false);
   const [isModelDetailOpen, setIsModelDetailOpen] = useState(false);
   const [selectedModelBrand, setSelectedModelBrand] = useState('');
-  const [isImageMode, setIsImageMode] = useState(false);
+  const [isImageMode, setIsImageMode] = useState(searchParams.get('imageMode') === 'true');
   const [isChatInputFocused, setIsChatInputFocused] = useState(false);
   const [, setStreamingMessages] = useState<Record<string, string>>({});
   const [isStreaming, setIsStreaming] = useState<Record<string, boolean>>({});
@@ -159,6 +159,11 @@ const AIChatDetail: React.FC = () => {
   const formatText = (text: string) => {
     if (!text) return text;
     
+    // 이미 HTML 태그가 포함된 경우 (이미지 등) 그대로 반환
+    if (text.includes('<img') || text.includes('<div')) {
+      return text;
+    }
+    
     let formattedText = text;
     
     // 코드 블록 처리 (```language\ncontent\n```)
@@ -279,6 +284,7 @@ const AIChatDetail: React.FC = () => {
     }
 
     console.log('Starting streaming with:', { questionText, conversationId });
+    console.log('현재 selectedModels:', selectedModels);
 
     // 스트리밍 시작 시간을 기록하여 고유 식별자로 사용
     const streamingStartTime = Date.now();
@@ -334,8 +340,93 @@ const AIChatDetail: React.FC = () => {
         
         // 스트림 시작 시간 기록
         streamStartTimeRef.current[model.name] = Date.now();
-        console.log(`[${model.name}] 스트림 시작:`, new Date().toISOString());
+        console.log(`[${model.name}] ${isImageMode ? '이미지 생성' : '스트림'} 시작:`, new Date().toISOString());
         
+        // 이미지 모드인 경우 이미지 생성 API 사용
+        if (isImageMode) {
+          // 모델에 따라 올바른 provider 결정
+          let imageProvider: 'openai' | 'gemini';
+          if (model.id.includes('dall-e') || model.brand === 'gpt') {
+            imageProvider = 'openai';
+          } else if (model.id.includes('imagen') || model.brand === 'gemini') {
+            imageProvider = 'gemini';
+          } else {
+            // 기본값은 모델의 브랜드 사용
+            imageProvider = model.brand === 'gpt' ? 'openai' : 'gemini';
+          }
+          
+          console.log(`[${model.name}] 모델-프로바이더 매칭:`, {
+            modelId: model.id,
+            modelBrand: model.brand,
+            provider: imageProvider
+          });
+          
+          return generateImageStream(
+            conversationId,
+            imageProvider,
+            { 
+              prompt: questionText, 
+              model: model.id 
+            },
+            token,
+            (imageUrl: string) => {
+              console.log(`[${model.name}] 이미지 수신:`, imageUrl);
+              
+              // base64 이미지 URL을 HTML img 태그로 표시
+              const imageContent = `<div style="width: 100%; margin: 0;">
+                <img src="${imageUrl}" alt="Generated Image" style="width: 100%; height: auto; border-radius: 8px; display: block;" />
+              </div>`;
+              
+              textBuffersRef.current[model.name] = imageContent;
+              
+              // allMessages 배열의 해당 AI 메시지 업데이트
+              const targetMessageId = streamingStartTime * 1000 + selectedModels.findIndex(m => m.id === model.id);
+              setAllMessages(prev => prev.map(msg => 
+                msg.messageId === targetMessageId
+                  ? { ...msg, content: imageContent }
+                  : msg
+              ));
+              
+              // 즉시 표시 (타이핑 효과 없이)
+              displayedMessagesRef.current[model.name] = imageContent;
+              forceUpdate();
+            },
+            () => {
+              console.log(`[${model.name}] 이미지 생성 완료`);
+              setIsStreaming(prev => ({ ...prev, [model.name]: false }));
+            },
+            (error) => {
+              console.error(`[${model.name}] 이미지 생성 오류:`, error);
+              const errorContent = '이미지 생성 중 오류가 발생했습니다.';
+              textBuffersRef.current[model.name] = errorContent;
+              
+              // 에러 메시지 표시
+              const targetMessageId = streamingStartTime * 1000 + selectedModels.findIndex(m => m.id === model.id);
+              setAllMessages(prev => prev.map(msg => 
+                msg.messageId === targetMessageId
+                  ? { ...msg, content: errorContent }
+                  : msg
+              ));
+              
+              displayedMessagesRef.current[model.name] = errorContent;
+              forceUpdate();
+              setIsStreaming(prev => ({ ...prev, [model.name]: false }));
+            },
+            (text: string) => {
+              // 진행 상황 텍스트 메시지 처리
+              console.log(`[${model.name}] 진행 상황:`, text);
+              
+              // 진행 상황을 임시로 표시
+              const currentBuffer = textBuffersRef.current[model.name] || '';
+              const progressText = currentBuffer || text;
+              
+              // 타이핑 효과로 진행 상황 표시
+              typeWriter(model.name, progressText);
+            }
+          );
+        }
+        
+        // 일반 채팅 모드 - 기존 스트리밍 로직
         return sendChatMessageStream(
           conversationId,
           provider,
@@ -403,7 +494,7 @@ const AIChatDetail: React.FC = () => {
     Promise.allSettled(promises).then(() => {
       console.log('All streaming completed');
     });
-  }, [conversationId, token, selectedModels, typeWriter]);
+  }, [conversationId, token, selectedModels, typeWriter, isImageMode]);
 
   const handleSubmit = async () => {
     if (!message.trim() || !token) {
@@ -620,18 +711,36 @@ const AIChatDetail: React.FC = () => {
     if (questionParam && modelsParam) {
       try {
         const decodedModels = decodeURIComponent(modelsParam);
+        console.log('URL에서 받은 models 파라미터:', decodedModels);
+        
         const parsedModels = decodedModels.split(',').map(modelStr => {
-          const [id, name, brand] = modelStr.split(':');
+          const parts = modelStr.split(':');
+          const [id, name, receivedBrand] = parts;
+          // 이미지 모드일 때 ':image'가 추가되므로 이를 무시
+          
+          // 모델 ID를 기반으로 올바른 브랜드 결정 (URL에서 온 브랜드가 잘못될 수 있음)
+          let correctBrand = receivedBrand;
+          if (id.includes('dall-e') || id.includes('gpt')) {
+            correctBrand = 'gpt';
+          } else if (id.includes('imagen') || id.includes('gemini')) {
+            correctBrand = 'gemini';
+          } else if (id.includes('claude')) {
+            correctBrand = 'claude';
+          }
           
           // 브랜드에 따른 아이콘 설정
           let icon = openAILogo;
-          if (brand === 'claude') icon = claudeLogo;
-          else if (brand === 'gemini') icon = geminiLogo;
+          if (correctBrand === 'claude') icon = claudeLogo;
+          else if (correctBrand === 'gemini') icon = geminiLogo;
           
-          return { id, name, icon, brand };
+          const model = { id, name, icon, brand: correctBrand };
+          console.log('파싱된 모델 (브랜드 수정):', model);
+          console.log('원본 브랜드:', receivedBrand, '→ 수정된 브랜드:', correctBrand);
+          return model;
         });
         
         setSelectedModels(parsedModels);
+        console.log('설정된 selectedModels:', parsedModels);
       } catch (error) {
         console.error('Error parsing models from URL:', error);
         // 파싱 실패 시 기본 모델 설정

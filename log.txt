@@ -1,0 +1,397 @@
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: {email: 'sp2877@naver.com', name: '안녕하세요', userId: 4, role: 'ROLE_USER', point: 37230, …}
+Header.tsx:17 Header - user.point: 37230
+Header.tsx:15 Header - isLoggedIn: true
+Header.tsx:16 Header - user: {email: 'sp2877@naver.com', name: '안녕하세요', userId: 4, role: 'ROLE_USER', point: 37230, …}
+Header.tsx:17 Header - user.point: 37230
+AIChatDetail.tsx:656 Auto-starting stream with conversationId: 114
+AIChatDetail.tsx:281 Starting streaming with: {questionText: '테스트트트트트', conversationId: 114}
+AIChatDetail.tsx:337 [GPT-4.1] 스트림 시작: 2025-08-26T10:14:39.578Z
+AIChatDetail.tsx:337 [Gemini 1.5 flash] 스트림 시작: 2025-08-26T10:14:39.580Z
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"테"}
+apiService.ts:1169 Processing data: {"type":"text","content":"테"}
+AIChatDetail.tsx:346 [GPT-4.1] SSE 수신 (1000ms): 테
+AIChatDetail.tsx:351 [GPT-4.1] 버퍼 업데이트: 1 글자
+AIChatDetail.tsx:192 [GPT-4.1] typeWriter 호출: 1 글자
+AIChatDetail.tsx:219 [GPT-4.1] 새 타이핑 시작 - 현재: 0 목표: 1
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 0, 타겟: 1
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"스트"}
+apiService.ts:1169 Processing data: {"type":"text","content":"스트"}
+AIChatDetail.tsx:346 [GPT-4.1] SSE 수신 (1001ms): 스트
+AIChatDetail.tsx:351 [GPT-4.1] 버퍼 업데이트: 3 글자
+AIChatDetail.tsx:192 [GPT-4.1] typeWriter 호출: 3 글자
+AIChatDetail.tsx:213 [GPT-4.1] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":" 잘"}
+apiService.ts:1169 Processing data: {"type":"text","content":" 잘"}
+AIChatDetail.tsx:346 [GPT-4.1] SSE 수신 (1001ms):  잘
+AIChatDetail.tsx:351 [GPT-4.1] 버퍼 업데이트: 5 글자
+AIChatDetail.tsx:192 [GPT-4.1] typeWriter 호출: 5 글자
+AIChatDetail.tsx:213 [GPT-4.1] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":" 전달"}
+apiService.ts:1169 Processing data: {"type":"text","content":" 전달"}
+AIChatDetail.tsx:346 [GPT-4.1] SSE 수신 (1001ms):  전달
+AIChatDetail.tsx:351 [GPT-4.1] 버퍼 업데이트: 8 글자
+AIChatDetail.tsx:192 [GPT-4.1] typeWriter 호출: 8 글자
+AIChatDetail.tsx:213 [GPT-4.1] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"되었습니다"}
+apiService.ts:1169 Processing data: {"type":"text","content":"되었습니다"}
+AIChatDetail.tsx:346 [GPT-4.1] SSE 수신 (1002ms): 되었습니다
+AIChatDetail.tsx:351 [GPT-4.1] 버퍼 업데이트: 13 글자
+AIChatDetail.tsx:192 [GPT-4.1] typeWriter 호출: 13 글자
+AIChatDetail.tsx:213 [GPT-4.1] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"!"}
+apiService.ts:1169 Processing data: {"type":"text","content":"!"}
+AIChatDetail.tsx:346 [GPT-4.1] SSE 수신 (1002ms): !
+AIChatDetail.tsx:351 [GPT-4.1] 버퍼 업데이트: 14 글자
+AIChatDetail.tsx:192 [GPT-4.1] typeWriter 호출: 14 글자
+AIChatDetail.tsx:213 [GPT-4.1] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":" \uD83D\uDE0A"}
+apiService.ts:1169 Processing data: {"type":"text","content":" \uD83D\uDE0A"}
+AIChatDetail.tsx:346 [GPT-4.1] SSE 수신 (1002ms):  😊
+AIChatDetail.tsx:351 [GPT-4.1] 버퍼 업데이트: 17 글자
+AIChatDetail.tsx:192 [GPT-4.1] typeWriter 호출: 17 글자
+AIChatDetail.tsx:213 [GPT-4.1] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"  \n"}
+apiService.ts:1169 Processing data: {"type":"text","content":"  \n"}
+AIChatDetail.tsx:346 [GPT-4.1] SSE 수신 (1002ms):
+
+AIChatDetail.tsx:351 [GPT-4.1] 버퍼 업데이트: 20 글자
+AIChatDetail.tsx:192 [GPT-4.1] typeWriter 호출: 20 글자
+AIChatDetail.tsx:213 [GPT-4.1] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"무"}
+apiService.ts:1169 Processing data: {"type":"text","content":"무"}
+AIChatDetail.tsx:346 [GPT-4.1] SSE 수신 (1003ms): 무
+AIChatDetail.tsx:351 [GPT-4.1] 버퍼 업데이트: 21 글자
+AIChatDetail.tsx:192 [GPT-4.1] typeWriter 호출: 21 글자
+AIChatDetail.tsx:213 [GPT-4.1] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"엇"}
+apiService.ts:1169 Processing data: {"type":"text","content":"엇"}
+AIChatDetail.tsx:346 [GPT-4.1] SSE 수신 (1003ms): 엇
+AIChatDetail.tsx:351 [GPT-4.1] 버퍼 업데이트: 22 글자
+AIChatDetail.tsx:192 [GPT-4.1] typeWriter 호출: 22 글자
+AIChatDetail.tsx:213 [GPT-4.1] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"을"}
+apiService.ts:1169 Processing data: {"type":"text","content":"을"}
+AIChatDetail.tsx:346 [GPT-4.1] SSE 수신 (1003ms): 을
+AIChatDetail.tsx:351 [GPT-4.1] 버퍼 업데이트: 23 글자
+AIChatDetail.tsx:192 [GPT-4.1] typeWriter 호출: 23 글자
+AIChatDetail.tsx:213 [GPT-4.1] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":" 도"}
+apiService.ts:1169 Processing data: {"type":"text","content":" 도"}
+AIChatDetail.tsx:346 [GPT-4.1] SSE 수신 (1003ms):  도
+AIChatDetail.tsx:351 [GPT-4.1] 버퍼 업데이트: 25 글자
+AIChatDetail.tsx:192 [GPT-4.1] typeWriter 호출: 25 글자
+AIChatDetail.tsx:213 [GPT-4.1] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"와"}
+apiService.ts:1169 Processing data: {"type":"text","content":"와"}
+AIChatDetail.tsx:346 [GPT-4.1] SSE 수신 (1004ms): 와
+AIChatDetail.tsx:351 [GPT-4.1] 버퍼 업데이트: 26 글자
+AIChatDetail.tsx:192 [GPT-4.1] typeWriter 호출: 26 글자
+AIChatDetail.tsx:213 [GPT-4.1] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"드"}
+apiService.ts:1169 Processing data: {"type":"text","content":"드"}
+AIChatDetail.tsx:346 [GPT-4.1] SSE 수신 (1004ms): 드
+AIChatDetail.tsx:351 [GPT-4.1] 버퍼 업데이트: 27 글자
+AIChatDetail.tsx:192 [GPT-4.1] typeWriter 호출: 27 글자
+AIChatDetail.tsx:213 [GPT-4.1] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"릴"}
+apiService.ts:1169 Processing data: {"type":"text","content":"릴"}
+AIChatDetail.tsx:346 [GPT-4.1] SSE 수신 (1004ms): 릴
+AIChatDetail.tsx:351 [GPT-4.1] 버퍼 업데이트: 28 글자
+AIChatDetail.tsx:192 [GPT-4.1] typeWriter 호출: 28 글자
+AIChatDetail.tsx:213 [GPT-4.1] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"까요"}
+apiService.ts:1169 Processing data: {"type":"text","content":"까요"}
+AIChatDetail.tsx:346 [GPT-4.1] SSE 수신 (1005ms): 까요
+AIChatDetail.tsx:351 [GPT-4.1] 버퍼 업데이트: 30 글자
+AIChatDetail.tsx:192 [GPT-4.1] typeWriter 호출: 30 글자
+AIChatDetail.tsx:213 [GPT-4.1] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"?"}
+apiService.ts:1169 Processing data: {"type":"text","content":"?"}
+AIChatDetail.tsx:346 [GPT-4.1] SSE 수신 (1005ms): ?
+AIChatDetail.tsx:351 [GPT-4.1] 버퍼 업데이트: 31 글자
+AIChatDetail.tsx:192 [GPT-4.1] typeWriter 호출: 31 글자
+AIChatDetail.tsx:213 [GPT-4.1] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:done
+apiService.ts:1184 SSE Event: done
+apiService.ts:1187 Stream completed
+AIChatDetail.tsx:367 [GPT-4.1] SSE 스트림 완료 - 1005ms, 31글자
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 1, 타겟: 31
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 2, 타겟: 31
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 3, 타겟: 31
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 4, 타겟: 31
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 5, 타겟: 31
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 6, 타겟: 31
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 7, 타겟: 31
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 8, 타겟: 31
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 9, 타겟: 31
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"메"}
+apiService.ts:1169 Processing data: {"type":"text","content":"메"}
+AIChatDetail.tsx:346 [Gemini 1.5 flash] SSE 수신 (1301ms): 메
+AIChatDetail.tsx:351 [Gemini 1.5 flash] 버퍼 업데이트: 1 글자
+AIChatDetail.tsx:192 [Gemini 1.5 flash] typeWriter 호출: 1 글자
+AIChatDetail.tsx:219 [Gemini 1.5 flash] 새 타이핑 시작 - 현재: 0 목표: 1
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 0, 타겟: 1
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"시지가 중복되어 보입니다.  \"테스트트트트"}
+apiService.ts:1169 Processing data: {"type":"text","content":"시지가 중복되어 보입니다.  \"테스트트트트"}
+AIChatDetail.tsx:346 [Gemini 1.5 flash] SSE 수신 (1302ms): 시지가 중복되어 보입니다.  "테스트트트트
+AIChatDetail.tsx:351 [Gemini 1.5 flash] 버퍼 업데이트: 24 글자
+AIChatDetail.tsx:192 [Gemini 1.5 flash] typeWriter 호출: 24 글자
+AIChatDetail.tsx:213 [Gemini 1.5 flash] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"트\"라는 문구가 반복되고 있습니다.  더 구체"}
+apiService.ts:1169 Processing data: {"type":"text","content":"트\"라는 문구가 반복되고 있습니다.  더 구체"}
+AIChatDetail.tsx:346 [Gemini 1.5 flash] SSE 수신 (1302ms): 트"라는 문구가 반복되고 있습니다.  더 구체
+AIChatDetail.tsx:351 [Gemini 1.5 flash] 버퍼 업데이트: 49 글자
+AIChatDetail.tsx:192 [Gemini 1.5 flash] typeWriter 호출: 49 글자
+AIChatDetail.tsx:213 [Gemini 1.5 flash] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"적인 질문이나 문맥이 있다면 알려주세요. 무엇을 하고 싶으신가요?  예를 들어,\n\n* 이"}
+apiService.ts:1169 Processing data: {"type":"text","content":"적인 질문이나 문맥이 있다면 알려주세요. 무엇을 하고 싶으신가요?  예를 들어,\n\n* 이"}
+AIChatDetail.tsx:346 [Gemini 1.5 flash] SSE 수신 (1302ms): 적인 질문이나 문맥이 있다면 알려주세요. 무엇을 하고 싶으신가요?  예를 들어,
+
+* 이
+AIChatDetail.tsx:351 [Gemini 1.5 flash] 버퍼 업데이트: 98 글자
+AIChatDetail.tsx:192 [Gemini 1.5 flash] typeWriter 호출: 98 글자
+AIChatDetail.tsx:213 [Gemini 1.5 flash] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":" 메시지의 오류를 수정하고 싶으신가요?\n* 이 메시지의 의미를 알고 싶으신가요?"}
+apiService.ts:1169 Processing data: {"type":"text","content":" 메시지의 오류를 수정하고 싶으신가요?\n* 이 메시지의 의미를 알고 싶으신가요?"}
+AIChatDetail.tsx:346 [Gemini 1.5 flash] SSE 수신 (1303ms):  메시지의 오류를 수정하고 싶으신가요?
+* 이 메시지의 의미를 알고 싶으신가요?
+AIChatDetail.tsx:351 [Gemini 1.5 flash] 버퍼 업데이트: 142 글자
+AIChatDetail.tsx:192 [Gemini 1.5 flash] typeWriter 호출: 142 글자
+AIChatDetail.tsx:213 [Gemini 1.5 flash] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:message
+apiService.ts:1184 SSE Event: message
+apiService.ts:1163 SSE Line: data:{"type":"text","content":"\n* 이 메시지를 다른 형태로 변환하고 싶으신가요?\n\n등의 질문에 답해주시면 더 도움을 드릴 수 있습니다.\n"}
+apiService.ts:1169 Processing data: {"type":"text","content":"\n* 이 메시지를 다른 형태로 변환하고 싶으신가요?\n\n등의 질문에 답해주시면 더 도움을 드릴 수 있습니다.\n"}
+AIChatDetail.tsx:346 [Gemini 1.5 flash] SSE 수신 (1303ms):
+* 이 메시지를 다른 형태로 변환하고 싶으신가요?
+
+등의 질문에 답해주시면 더 도움을 드릴 수 있습니다.
+
+AIChatDetail.tsx:351 [Gemini 1.5 flash] 버퍼 업데이트: 202 글자
+AIChatDetail.tsx:192 [Gemini 1.5 flash] typeWriter 호출: 202 글자
+AIChatDetail.tsx:213 [Gemini 1.5 flash] 이미 타이핑 중 - 타겟만 업데이트
+apiService.ts:1163 SSE Line: event:done
+apiService.ts:1184 SSE Event: done
+apiService.ts:1187 Stream completed
+AIChatDetail.tsx:367 [Gemini 1.5 flash] SSE 스트림 완료 - 1303ms, 202글자
+AIChatDetail.tsx:404 All streaming completed
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 10, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 1, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 11, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 2, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 12, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 3, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 13, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 4, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 14, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 5, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 15, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 6, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 16, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 7, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 17, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 8, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 18, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 9, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 19, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 10, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 20, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 11, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 21, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 12, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 22, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 13, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 23, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 14, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 24, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 15, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 25, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 16, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 26, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 17, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 27, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 18, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 28, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 19, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 29, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 20, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 30, 타겟: 31
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 21, 타겟: 202
+AIChatDetail.tsx:229 [GPT-4.1] 타이핑 진행 - 현재: 31, 타겟: 31
+AIChatDetail.tsx:246 [GPT-4.1] 타이핑 완료 - 최종 텍스트: "테스트 잘 전달되었습니다! 😊
+무엇을 도와드릴까요?"
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 22, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 23, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 24, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 25, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 26, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 27, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 28, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 29, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 30, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 31, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 32, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 33, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 34, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 35, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 36, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 37, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 38, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 39, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 40, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 41, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 42, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 43, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 44, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 45, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 46, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 47, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 48, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 49, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 50, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 51, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 52, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 53, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 54, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 55, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 56, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 57, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 58, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 59, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 60, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 61, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 62, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 63, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 64, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 65, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 66, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 67, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 68, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 69, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 70, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 71, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 72, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 73, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 74, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 75, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 76, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 77, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 78, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 79, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 80, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 81, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 82, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 83, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 84, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 85, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 86, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 87, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 88, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 89, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 90, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 91, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 92, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 93, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 94, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 95, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 96, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 97, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 98, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 99, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 100, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 101, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 102, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 103, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 104, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 105, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 106, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 107, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 108, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 109, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 110, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 111, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 112, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 113, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 114, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 115, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 116, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 117, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 118, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 119, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 120, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 121, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 122, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 123, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 124, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 125, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 126, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 127, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 128, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 129, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 130, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 131, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 132, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 133, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 134, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 135, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 136, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 137, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 138, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 139, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 140, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 141, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 142, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 143, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 144, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 145, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 146, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 147, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 148, 타겟: 202
+AIChatDetail.tsx:229 [Gemini 1.5 flash] 타이핑 진행 - 현재: 149, 타겟: 202
+AIChatDetail.tsx:262 [Gemini 1.5 flash] 5초 타임아웃 - 남은 텍스트를 즉시 표시
+(anonymous) @ AIChatDetail.tsx:262

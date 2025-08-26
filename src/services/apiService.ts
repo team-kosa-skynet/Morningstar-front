@@ -1261,3 +1261,114 @@ export const getConversationDetail = async (conversationId: number, token: strin
     throw error;
   }
 };
+
+interface GenerateImageRequest {
+  prompt: string;
+  model?: string;
+}
+
+interface GenerateImageResponse {
+  code: number;
+  message: string;
+  data: any;
+}
+
+export const generateImageStream = async (
+  conversationId: number,
+  provider: 'openai' | 'gemini',
+  imageData: GenerateImageRequest,
+  token: string,
+  onImage: (imageUrl: string) => void,
+  onComplete?: () => void,
+  onError?: (error: any) => void,
+  onText?: (text: string) => void
+) => {
+  try {
+    console.log(`[generateImageStream] API 호출:`, {
+      url: `${API_BASE_URL}/conversations/${conversationId}/${provider}/generate-image`,
+      data: imageData
+    });
+
+    const response = await fetch(
+      `${API_BASE_URL}/conversations/${conversationId}/${provider}/generate-image`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(imageData)
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error('Response body is not readable');
+    }
+
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      
+      // Keep the last incomplete line in buffer
+      buffer = lines.pop() || '';
+      
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        
+        if (trimmedLine.startsWith('event:image')) {
+          // 이미지 이벤트 시작
+          continue;
+        } else if (trimmedLine.startsWith('data:')) {
+          const text = trimmedLine.slice(5).trim();
+          if (text && text !== '[DONE]') {
+            try {
+              const jsonData = JSON.parse(text);
+              if (jsonData.imageUrl) {
+                onImage(jsonData.imageUrl);
+              }
+            } catch (error) {
+              // JSON 파싱 실패한 경우 일반 텍스트로 처리
+              console.log('Received non-JSON data:', text);
+              onText?.(text); // 텍스트 메시지 콜백 호출
+            }
+          }
+        }
+      }
+    }
+    
+    // Process any remaining data in buffer
+    const trimmedBuffer = buffer.trim();
+    if (trimmedBuffer.startsWith('data:')) {
+      const text = trimmedBuffer.slice(5).trim();
+      if (text && text !== '[DONE]') {
+        try {
+          const jsonData = JSON.parse(text);
+          if (jsonData.imageUrl) {
+            onImage(jsonData.imageUrl);
+          }
+        } catch (error) {
+          // JSON 파싱 실패한 경우 일반 텍스트로 처리
+          console.log('Received final non-JSON data:', text);
+          onText?.(text); // 텍스트 메시지 콜백 호출
+        }
+      }
+    }
+    
+    onComplete?.();
+  } catch (error) {
+    console.error('Image generation streaming error:', error);
+    onError?.(error);
+    throw error;
+  }
+};

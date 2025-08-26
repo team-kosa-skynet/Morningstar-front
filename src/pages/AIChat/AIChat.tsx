@@ -316,9 +316,16 @@ const AIChat: React.FC = () => {
       if (conversationResponse.code === 200) {
         const conversationId = conversationResponse.data.conversationId;
         
-        // 선택된 모델들과 질문을 URL 파라미터로 전달
+        // 모든 모드에서 동일한 형식 사용
         const modelsParam = selectedModels.map(model => `${model.id}:${model.name}:${model.brand}`).join(',');
-        navigate(`/ai-chat/detail?conversationId=${conversationId}&question=${encodeURIComponent(message)}&models=${encodeURIComponent(modelsParam)}`);
+        console.log('AIChat에서 전송할 models 파라미터:', modelsParam);
+        console.log('AIChat selectedModels:', selectedModels);
+        
+        if (isImageMode) {
+          navigate(`/ai-chat/detail?conversationId=${conversationId}&question=${encodeURIComponent(message)}&models=${encodeURIComponent(modelsParam)}&imageMode=true`);
+        } else {
+          navigate(`/ai-chat/detail?conversationId=${conversationId}&question=${encodeURIComponent(message)}&models=${encodeURIComponent(modelsParam)}`);
+        }
       } else {
         alert('세션 생성에 실패했습니다.');
       }
