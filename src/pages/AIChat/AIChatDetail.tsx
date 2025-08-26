@@ -41,7 +41,7 @@ const AIChatDetail: React.FC = () => {
     createdAt: string;
     attachments: unknown[];
   }
-  const [existingMessages, setExistingMessages] = useState<Message[]>([]);
+  const [allMessages, setAllMessages] = useState<Message[]>([]);
   const chatInputRef = useRef<HTMLDivElement>(null);
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean;
@@ -280,6 +280,22 @@ const AIChatDetail: React.FC = () => {
 
     console.log('Starting streaming with:', { questionText, conversationId });
 
+    // 현재 최대 messageOrder 계산
+    const currentMaxOrder = Math.max(...allMessages.map(m => m.messageOrder), 0);
+    
+    // AI 메시지들을 allMessages에 추가
+    const newAIMessages: Message[] = selectedModels.map((model, index) => ({
+      messageId: Date.now() + index, // 임시 ID
+      content: '',
+      role: 'assistant' as const,
+      aiModel: model.id,
+      messageOrder: currentMaxOrder + 1,
+      createdAt: new Date().toISOString(),
+      attachments: []
+    }));
+    
+    setAllMessages(prev => [...prev, ...newAIMessages]);
+
     // 선택된 모델들로 스트리밍 상태 초기화
     const initialStreaming: Record<string, boolean> = {};
     const initialMessages: Record<string, string> = {};
@@ -328,6 +344,14 @@ const AIChatDetail: React.FC = () => {
             textBuffersRef.current[model.name] = currentBuffer + text;
             const newBuffer = textBuffersRef.current[model.name];
             console.log(`[${model.name}] 버퍼 업데이트:`, newBuffer.length, '글자');
+            
+            // allMessages 배열의 해당 AI 메시지 업데이트
+            setAllMessages(prev => prev.map(msg => 
+              msg.role === 'assistant' && msg.aiModel === model.id && msg.messageOrder === currentMaxOrder + 1
+                ? { ...msg, content: newBuffer }
+                : msg
+            ));
+            
             // 타이핑 효과로 표시
             typeWriter(model.name, newBuffer);
           },
@@ -383,6 +407,18 @@ const AIChatDetail: React.FC = () => {
     const currentMessage = message;
     setCurrentQuestion(currentMessage);
     setMessage('');
+    
+    // 새 유저 메시지를 allMessages 배열에 추가
+    const newUserMessage: Message = {
+      messageId: Date.now(), // 임시 ID
+      content: currentMessage,
+      role: 'user',
+      messageOrder: Math.max(...allMessages.map(m => m.messageOrder), 0) + 1,
+      createdAt: new Date().toISOString(),
+      attachments: []
+    };
+    
+    setAllMessages(prev => [...prev, newUserMessage]);
     
     await startStreaming(currentMessage);
   };
@@ -473,7 +509,7 @@ const AIChatDetail: React.FC = () => {
         const sortedMessages = (data.messages || [])
           .sort((a: Message, b: Message) => a.messageOrder - b.messageOrder);
         
-        setExistingMessages(sortedMessages);
+        setAllMessages(sortedMessages);
         
         // 메시지가 있는 경우 실제 사용된 모델들을 추출하여 selectedModels 설정
         if (data.messages && data.messages.length > 0) {
@@ -594,11 +630,11 @@ const AIChatDetail: React.FC = () => {
     const questionParam = searchParams.get('question');
     
     // 새로운 대화인 경우에만 자동 스트리밍 시작
-    if (conversationId && token && currentQuestion && selectedModels.length > 0 && questionParam && existingMessages.length === 0 && !isLoadingExistingConversation) {
+    if (conversationId && token && currentQuestion && selectedModels.length > 0 && questionParam && allMessages.length === 0 && !isLoadingExistingConversation) {
       console.log('Auto-starting stream with conversationId:', conversationId);
       startStreaming(currentQuestion);
     }
-  }, [conversationId, token, currentQuestion, selectedModels, searchParams, existingMessages, isLoadingExistingConversation, startStreaming]);
+  }, [conversationId, token, currentQuestion, selectedModels, searchParams, allMessages, isLoadingExistingConversation, startStreaming]);
 
   // 컴포넌트 언마운트 시 타이핑 애니메이션 정리
   useEffect(() => {
@@ -631,123 +667,90 @@ const AIChatDetail: React.FC = () => {
           </div>
         )}
 
-        {/* 기존 대화 메시지들을 그룹별로 표시 */}
-        {!isLoadingExistingConversation && existingMessages.length > 0 && (
+        {/* 모든 대화 메시지들을 그룹별로 통합 표시 */}
+        {!isLoadingExistingConversation && (
           <div className={styles.messageHistory}>
-            {groupMessagesByOrder(existingMessages).map((group, groupIndex) => (
-              <div key={`group-${groupIndex}`} className={styles.messageGroup}>
-                {/* 유저 메시지 */}
-                {group.userMessage && (
-                  <div className={styles.messageSection}>
-                    <div className={styles.userMessageContainer}>
-                      <div className={styles.userMessage}>
-                        {group.userMessage.content}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* 해당 그룹의 AI 답변들 */}
-                {group.aiMessages.length > 0 && (
-                  <div className={styles.aiResponsesContainer}>
-                    {group.aiMessages.map((message: Message, index: number) => (
-                      <div key={`${message.messageId}-${index}`} className={styles.aiResponse}>
-                        <div className={styles.responseContent}>
-                          {/* 모델 정보 헤더 */}
-                          <div className={styles.modelHeader}>
-                            <img 
-                              src={message.aiModel?.toLowerCase().includes('claude') ? claudeLogo :
-                                   message.aiModel?.toLowerCase().includes('gemini') ? geminiLogo :
-                                   openAILogo} 
-                              alt={message.aiModel} 
-                              className={styles.modelIcon}
-                            />
-                            <span className={styles.modelName}>
-                              {message.aiModel ? 
-                                (message.aiModel.toLowerCase().includes('claude') ? 
-                                  message.aiModel.replace(/claude-/g, 'Claude ').replace(/\b\w/g, (l: string) => l.toUpperCase()) :
-                                 message.aiModel.toLowerCase().includes('gemini') ? 
-                                  message.aiModel.replace(/gemini-/g, 'Gemini ').replace(/\b\w/g, (l: string) => l.toUpperCase()) :
-                                 message.aiModel.toUpperCase()) : 
-                                'AI Assistant'}
-                            </span>
-                          </div>
-
-                          {/* 답변 내용 */}
-                          <div className={styles.responseText}>
-                            <span dangerouslySetInnerHTML={{ __html: formatText(message.content) }} />
-                          </div>
-
-                          {/* 피드백 버튼 */}
-                          <div className={styles.feedbackSection}>
-                            <button 
-                              className={styles.likeButton}
-                              onClick={() => handleLike(message.aiModel || 'AI Assistant')}
-                            >
-                              <i className="bi bi-hand-thumbs-up"></i>
-                              마음에 들어요
-                            </button>
-                          </div>
+            {groupMessagesByOrder(allMessages).map((group, groupIndex) => {
+              const isLastGroup = groupIndex === groupMessagesByOrder(allMessages).length - 1;
+              
+              return (
+                <div key={`group-${groupIndex}`} className={styles.messageGroup}>
+                  {/* 유저 메시지 */}
+                  {group.userMessage && (
+                    <div className={styles.messageSection}>
+                      <div className={styles.userMessageContainer}>
+                        <div className={styles.userMessage}>
+                          {group.userMessage.content}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+                    </div>
+                  )}
 
-        {/* 새로운 질문이 있는 경우만 질문 말풍선 표시 */}
-        {(!existingMessages.length || Object.values(isStreaming).some(streaming => streaming)) && (
-          <div className={styles.messageSection}>
-            <div className={styles.userMessageContainer}>
-              <div className={styles.userMessage}>
-                {currentQuestion}
-              </div>
-            </div>
-          </div>
-        )}
+                  {/* 해당 그룹의 AI 답변들 */}
+                  {group.aiMessages.length > 0 && (
+                    <div className={styles.aiResponsesContainer}>
+                      {group.aiMessages.map((message: Message, index: number) => {
+                        // 마지막 그룹이고 스트리밍 중인 메시지인지 확인
+                        const isStreamingMessage = isLastGroup && selectedModels.some(model => 
+                          model.id === message.aiModel && (isStreaming[model.name] || typingStateRef.current[model.name]?.isTyping)
+                        );
+                        
+                        const modelInfo = selectedModels.find(model => model.id === message.aiModel);
+                        
+                        return (
+                          <div key={`${message.messageId}-${index}`} className={styles.aiResponse}>
+                            <div className={styles.responseContent}>
+                              {/* 모델 정보 헤더 */}
+                              <div className={styles.modelHeader}>
+                                <img 
+                                  src={message.aiModel?.toLowerCase().includes('claude') ? claudeLogo :
+                                       message.aiModel?.toLowerCase().includes('gemini') ? geminiLogo :
+                                       openAILogo} 
+                                  alt={message.aiModel} 
+                                  className={styles.modelIcon}
+                                />
+                                <span className={styles.modelName}>
+                                  {message.aiModel ? 
+                                    (message.aiModel.toLowerCase().includes('claude') ? 
+                                      message.aiModel.replace(/claude-/g, 'Claude ').replace(/\b\w/g, (l: string) => l.toUpperCase()) :
+                                     message.aiModel.toLowerCase().includes('gemini') ? 
+                                      message.aiModel.replace(/gemini-/g, 'Gemini ').replace(/\b\w/g, (l: string) => l.toUpperCase()) :
+                                     message.aiModel.toUpperCase()) : 
+                                    'AI Assistant'}
+                                </span>
+                              </div>
 
-        {/* AI 답변들 (새로운 대화 또는 스트리밍 중인 경우) */}
-        {(!existingMessages.length || Object.values(isStreaming).some(streaming => streaming)) && (
-          <div className={styles.aiResponsesContainer}>
-            {selectedModels.map((model) => (
-              <div key={model.id} className={styles.aiResponse}>
-                <div className={styles.responseContent}>
-                  {/* 모델 정보 헤더 */}
-                  <div className={styles.modelHeader}>
-                    <img 
-                      src={model.icon} 
-                      alt={model.name} 
-                      className={styles.modelIcon}
-                    />
-                    <span className={styles.modelName}>{model.name}</span>
-                  </div>
+                              {/* 답변 내용 */}
+                              <div className={styles.responseText}>
+                                <span dangerouslySetInnerHTML={{ 
+                                  __html: formatText(
+                                    isStreamingMessage && modelInfo 
+                                      ? displayedMessagesRef.current[modelInfo.name] || ''
+                                      : message.content
+                                  ) 
+                                }} />
+                                {isStreamingMessage && <span className={styles.cursor}>|</span>}
+                              </div>
 
-                  {/* 답변 내용 */}
-                  <div className={styles.responseText}>
-                    <span 
-                      dangerouslySetInnerHTML={{ 
-                        __html: formatText(displayedMessagesRef.current[model.name] || '') 
-                      }} 
-                    />
-                    {(isStreaming[model.name] || typingStateRef.current[model.name]?.isTyping) && <span className={styles.cursor}>|</span>}
-                  </div>
-
-                  {/* 피드백 버튼 */}
-                  <div className={styles.feedbackSection}>
-                    <button 
-                      className={styles.likeButton}
-                      onClick={() => handleLike(model.name)}
-                    >
-                      <i className="bi bi-hand-thumbs-up"></i>
-                      마음에 들어요
-                    </button>
-                  </div>
+                              {/* 피드백 버튼 */}
+                              <div className={styles.feedbackSection}>
+                                <button 
+                                  className={styles.likeButton}
+                                  onClick={() => handleLike(message.aiModel || 'AI Assistant')}
+                                >
+                                  <i className="bi bi-hand-thumbs-up"></i>
+                                  마음에 들어요
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
