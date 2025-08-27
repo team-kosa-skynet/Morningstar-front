@@ -415,7 +415,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  z-index: 99;
+  z-index: 1000;
   animation: slideUp 0.3s ease forwards;
 }
 
@@ -428,6 +428,10 @@
   }
 }
 
+.modelSelectionBox {
+  // 컨테이너 스타일은 .modelSelection에서 상속받음
+}
+
 .modelSelectionHeader {
   display: flex;
   align-items: center;
@@ -438,6 +442,10 @@
     font-size: 20px;
     color: #333333;
   }
+}
+
+.modelDetailBox {
+  // 컨테이너 스타일은 .modelSelection에서 상속받음
 }
 
 .modelList {
@@ -614,6 +622,91 @@
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 0.9em;
   color: #d73a49;
+}
+
+// 추가 스타일들
+.conversationItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  background-color: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 10px;
+  padding: 0;
+  
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+.conversationButton {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+  padding: 10px 15px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: #333333;
+  cursor: pointer;
+  text-align: left;
+  
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.deleteConversationButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-right: 5px;
+  
+  i {
+    color: #000000;
+    font-size: 12px;
+  }
+  
+  &:hover {
+    background-color: #f0f0f0;
+  }
+}
+
+.loadingMessage {
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  color: #777777;
+  text-align: center;
+  padding: 20px;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  
+  &:hover {
+    background-color: transparent !important;
+    border-color: #dddddd !important;
+  }
+}
+
+.noImageSupport {
+  font-size: 12px;
+  color: #999999;
+  margin-left: 8px;
 }
 
 
