@@ -1267,11 +1267,6 @@ interface GenerateImageRequest {
   model?: string;
 }
 
-interface GenerateImageResponse {
-  code: number;
-  message: string;
-  data: any;
-}
 
 export const generateImageStream = async (
   conversationId: number,
