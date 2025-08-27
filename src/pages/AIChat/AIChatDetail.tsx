@@ -618,7 +618,12 @@ const AIChatDetail: React.FC = () => {
   }, [conversationId, token, selectedModels, typeWriter, isImageMode]);
 
   const handleSubmit = async () => {
-    if (!message.trim() || !token) {
+    if (!message.trim()) {
+      return;
+    }
+
+    if (!token) {
+      alert('로그인이 필요합니다.');
       return;
     }
 
