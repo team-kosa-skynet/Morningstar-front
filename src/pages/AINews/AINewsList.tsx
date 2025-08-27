@@ -23,8 +23,9 @@ const AINewsList = () => {
     setError(null);
     try {
       const response = await getNews();
-      // response.data가 배열인지 확인
-      const newsData = response?.data && Array.isArray(response.data) ? response.data : [];
+      // response.data가 배열인지 확인하고 이미지 URL이 있는 항목만 필터링
+      const allNewsData = response?.data && Array.isArray(response.data) ? response.data : [];
+      const newsData = allNewsData.filter(item => item.imageUrl && item.imageUrl.trim() !== '');
       setNews(newsData);
       setFilteredNews(newsData);
       // isPopular가 1인 항목들을 필터링하여 최신순으로 정렬 후 상위 4개 선택
@@ -52,8 +53,9 @@ const AINewsList = () => {
   const handleSearch = () => {
     if (searchQuery.trim()) {
       const filtered = news.filter(item => 
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchQuery.toLowerCase())
+        (item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchQuery.toLowerCase())) &&
+        item.imageUrl && item.imageUrl.trim() !== ''
       );
       setFilteredNews(filtered);
       setCurrentPage(1);
