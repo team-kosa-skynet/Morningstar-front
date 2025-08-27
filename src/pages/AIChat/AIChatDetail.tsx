@@ -1329,7 +1329,7 @@ const AIChatDetail: React.FC = () => {
                 <span>이전 대화</span>
               </div>
               
-              <div className={styles.modelList}>
+              <div className={styles.conversationList}>
                 {historyLoading ? (
                   <div className={styles.loadingMessage}>대화 목록을 불러오는 중...</div>
                 ) : conversations.length === 0 ? (

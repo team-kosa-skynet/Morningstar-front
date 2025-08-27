@@ -466,6 +466,33 @@
   flex-wrap: wrap;
 }
 
+.conversationList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+    
+    &:hover {
+      background: #a1a1a1;
+    }
+  }
+}
+
 .modelOption {
   display: flex;
   align-items: center;
@@ -688,12 +715,16 @@
   margin-right: 5px;
   
   i {
-    color: #000000;
+    color: #999999;
     font-size: 12px;
   }
   
   &:hover {
     background-color: #f0f0f0;
+    
+    i {
+      color: #666666;
+    }
   }
 }
 
