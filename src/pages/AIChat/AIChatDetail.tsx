@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import styles from './AIChatDetail.module.scss';
 import FeedbackModal from '../../components/Modal/FeedbackModal';
 import openAILogo from '../../assets/images/openAI-Photoroom.png';
@@ -8,7 +9,16 @@ import claudeLogo from '../../assets/images/클로드-Photoroom.png';
 import { sendChatMessageStream, getConversationDetail, generateImageStream } from '../../services/apiService';
 import { useAuthStore } from '../../stores/authStore';
 
+interface Conversation {
+  conversationId: number;
+  title: string;
+  lastModifiedAt: number[];
+  messageCount: number;
+  lastMessagePreview: string;
+}
+
 const AIChatDetail: React.FC = () => {
+  const navigate = useNavigate();
   const { token } = useAuthStore();
   const [searchParams] = useSearchParams();
   const [message, setMessage] = useState('');
@@ -54,6 +64,14 @@ const AIChatDetail: React.FC = () => {
   });
 
   const [selectedModels, setSelectedModels] = useState<Array<{id: string, name: string, icon: string, brand: string}>>([]);
+  
+  // 이전 대화 관련 상태
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  
+  // 버튼 클릭 시 포커스 해제 방지
+  const [isInteractingWithButtons, setIsInteractingWithButtons] = useState(false);
 
   const models = [
     { id: 'gpt', name: 'GPT by OpenAI', icon: openAILogo },
@@ -61,46 +79,87 @@ const AIChatDetail: React.FC = () => {
     { id: 'claude', name: 'Claude by Anthropic', icon: claudeLogo }
   ];
 
-  const modelDetails: Record<string, Array<{id: string, name: string, icon: string}>> = {
-    gpt: [
-      { id: 'gpt-4o', name: 'GPT-4o', icon: openAILogo },
-      { id: 'gpt-4o-mini', name: 'GPT-4o mini', icon: openAILogo },
-      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', icon: openAILogo },
-      { id: 'gpt-4', name: 'GPT-4', icon: openAILogo },
-      { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', icon: openAILogo },
-      { id: 'o1-preview', name: 'OpenAI o1-preview', icon: openAILogo },
-      { id: 'o1-mini', name: 'OpenAI o1-mini', icon: openAILogo },
-      { id: 'gpt-oss-120b', name: 'gpt-oss-120b', icon: openAILogo },
-      { id: 'o3-pro', name: 'OpenAI o3-pro', icon: openAILogo },
-      { id: 'gpt-4.1', name: 'GPT-4.1', icon: openAILogo },
-      { id: 'o1', name: 'OpenAI o1', icon: openAILogo },
-      { id: 'gpt-5', name: 'GPT-5', icon: openAILogo }
-    ],
-    gemini: [
-      { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', icon: geminiLogo },
-      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', icon: geminiLogo },
-      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', icon: geminiLogo },
-      { id: 'gemini-pro', name: 'Gemini Pro', icon: geminiLogo },
-      { id: 'gemini-ultra', name: 'Gemini Ultra', icon: geminiLogo },
-      { id: 'gemini-nano', name: 'Gemini Nano', icon: geminiLogo },
-      { id: 'gemini-experimental', name: 'Gemini Experimental', icon: geminiLogo },
-      { id: 'gemini-code', name: 'Gemini Code', icon: geminiLogo },
-      { id: 'gemini-vision', name: 'Gemini Vision', icon: geminiLogo },
-      { id: 'gemini-thinking', name: 'Gemini Thinking', icon: geminiLogo }
-    ],
-    claude: [
-      { id: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', icon: claudeLogo },
-      { id: 'claude-3.5-haiku', name: 'Claude 3.5 Haiku', icon: claudeLogo },
-      { id: 'claude-3-opus', name: 'Claude 3 Opus', icon: claudeLogo },
-      { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', icon: claudeLogo },
-      { id: 'claude-3-haiku', name: 'Claude 3 Haiku', icon: claudeLogo },
-      { id: 'claude-2.1', name: 'Claude 2.1', icon: claudeLogo },
-      { id: 'claude-2', name: 'Claude 2', icon: claudeLogo },
-      { id: 'claude-instant', name: 'Claude Instant', icon: claudeLogo },
-      { id: 'claude-4', name: 'Claude 4', icon: claudeLogo },
-      { id: 'claude-computer-use', name: 'Claude Computer Use', icon: claudeLogo }
-    ]
+  // AI 모델 정보 로딩
+  const [modelInfoData, setModelInfoData] = useState<any>(null);
+  const [modelInfoLoading, setModelInfoLoading] = useState(false);
+
+  // API 데이터를 기반으로 모델 세부 리스트 생성
+  const getModelDetails = (): Record<string, Array<{id: string, name: string, icon: string}>> => {
+    if (!modelInfoData) {
+      // API 데이터가 없을 때 기본 모델들
+      return {
+        gpt: [
+          { id: 'gpt-4o', name: 'GPT-4o', icon: openAILogo },
+          { id: 'gpt-4o-mini', name: 'GPT-4o mini', icon: openAILogo },
+          { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', icon: openAILogo },
+          { id: 'gpt-4', name: 'GPT-4', icon: openAILogo },
+          { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', icon: openAILogo },
+          { id: 'o1-preview', name: 'OpenAI o1-preview', icon: openAILogo },
+          { id: 'o1-mini', name: 'OpenAI o1-mini', icon: openAILogo }
+        ],
+        gemini: [
+          { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', icon: geminiLogo },
+          { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', icon: geminiLogo },
+          { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', icon: geminiLogo },
+          { id: 'gemini-pro', name: 'Gemini Pro', icon: geminiLogo }
+        ],
+        claude: [
+          { id: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', icon: claudeLogo },
+          { id: 'claude-3.5-haiku', name: 'Claude 3.5 Haiku', icon: claudeLogo },
+          { id: 'claude-3-opus', name: 'Claude 3 Opus', icon: claudeLogo },
+          { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', icon: claudeLogo }
+        ]
+      };
+    }
+
+    const details: Record<string, Array<{id: string, name: string, icon: string}>> = {};
+
+    // OpenAI 모델들
+    if (modelInfoData.openai) {
+      let openaiModels = modelInfoData.openai.models;
+      // 이미지 모드일 때 isCreateImage가 true인 모델만 필터링
+      if (isImageMode) {
+        openaiModels = openaiModels.filter((model: any) => model.isCreateImage === true);
+      }
+      details.gpt = openaiModels.map((model: any) => ({
+        id: model.name,
+        name: model.name.toUpperCase(),
+        icon: openAILogo
+      }));
+    }
+
+    // Gemini 모델들
+    if (modelInfoData.gemini) {
+      let geminiModels = modelInfoData.gemini.models;
+      // 이미지 모드일 때 isCreateImage가 true인 모델만 필터링
+      if (isImageMode) {
+        geminiModels = geminiModels.filter((model: any) => model.isCreateImage === true);
+      }
+      details.gemini = geminiModels.map((model: any) => ({
+        id: model.name,
+        name: model.name.charAt(0).toUpperCase() + model.name.slice(1).replace(/-/g, ' '),
+        icon: geminiLogo
+      }));
+    }
+
+    // Claude 모델들
+    if (modelInfoData.claude) {
+      let claudeModels = modelInfoData.claude.models;
+      // 이미지 모드일 때 isCreateImage가 true인 모델만 필터링
+      if (isImageMode) {
+        claudeModels = claudeModels.filter((model: any) => model.isCreateImage === true);
+      }
+      details.claude = claudeModels.map((model: any) => ({
+        id: model.name,
+        name: model.name.charAt(0).toUpperCase() + model.name.slice(1).replace(/-/g, ' '),
+        icon: claudeLogo
+      }));
+    }
+
+    return details;
   };
+
+  const modelDetails = useMemo(() => getModelDetails(), [modelInfoData, isImageMode]);
 
   const handleLike = (selectedModelName: string) => {
     // 선택한 모델과 선택하지 않은 모델 찾기
@@ -144,6 +203,11 @@ const AIChatDetail: React.FC = () => {
       }
     }
     setIsModelDetailOpen(false);
+    
+    // 메시지가 없으면 포커스 해제
+    if (!message.trim()) {
+      setIsChatInputFocused(false);
+    }
   };
 
   const handleRemoveModel = (modelId: string) => {
@@ -153,6 +217,63 @@ const AIChatDetail: React.FC = () => {
   const handleBackToModelSelection = () => {
     setIsModelDetailOpen(false);
     setIsModelSelectionOpen(true);
+  };
+
+  // 이전 대화 목록 가져오기
+  const fetchConversations = async () => {
+    if (!token) return;
+    
+    try {
+      setHistoryLoading(true);
+      const response = await axios.get('https://gaebang.site/api/conversations', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.data.code === 200 && response.data.data?.conversations) {
+        setConversations(response.data.data.conversations);
+      }
+    } catch (error) {
+      console.error('이전 대화 목록 조회 오류:', error);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  // 이전 대화 버튼 클릭 핸들러
+  const handleHistoryToggle = () => {
+    if (!isHistoryOpen && conversations.length === 0) {
+      fetchConversations();
+    }
+    setIsHistoryOpen(!isHistoryOpen);
+  };
+
+  // 대화 삭제 핸들러
+  const handleDeleteConversation = async (conversationId: number) => {
+    if (!token) return;
+    
+    if (!confirm('이 대화를 삭제하시겠습니까?')) {
+      return;
+    }
+    
+    try {
+      const response = await axios.delete(`https://gaebang.site/api/conversations/${conversationId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.data.code === 200) {
+        // 삭제 성공 시 목록에서 제거
+        setConversations(prev => prev.filter(conv => conv.conversationId !== conversationId));
+      } else {
+        alert('대화 삭제에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('대화 삭제 오류:', error);
+      alert('대화 삭제 중 오류가 발생했습니다.');
+    }
   };
 
   // 텍스트 포맷팅 함수 (코드 블록 및 bold 처리)
@@ -545,6 +666,49 @@ const AIChatDetail: React.FC = () => {
     updateChatInputHeight();
   }, []);
 
+  // AI 모델 정보 로딩
+  useEffect(() => {
+    const fetchModelInfo = async () => {
+      try {
+        setModelInfoLoading(true);
+        const response = await axios.get('https://gaebang.site/api/models/info');
+        
+        if (response.data.code === 200 && response.data.data) {
+          setModelInfoData(response.data.data);
+        }
+      } catch (err) {
+        console.error('모델 정보 API 호출 오류:', err);
+      } finally {
+        setModelInfoLoading(false);
+      }
+    };
+
+    fetchModelInfo();
+  }, []);
+
+  // ESC 키로 모달 닫기
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        if (isModelDetailOpen) {
+          setIsModelDetailOpen(false);
+        } else if (isModelSelectionOpen) {
+          setIsModelSelectionOpen(false);
+        } else if (isHistoryOpen) {
+          setIsHistoryOpen(false);
+        }
+        
+        // 메시지가 없으면 포커스 해제
+        if (!message.trim()) {
+          setIsChatInputFocused(false);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [isModelSelectionOpen, isModelDetailOpen, isHistoryOpen, message]);
+
   // 컴포넌트 언마운트 시 타이핑 애니메이션 정리
   useEffect(() => {
     return () => {
@@ -927,8 +1091,14 @@ const AIChatDetail: React.FC = () => {
               onKeyDown={handleKeyPress}
               onFocus={() => setIsChatInputFocused(true)}
               onBlur={() => {
-                if (!message.trim()) {
-                  setIsChatInputFocused(false);
+                // 버튼과 상호작용 중이거나 모달이 열린 상태거나 메시지가 있으면 포커스 상태 유지
+                if (!message.trim() && !isModelSelectionOpen && !isModelDetailOpen && !isHistoryOpen && !isInteractingWithButtons) {
+                  setTimeout(() => {
+                    // 100ms 후에도 버튼과 상호작용하지 않는 상태라면 포커스 해제
+                    if (!isInteractingWithButtons && !isModelSelectionOpen && !isModelDetailOpen && !isHistoryOpen && !message.trim()) {
+                      setIsChatInputFocused(false);
+                    }
+                  }, 100);
                 }
               }}
               rows={1}
@@ -937,7 +1107,11 @@ const AIChatDetail: React.FC = () => {
           )}
           
           {isChatInputFocused && (
-            <div className={styles.buttonGroup}>
+            <div 
+              className={styles.buttonGroup}
+              onMouseEnter={() => setIsInteractingWithButtons(true)}
+              onMouseLeave={() => setTimeout(() => setIsInteractingWithButtons(false), 100)}
+            >
               <div className={styles.leftButtonGroup}>
                 <button 
                   className={styles.modelSelectButton}
@@ -945,6 +1119,14 @@ const AIChatDetail: React.FC = () => {
                 >
                   모델 선택
                 </button>
+                
+                <button
+                  className={`${styles.modelSelectButton} ${isHistoryOpen ? styles.active : ''}`}
+                  onClick={handleHistoryToggle}
+                >
+                  이전 대화
+                </button>
+                
                 <button 
                   className={`${styles.imageButton} ${isImageMode ? styles.active : ''}`}
                   onClick={() => {
@@ -971,7 +1153,11 @@ const AIChatDetail: React.FC = () => {
 
           {/* 선택된 모델들 표시 */}
           {selectedModels.length > 0 && isChatInputFocused && (
-            <div className={styles.selectedModels}>
+            <div 
+              className={styles.selectedModels}
+              onMouseEnter={() => setIsInteractingWithButtons(true)}
+              onMouseLeave={() => setTimeout(() => setIsInteractingWithButtons(false), 100)}
+            >
               {selectedModels.map((model) => (
                 <div key={model.id} className={styles.selectedModelItem}>
                   <div className={styles.modelInfo}>
@@ -992,30 +1178,72 @@ const AIChatDetail: React.FC = () => {
 
         {/* 모델 선택 모달 */}
         {isModelSelectionOpen && (
-          <div className={styles.modelSelection}>
-            <div className={styles.modelSelectionHeader}>
-              <span>모델 선택</span>
-            </div>
-            
-            <div className={styles.modelList}>
-              {models.map((model) => (
-                <button
-                  key={model.id}
-                  className={styles.modelOption}
-                  onClick={() => handleModelSelect(model.id)}
-                >
-                  <img src={model.icon} alt={model.name} className={styles.modelIcon} />
-                  <span>{model.name}</span>
-                </button>
-              ))}
+          <div 
+            className={styles.modelSelection}
+            onClick={(e) => {
+              // 모달 배경 클릭 시 닫기
+              if (e.target === e.currentTarget) {
+                setIsModelSelectionOpen(false);
+                if (!message.trim()) {
+                  setIsChatInputFocused(false);
+                }
+              }
+            }}
+          >
+            <div 
+              className={styles.modelSelectionBox}
+              onMouseEnter={() => setIsInteractingWithButtons(true)}
+              onMouseLeave={() => setTimeout(() => setIsInteractingWithButtons(false), 100)}
+            >
+              <div className={styles.modelSelectionHeader}>
+                <span>모델 선택</span>
+              </div>
+              
+              <div className={styles.modelList}>
+              {models.map((model) => {
+                // 이미지 모드일 때 해당 브랜드에 이미지 생성 가능한 모델이 있는지 확인
+                const hasImageModels = isImageMode ? (modelDetails[model.id]?.length > 0) : true;
+                
+                return (
+                  <button
+                    key={model.id}
+                    className={`${styles.modelOption} ${!hasImageModels ? styles.disabled : ''}`}
+                    onClick={() => hasImageModels && handleModelSelect(model.id)}
+                    disabled={!hasImageModels}
+                  >
+                    <img src={model.icon} alt={model.name} className={styles.modelIcon} />
+                    <span>{model.name}</span>
+                    {!hasImageModels && isImageMode && (
+                      <span className={styles.noImageSupport}>(이미지 생성 미지원)</span>
+                    )}
+                  </button>
+                );
+              })}
+              </div>
             </div>
           </div>
         )}
 
         {/* 모델 세부 선택 모달 */}
         {isModelDetailOpen && selectedModelBrand && (
-          <div className={styles.modelSelection}>
-            <div className={styles.modelDetailHeader}>
+          <div 
+            className={styles.modelSelection}
+            onClick={(e) => {
+              // 모달 배경 클릭 시 닫기
+              if (e.target === e.currentTarget) {
+                setIsModelDetailOpen(false);
+                if (!message.trim()) {
+                  setIsChatInputFocused(false);
+                }
+              }
+            }}
+          >
+            <div 
+              className={styles.modelDetailBox}
+              onMouseEnter={() => setIsInteractingWithButtons(true)}
+              onMouseLeave={() => setTimeout(() => setIsInteractingWithButtons(false), 100)}
+            >
+              <div className={styles.modelDetailHeader}>
               <button className={styles.backButton} onClick={handleBackToModelSelection}>
                 <i className="bi bi-arrow-left"></i>
               </button>
@@ -1023,16 +1251,82 @@ const AIChatDetail: React.FC = () => {
             </div>
             
             <div className={styles.modelDetailList}>
-              {modelDetails[selectedModelBrand]?.slice(0, 10).map((model) => (
-                <button
-                  key={model.id}
-                  className={styles.modelDetailOption}
-                  onClick={() => handleModelDetailSelect(model.id)}
-                >
-                  <img src={model.icon} alt={model.name} className={styles.modelIcon} />
-                  <span>{model.name}</span>
-                </button>
-              ))}
+              {modelInfoLoading ? (
+                <div className={styles.loadingMessage}>모델 목록을 불러오는 중...</div>
+              ) : (
+                modelDetails[selectedModelBrand]?.slice(0, 10).map((model) => (
+                  <button
+                    key={model.id}
+                    className={styles.modelDetailOption}
+                    onClick={() => handleModelDetailSelect(model.id)}
+                  >
+                    <img src={model.icon} alt={model.name} className={styles.modelIcon} />
+                    <span>{model.name}</span>
+                  </button>
+                ))
+              )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 이전 대화 모달 */}
+        {isHistoryOpen && (
+          <div 
+            className={styles.modelSelection}
+            onClick={(e) => {
+              // 모달 배경 클릭 시 닫기
+              if (e.target === e.currentTarget) {
+                setIsHistoryOpen(false);
+                if (!message.trim()) {
+                  setIsChatInputFocused(false);
+                }
+              }
+            }}
+          >
+            <div 
+              className={styles.modelSelectionBox}
+              onMouseEnter={() => setIsInteractingWithButtons(true)}
+              onMouseLeave={() => setTimeout(() => setIsInteractingWithButtons(false), 100)}
+            >
+              <div className={styles.modelSelectionHeader}>
+                <span>이전 대화</span>
+              </div>
+              
+              <div className={styles.modelList}>
+                {historyLoading ? (
+                  <div className={styles.loadingMessage}>대화 목록을 불러오는 중...</div>
+                ) : conversations.length === 0 ? (
+                  <div className={styles.loadingMessage}>대화 내역이 없습니다.</div>
+                ) : (
+                  conversations.map((conversation) => (
+                    <div key={conversation.conversationId} className={styles.conversationItem}>
+                      <button
+                        className={styles.conversationButton}
+                        onClick={() => {
+                          setIsHistoryOpen(false);
+                          // 메시지가 없으면 포커스 해제
+                          if (!message.trim()) {
+                            setIsChatInputFocused(false);
+                          }
+                          navigate(`/ai-chat/detail?conversationId=${conversation.conversationId}`);
+                        }}
+                      >
+                        <span>{conversation.lastMessagePreview}</span>
+                      </button>
+                      <button
+                        className={styles.deleteConversationButton}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteConversation(conversation.conversationId);
+                        }}
+                      >
+                        <i className="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         )}
