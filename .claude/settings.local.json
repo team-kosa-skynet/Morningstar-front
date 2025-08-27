@@ -19,7 +19,8 @@
       "Bash(npx:*)",
       "mcp__figma__get_figma_data",
       "Bash(mkdir:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "WebSearch"
     ],
     "deny": []
   }

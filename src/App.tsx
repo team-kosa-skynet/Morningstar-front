@@ -75,6 +75,7 @@ function App() {
     const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
     const checkDailyAttendance = useAuthStore((state) => state.checkDailyAttendance);
     const refreshUserPoint = useAuthStore((state) => state.refreshUserPoint);
+    const checkTokenValidity = useAuthStore((state) => state.checkTokenValidity);
 
     useEffect(() => {
         initializeAuth();
@@ -87,6 +88,18 @@ function App() {
             refreshUserPoint();
         }
     }, [isAuthInitialized, isLoggedIn, checkDailyAttendance, refreshUserPoint]);
+
+    // 주기적으로 토큰 유효성 검사 (5분마다)
+    useEffect(() => {
+        if (isAuthInitialized && isLoggedIn) {
+            const interval = setInterval(() => {
+                console.log('주기적 토큰 유효성 검사 중...');
+                checkTokenValidity();
+            }, 5 * 60 * 1000); // 5분마다
+
+            return () => clearInterval(interval);
+        }
+    }, [isAuthInitialized, isLoggedIn, checkTokenValidity]);
 
 
     // 인증 초기화가 완료되지 않았으면 로딩 화면 표시
