@@ -1114,7 +1114,7 @@ const AIChatDetail: React.FC = () => {
             >
               <div className={styles.leftButtonGroup}>
                 <button 
-                  className={styles.modelSelectButton}
+                  className={`${styles.modelSelectButton} ${(isModelSelectionOpen || isModelDetailOpen) ? styles.active : ''}`}
                   onClick={() => setIsModelSelectionOpen(!isModelSelectionOpen)}
                 >
                   모델 선택

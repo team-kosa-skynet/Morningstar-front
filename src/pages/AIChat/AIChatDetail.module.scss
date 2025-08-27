@@ -270,6 +270,17 @@
     background: #f8f9ff;
     border-color: #4e4eff;
   }
+
+  &.active {
+    background: #4e4eff;
+    border-color: #4e4eff;
+    color: #ffffff;
+    
+    &:hover {
+      background: #3d3de6;
+      border-color: #3d3de6;
+    }
+  }
 }
 
 .imageButton {
