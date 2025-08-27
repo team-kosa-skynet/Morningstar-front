@@ -652,7 +652,12 @@ const AIChatDetail: React.FC = () => {
   const updateChatInputHeight = () => {
     if (chatInputRef.current) {
       const height = chatInputRef.current.offsetHeight;
-      document.documentElement.style.setProperty('--chat-input-height', `${height + 40}px`); // 20px(bottom 여백) + 20px(모달과의 간격)
+      const bottomMargin = 20; // 채팅창의 bottom 여백
+      const modalGap = 20; // 모달과 채팅창 사이 간격
+      const totalHeight = height + bottomMargin + modalGap;
+      
+      document.documentElement.style.setProperty('--chat-input-height', `${totalHeight}px`);
+      console.log('Chat input height updated:', height, 'Total:', totalHeight); // 디버깅용
     }
   };
 
@@ -661,9 +666,30 @@ const AIChatDetail: React.FC = () => {
     updateChatInputHeight();
   }, [selectedModels]);
 
-  // 컴포넌트 마운트 시 초기 높이 설정
+  // isChatInputFocused가 변경될 때마다 높이 재계산
+  useEffect(() => {
+    // 약간의 지연을 두어 DOM 업데이트 후 높이 계산
+    setTimeout(() => {
+      updateChatInputHeight();
+    }, 50);
+  }, [isChatInputFocused]);
+
+  // 컴포넌트 마운트 시 초기 높이 설정 및 ResizeObserver 설정
   useEffect(() => {
     updateChatInputHeight();
+    
+    // ResizeObserver로 채팅 입력창 크기 변화 감지
+    if (chatInputRef.current) {
+      const resizeObserver = new ResizeObserver(() => {
+        updateChatInputHeight();
+      });
+      
+      resizeObserver.observe(chatInputRef.current);
+      
+      return () => {
+        resizeObserver.disconnect();
+      };
+    }
   }, []);
 
   // AI 모델 정보 로딩
@@ -1085,7 +1111,17 @@ const AIChatDetail: React.FC = () => {
           ) : (
             <textarea
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={(e) => {
+                setMessage(e.target.value);
+                
+                // 자동 높이 조절
+                e.target.style.height = '24px'; // 최소 높이로 리셋
+                const newHeight = Math.min(Math.max(e.target.scrollHeight, 24), 320); // 최소 24px, 최대 320px
+                e.target.style.height = `${newHeight}px`;
+                
+                // 텍스트 변경 시 높이 재계산 (textarea 자동 높이 조절 후)
+                setTimeout(updateChatInputHeight, 0);
+              }}
               placeholder="질문을 입력해주세요."
               className={styles.messageInput}
               onKeyDown={handleKeyPress}

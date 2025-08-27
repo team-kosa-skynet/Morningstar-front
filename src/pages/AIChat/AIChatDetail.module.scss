@@ -428,6 +428,7 @@
   gap: 16px;
   z-index: 1000;
   animation: slideUp 0.3s ease forwards;
+  transition: bottom 0.3s ease; // bottom 위치 변화에 대한 부드러운 전환
 }
 
 @keyframes slideUp {
