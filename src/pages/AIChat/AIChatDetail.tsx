@@ -947,7 +947,13 @@ const AIChatDetail: React.FC = () => {
                 </button>
                 <button 
                   className={`${styles.imageButton} ${isImageMode ? styles.active : ''}`}
-                  onClick={() => setIsImageMode(!isImageMode)}
+                  onClick={() => {
+                    // 이미지 모드를 활성화할 때 기존 모델 선택 초기화
+                    if (!isImageMode) {
+                      setSelectedModels([]);
+                    }
+                    setIsImageMode(!isImageMode);
+                  }}
                 >
                   <i className="bi bi-image"></i>
                 </button>
