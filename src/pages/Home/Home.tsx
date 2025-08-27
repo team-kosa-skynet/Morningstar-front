@@ -65,8 +65,9 @@ const Home: React.FC = () => {
           fetch('https://gaebang.site/api/ai-updates?page=0&size=4')
         ]);
 
-        // 뉴스 데이터 처리 (상위 7개만)
-        const newsData = newsResponse?.data && Array.isArray(newsResponse.data) ? newsResponse.data.slice(0, 7) : [];
+        // 뉴스 데이터 처리 (이미지 URL이 있는 항목만 필터링 후 상위 7개만)
+        const allNewsData = newsResponse?.data && Array.isArray(newsResponse.data) ? newsResponse.data : [];
+        const newsData = allNewsData.filter(item => item.imageUrl && item.imageUrl.trim() !== '').slice(0, 7);
         setNews(newsData);
 
         // 채용공고 데이터 처리 (상위 7개만)

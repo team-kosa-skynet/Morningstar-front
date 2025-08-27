@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { getMemberInfo, markAttendance } from '../services/apiService.ts';
+import { isTokenValid } from '../utils/auth';
 
 interface User {
   email: string;
@@ -23,6 +24,7 @@ interface AuthState {
   refreshUserPoint: () => Promise<void>;
   updateUserName: (newName: string) => void;
   checkDailyAttendance: () => Promise<void>;
+  checkTokenValidity: () => boolean;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -60,16 +62,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const lastAttendanceCheck = localStorage.getItem('lastAttendanceCheck');
     
     if (token && userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        set({
-          isLoggedIn: true,
-          user,
-          token,
-          lastAttendanceCheck,
-        });
-      } catch (error) {
-        console.error('Failed to parse user data:', error);
+      // 토큰 유효성 검사
+      if (isTokenValid(token)) {
+        try {
+          const user = JSON.parse(userStr);
+          set({
+            isLoggedIn: true,
+            user,
+            token,
+            lastAttendanceCheck,
+          });
+        } catch (error) {
+          console.error('Failed to parse user data:', error);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('lastAttendanceCheck');
+        }
+      } else {
+        console.log('토큰이 만료되었습니다. 자동 로그아웃 처리');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('lastAttendanceCheck');
@@ -94,6 +104,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { token } = get();
     if (!token) {
       console.log('토큰이 없어서 멤버 정보 새로고침을 건너뜁니다.');
+      return;
+    }
+
+    // 토큰 유효성 검사
+    if (!isTokenValid(token)) {
+      console.log('포인트 새로고침 전 토큰 만료 감지 - 자동 로그아웃 처리');
+      get().logout();
       return;
     }
     
@@ -142,6 +159,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return;
     }
 
+    // 토큰 유효성 검사
+    if (!isTokenValid(token)) {
+      console.log('출석체크 전 토큰 만료 감지 - 자동 로그아웃 처리');
+      get().logout();
+      return;
+    }
+
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식
     
     // 오늘 이미 출석체크를 했는지 확인
@@ -173,5 +197,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       console.error('일일 출석 체크 실패:', error);
     }
+  },
+
+  checkTokenValidity: () => {
+    const { token } = get();
+    if (!token) {
+      return false;
+    }
+    
+    if (!isTokenValid(token)) {
+      console.log('토큰 만료 감지 - 자동 로그아웃 처리');
+      get().logout();
+      return false;
+    }
+    
+    return true;
   },
 }));

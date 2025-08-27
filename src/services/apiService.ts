@@ -1,6 +1,23 @@
 import axios from 'axios';
+import { useAuthStore } from '../stores/authStore';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://www.gaebang.site/api';
+
+// axios 인터셉터 설정
+axios.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      console.log('토큰 만료로 인한 401 에러 - 자동 로그아웃 처리');
+      const authStore = useAuthStore.getState();
+      authStore.logout();
+      window.location.href = '#/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 interface SignUpRequest {
   email: string;
@@ -998,6 +1015,355 @@ export const paymentReady = async (paymentData: PaymentReadyRequest, token: stri
     if (axios.isAxiosError(error) && error.response) {
       throw error.response.data;
     }
+    throw error;
+  }
+};
+
+interface CreateConversationRequest {
+  title: string;
+}
+
+interface CreateConversationResponse {
+  code: number;
+  message: string;
+  data: {
+    conversationId: number;
+    title: string;
+    createdAt: number[];
+  };
+}
+
+interface ChatRequest {
+  content: string;
+  model?: string;
+  files?: File[];
+}
+
+export const createConversation = async (conversationData: CreateConversationRequest, token: string): Promise<CreateConversationResponse> => {
+  try {
+    const response = await axios.post<CreateConversationResponse>(
+      `${API_BASE_URL}/conversations`,
+      conversationData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const sendChatMessage = async (
+  conversationId: number,
+  provider: 'openai' | 'claude' | 'gemini',
+  chatData: ChatRequest,
+  token: string
+): Promise<any> => {
+  try {
+    const formData = new FormData();
+    formData.append('content', chatData.content);
+    
+    if (chatData.model) {
+      formData.append('model', chatData.model);
+    }
+    
+    if (chatData.files && chatData.files.length > 0) {
+      chatData.files.forEach((file) => {
+        formData.append('files', file);
+      });
+    }
+
+    const response = await axios.post(
+      `${API_BASE_URL}/conversations/${conversationId}/${provider}/stream`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const sendChatMessageStream = async (
+  conversationId: number,
+  provider: 'openai' | 'claude' | 'gemini',
+  chatData: ChatRequest,
+  token: string,
+  onMessage: (text: string) => void,
+  onComplete?: () => void,
+  onError?: (error: any) => void
+) => {
+  try {
+    const formData = new FormData();
+    formData.append('content', chatData.content);
+    
+    if (chatData.model) {
+      formData.append('model', chatData.model);
+    }
+    
+    if (chatData.files && chatData.files.length > 0) {
+      chatData.files.forEach((file) => {
+        formData.append('files', file);
+      });
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/conversations/${conversationId}/${provider}/stream`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error('Response body is not readable');
+    }
+
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      
+      // Keep the last incomplete line in buffer
+      buffer = lines.pop() || '';
+      
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        
+        // 디버깅 로그
+        if (trimmedLine) {
+          console.log('SSE Line:', trimmedLine);
+        }
+        
+        if (trimmedLine.startsWith('data:')) {
+          const text = trimmedLine.slice(5).trim();
+          if (text && text !== '[DONE]') {
+            console.log('Processing data:', text);
+            
+            // JSON 형식인지 확인하고 content 추출
+            try {
+              const jsonData = JSON.parse(text);
+              if (jsonData.type === 'text' && jsonData.content) {
+                onMessage(jsonData.content);
+              }
+            } catch (error) {
+              // JSON이 아닌 경우 기존 방식으로 처리
+              onMessage(text);
+            }
+          }
+        } else if (trimmedLine.startsWith('event:')) {
+          const eventType = trimmedLine.slice(6).trim();
+          console.log('SSE Event:', eventType);
+          
+          if (eventType === 'done') {
+            console.log('Stream completed');
+            onComplete?.();
+            return;
+          }
+        }
+      }
+    }
+    
+    // Process any remaining data in buffer
+    const trimmedBuffer = buffer.trim();
+    if (trimmedBuffer.startsWith('data:')) {
+      const text = trimmedBuffer.slice(5).trim();
+      if (text && text !== '[DONE]') {
+        console.log('Processing final data:', text);
+        
+        // JSON 형식인지 확인하고 content 추출
+        try {
+          const jsonData = JSON.parse(text);
+          if (jsonData.type === 'text' && jsonData.content) {
+            onMessage(jsonData.content);
+          }
+        } catch (error) {
+          // JSON이 아닌 경우 기존 방식으로 처리
+          onMessage(text);
+        }
+      }
+    }
+    
+    onComplete?.();
+  } catch (error) {
+    console.error('Streaming error:', error);
+    onError?.(error);
+    throw error;
+  }
+};
+
+interface ConversationMessage {
+  messageId: number;
+  role: 'user' | 'assistant';
+  content: string;
+  aiModel?: string;
+  messageOrder: number;
+  createdAt: string;
+  attachments: any[];
+}
+
+interface ConversationDetailResponse {
+  code: number;
+  message: string;
+  data: {
+    conversationId: number;
+    title: string;
+    createdAt: string;
+    lastModifiedAt: string;
+    messages: ConversationMessage[];
+    totalMessageCount: number;
+  };
+}
+
+export const getConversationDetail = async (conversationId: number, token: string): Promise<ConversationDetailResponse> => {
+  try {
+    const response = await axios.get<ConversationDetailResponse>(
+      `${API_BASE_URL}/conversations/${conversationId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+interface GenerateImageRequest {
+  prompt: string;
+  model?: string;
+}
+
+
+export const generateImageStream = async (
+  conversationId: number,
+  provider: 'openai' | 'gemini',
+  imageData: GenerateImageRequest,
+  token: string,
+  onImage: (imageUrl: string) => void,
+  onComplete?: () => void,
+  onError?: (error: any) => void,
+  onText?: (text: string) => void
+) => {
+  try {
+    console.log(`[generateImageStream] API 호출:`, {
+      url: `${API_BASE_URL}/conversations/${conversationId}/${provider}/generate-image`,
+      data: imageData
+    });
+
+    const response = await fetch(
+      `${API_BASE_URL}/conversations/${conversationId}/${provider}/generate-image`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(imageData)
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error('Response body is not readable');
+    }
+
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      
+      // Keep the last incomplete line in buffer
+      buffer = lines.pop() || '';
+      
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        
+        if (trimmedLine.startsWith('event:image')) {
+          // 이미지 이벤트 시작
+          continue;
+        } else if (trimmedLine.startsWith('data:')) {
+          const text = trimmedLine.slice(5).trim();
+          if (text && text !== '[DONE]') {
+            try {
+              const jsonData = JSON.parse(text);
+              if (jsonData.imageUrl) {
+                onImage(jsonData.imageUrl);
+              }
+            } catch (error) {
+              // JSON 파싱 실패한 경우 일반 텍스트로 처리
+              console.log('Received non-JSON data:', text);
+              onText?.(text); // 텍스트 메시지 콜백 호출
+            }
+          }
+        }
+      }
+    }
+    
+    // Process any remaining data in buffer
+    const trimmedBuffer = buffer.trim();
+    if (trimmedBuffer.startsWith('data:')) {
+      const text = trimmedBuffer.slice(5).trim();
+      if (text && text !== '[DONE]') {
+        try {
+          const jsonData = JSON.parse(text);
+          if (jsonData.imageUrl) {
+            onImage(jsonData.imageUrl);
+          }
+        } catch (error) {
+          // JSON 파싱 실패한 경우 일반 텍스트로 처리
+          console.log('Received final non-JSON data:', text);
+          onText?.(text); // 텍스트 메시지 콜백 호출
+        }
+      }
+    }
+    
+    onComplete?.();
+  } catch (error) {
+    console.error('Image generation streaming error:', error);
+    onError?.(error);
     throw error;
   }
 };
