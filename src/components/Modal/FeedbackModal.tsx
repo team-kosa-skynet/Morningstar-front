@@ -21,13 +21,15 @@ interface FeedbackModalProps {
     icon?: string;
     value?: string; // API에 전송할 실제 모델명
   };
+  onSubmitSuccess?: () => void; // 제출 성공 시 호출되는 콜백
 }
 
 const FeedbackModal: React.FC<FeedbackModalProps> = ({ 
   isOpen, 
   onClose, 
   selectedModel,
-  unselectedModel
+  unselectedModel,
+  onSubmitSuccess
 }) => {
   const [selectedPositiveReasons, setSelectedPositiveReasons] = useState<string[]>([]);
   const [selectedNegativeReasons, setSelectedNegativeReasons] = useState<string[]>([]);
@@ -124,6 +126,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
         setSelectedPositiveReasons([]);
         setSelectedNegativeReasons([]);
         setDetailText('');
+        onSubmitSuccess?.(); // 성공 콜백 호출
         onClose();
       } else {
         alert('피드백 제출에 실패했습니다. 다시 시도해주세요.');
