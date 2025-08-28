@@ -1152,7 +1152,7 @@ const AIChatDetail: React.FC = () => {
                               <div className={styles.modelHeader}>
                                 <img 
                                   src={message.aiModel?.toLowerCase().includes('claude') ? claudeLogo :
-                                       message.aiModel?.toLowerCase().includes('gemini') ? geminiLogo :
+                                       (message.aiModel?.toLowerCase().includes('gemini') || message.aiModel?.toLowerCase().includes('imagen')) ? geminiLogo :
                                        openAILogo} 
                                   alt={message.aiModel} 
                                   className={styles.modelIcon}
@@ -1161,8 +1161,8 @@ const AIChatDetail: React.FC = () => {
                                   {message.aiModel ? 
                                     (message.aiModel.toLowerCase().includes('claude') ? 
                                       message.aiModel.replace(/claude-/g, 'Claude ').replace(/\b\w/g, (l: string) => l.toUpperCase()) :
-                                     message.aiModel.toLowerCase().includes('gemini') ? 
-                                      message.aiModel.replace(/gemini-/g, 'Gemini ').replace(/\b\w/g, (l: string) => l.toUpperCase()) :
+                                     (message.aiModel.toLowerCase().includes('gemini') || message.aiModel.toLowerCase().includes('imagen')) ? 
+                                      message.aiModel.replace(/gemini-/g, 'Gemini ').replace(/imagen-/g, 'Imagen ').replace(/\b\w/g, (l: string) => l.toUpperCase()) :
                                      message.aiModel.toUpperCase()) : 
                                     'AI Assistant'}
                                 </span>
