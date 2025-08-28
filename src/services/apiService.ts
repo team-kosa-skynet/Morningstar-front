@@ -1298,6 +1298,51 @@ export const getFeedbackOptions = async (): Promise<FeedbackOptionsResponse> => 
   }
 };
 
+// 피드백 제출 인터페이스
+interface SubmitFeedbackRequest {
+  positiveModel: string;
+  negativeModel: string;
+  positiveFeedback: string;
+  negativeFeedback: string;
+  detailedComment?: string | null;
+}
+
+interface SubmitFeedbackResponse {
+  code: number;
+  message: string;
+  data: {
+    feedbackId: number;
+    memberId: number;
+    positiveModel: string;
+    negativeModel: string;
+    positiveFeedback: string;
+    negativeFeedback: string;
+    detailedComment?: string | null;
+  };
+}
+
+// 피드백 제출
+export const submitFeedback = async (feedbackData: SubmitFeedbackRequest, token: string): Promise<SubmitFeedbackResponse> => {
+  try {
+    const response = await axios.post<SubmitFeedbackResponse>(
+      `${API_BASE_URL}/feedback/submit`,
+      feedbackData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
 export const generateImageStream = async (
   conversationId: number,
   provider: 'openai' | 'gemini',

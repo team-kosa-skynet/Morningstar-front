@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './FeedbackModal.module.scss';
-import { getFeedbackOptions } from '../../services/apiService';
+import { getFeedbackOptions, submitFeedback } from '../../services/apiService';
+import { useAuthStore } from '../../stores/authStore';
 
 interface FeedbackOption {
   code: string;
@@ -13,10 +14,12 @@ interface FeedbackModalProps {
   selectedModel: {
     name: string;
     icon?: string;
+    value?: string; // API에 전송할 실제 모델명
   };
   unselectedModel: {
     name: string;
     icon?: string;
+    value?: string; // API에 전송할 실제 모델명
   };
 }
 
@@ -32,6 +35,8 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const [positiveOptions, setPositiveOptions] = useState<FeedbackOption[]>([]);
   const [negativeOptions, setNegativeOptions] = useState<FeedbackOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { token } = useAuthStore();
 
   useEffect(() => {
     if (isOpen) {
@@ -85,15 +90,50 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
     }
   };
 
-  const handleSubmit = () => {
-    console.log('제출된 피드백:', {
-      selectedModel: selectedModel.name,
-      positiveReasons: selectedPositiveReasons,
-      unselectedModel: unselectedModel.name,
-      negativeReasons: selectedNegativeReasons,
-      detail: detailText
-    });
-    onClose();
+  const handleSubmit = async () => {
+    // 필수 항목 체크
+    if (selectedPositiveReasons.length === 0 || selectedNegativeReasons.length === 0) {
+      alert('긍정적인 이유와 부정적인 이유를 각각 하나 이상 선택해주세요.');
+      return;
+    }
+
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      
+      // API에서는 단일 선택만 지원하므로 첫 번째 선택 항목만 전송
+      const feedbackData = {
+        positiveModel: selectedModel.value || selectedModel.name,
+        negativeModel: unselectedModel.value || unselectedModel.name,
+        positiveFeedback: selectedPositiveReasons[0], // 첫 번째 항목만 전송
+        negativeFeedback: selectedNegativeReasons[0], // 첫 번째 항목만 전송
+        detailedComment: detailText || null
+      };
+
+      console.log('제출할 피드백 데이터:', feedbackData);
+      
+      const response = await submitFeedback(feedbackData, token);
+      
+      if (response.code === 200) {
+        alert('피드백이 성공적으로 제출되었습니다. 감사합니다!');
+        // 상태 초기화
+        setSelectedPositiveReasons([]);
+        setSelectedNegativeReasons([]);
+        setDetailText('');
+        onClose();
+      } else {
+        alert('피드백 제출에 실패했습니다. 다시 시도해주세요.');
+      }
+    } catch (error) {
+      console.error('피드백 제출 오류:', error);
+      alert('피드백 제출 중 오류가 발생했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -173,9 +213,9 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
           <button 
             className={styles.submitButton}
             onClick={handleSubmit}
-            disabled={selectedPositiveReasons.length === 0 && selectedNegativeReasons.length === 0}
+            disabled={selectedPositiveReasons.length === 0 || selectedNegativeReasons.length === 0 || isSubmitting}
           >
-            답변 제출하기
+            {isSubmitting ? '제출 중...' : '답변 제출하기'}
           </button>
         </div>
       </div>
