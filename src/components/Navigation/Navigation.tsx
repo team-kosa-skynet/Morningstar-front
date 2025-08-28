@@ -6,7 +6,7 @@ import leaderboardIcon from '../../assets/images/nav-img/leaderboard-removebg-pr
 import itNewsIcon from '../../assets/images/nav-img/news.svg';
 import jobIcon from '../../assets/images/nav-img/job.svg';
 import questionIcon from '../../assets/images/nav-img/question.svg';
-import micIcon from '../../assets/images/nav-img/mic.svg';
+import micIcon from '../../assets/images/nav-img/마이크-Photoroom.png';
 import communityIcon from '../../assets/images/nav-img/community.svg';
 
 const Navigation: React.FC = () => {
