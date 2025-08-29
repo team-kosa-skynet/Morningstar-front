@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './FeedbackModal.module.scss';
+import { getFeedbackOptions, submitFeedback } from '../../services/apiService';
+import { useAuthStore } from '../../stores/authStore';
+
+interface FeedbackOption {
+  code: string;
+  displayName: string;
+}
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -7,64 +14,129 @@ interface FeedbackModalProps {
   selectedModel: {
     name: string;
     icon?: string;
+    value?: string; // API에 전송할 실제 모델명
   };
   unselectedModel: {
     name: string;
     icon?: string;
+    value?: string; // API에 전송할 실제 모델명
   };
+  onSubmitSuccess?: () => void; // 제출 성공 시 호출되는 콜백
 }
 
 const FeedbackModal: React.FC<FeedbackModalProps> = ({ 
   isOpen, 
   onClose, 
   selectedModel,
-  unselectedModel
+  unselectedModel,
+  onSubmitSuccess
 }) => {
   const [selectedPositiveReasons, setSelectedPositiveReasons] = useState<string[]>([]);
   const [selectedNegativeReasons, setSelectedNegativeReasons] = useState<string[]>([]);
   const [detailText, setDetailText] = useState('');
+  const [positiveOptions, setPositiveOptions] = useState<FeedbackOption[]>([]);
+  const [negativeOptions, setNegativeOptions] = useState<FeedbackOption[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { token } = useAuthStore();
 
-  const positiveReasons = [
-    '정확해요',
-    '빨라요',
-    '마음에 들어요',
-    '친절해요',
-    '답변이 자세해요'
-  ];
+  useEffect(() => {
+    if (isOpen) {
+      fetchFeedbackOptions();
+    }
+  }, [isOpen]);
 
-  const negativeReasons = [
-    '틀려요',
-    '환각증상',
-    '느려요',
-    '답변이 너무 길어요',
-    '자세하지 않아요'
-  ];
-
-  const handlePositiveReasonClick = (reason: string) => {
-    if (selectedPositiveReasons.includes(reason)) {
-      setSelectedPositiveReasons(selectedPositiveReasons.filter(r => r !== reason));
-    } else {
-      setSelectedPositiveReasons([...selectedPositiveReasons, reason]);
+  const fetchFeedbackOptions = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getFeedbackOptions();
+      if (response.data) {
+        setPositiveOptions(response.data.positiveOptions);
+        setNegativeOptions(response.data.negativeOptions);
+      }
+    } catch (error) {
+      console.error('Failed to fetch feedback options:', error);
+      // 에러 발생 시 기본값 설정
+      setPositiveOptions([
+        { code: 'ACCURATE', displayName: '정확해요' },
+        { code: 'FAST', displayName: '빨라요' },
+        { code: 'SATISFYING', displayName: '마음에 들어요' },
+        { code: 'KIND', displayName: '친절해요' },
+        { code: 'DETAILED', displayName: '답변이 자세해요' }
+      ]);
+      setNegativeOptions([
+        { code: 'INCORRECT', displayName: '틀려요' },
+        { code: 'HALLUCINATION', displayName: '환각증상' },
+        { code: 'SLOW', displayName: '느려요' },
+        { code: 'TOO_LONG', displayName: '답변이 너무 길어요' },
+        { code: 'NOT_DETAILED', displayName: '자세하지 않아요' }
+      ]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleNegativeReasonClick = (reason: string) => {
-    if (selectedNegativeReasons.includes(reason)) {
-      setSelectedNegativeReasons(selectedNegativeReasons.filter(r => r !== reason));
+  const handlePositiveReasonClick = (code: string) => {
+    if (selectedPositiveReasons.includes(code)) {
+      setSelectedPositiveReasons(selectedPositiveReasons.filter(r => r !== code));
     } else {
-      setSelectedNegativeReasons([...selectedNegativeReasons, reason]);
+      setSelectedPositiveReasons([...selectedPositiveReasons, code]);
     }
   };
 
-  const handleSubmit = () => {
-    console.log('제출된 피드백:', {
-      selectedModel: selectedModel.name,
-      positiveReasons: selectedPositiveReasons,
-      unselectedModel: unselectedModel.name,
-      negativeReasons: selectedNegativeReasons,
-      detail: detailText
-    });
-    onClose();
+  const handleNegativeReasonClick = (code: string) => {
+    if (selectedNegativeReasons.includes(code)) {
+      setSelectedNegativeReasons(selectedNegativeReasons.filter(r => r !== code));
+    } else {
+      setSelectedNegativeReasons([...selectedNegativeReasons, code]);
+    }
+  };
+
+  const handleSubmit = async () => {
+    // 필수 항목 체크
+    if (selectedPositiveReasons.length === 0 || selectedNegativeReasons.length === 0) {
+      alert('긍정적인 이유와 부정적인 이유를 각각 하나 이상 선택해주세요.');
+      return;
+    }
+
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      
+      // API에서는 단일 선택만 지원하므로 첫 번째 선택 항목만 전송
+      const feedbackData = {
+        positiveModel: selectedModel.value || selectedModel.name,
+        negativeModel: unselectedModel.value || unselectedModel.name,
+        positiveFeedback: selectedPositiveReasons[0], // 첫 번째 항목만 전송
+        negativeFeedback: selectedNegativeReasons[0], // 첫 번째 항목만 전송
+        detailedComment: detailText || null
+      };
+
+      console.log('제출할 피드백 데이터:', feedbackData);
+      
+      const response = await submitFeedback(feedbackData, token);
+      
+      if (response.code === 200) {
+        alert('피드백이 성공적으로 제출되었습니다. 감사합니다!');
+        // 상태 초기화
+        setSelectedPositiveReasons([]);
+        setSelectedNegativeReasons([]);
+        setDetailText('');
+        onSubmitSuccess?.(); // 성공 콜백 호출
+        onClose();
+      } else {
+        alert('피드백 제출에 실패했습니다. 다시 시도해주세요.');
+      }
+    } catch (error) {
+      console.error('피드백 제출 오류:', error);
+      alert('피드백 제출 중 오류가 발생했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -86,17 +158,21 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
             </div>
 
             <div className={styles.reasonsContainer}>
-              {positiveReasons.map((reason) => (
-                <button
-                  key={reason}
-                  className={`${styles.reasonButton} ${styles.positive} ${
-                    selectedPositiveReasons.includes(reason) ? styles.selected : ''
-                  }`}
-                  onClick={() => handlePositiveReasonClick(reason)}
-                >
-                  {reason}
-                </button>
-              ))}
+              {isLoading ? (
+                <div>로딩 중...</div>
+              ) : (
+                positiveOptions.map((option) => (
+                  <button
+                    key={option.code}
+                    className={`${styles.reasonButton} ${styles.positive} ${
+                      selectedPositiveReasons.includes(option.code) ? styles.selected : ''
+                    }`}
+                    onClick={() => handlePositiveReasonClick(option.code)}
+                  >
+                    {option.displayName}
+                  </button>
+                ))
+              )}
             </div>
           </div>
 
@@ -109,17 +185,21 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
             </div>
 
             <div className={styles.reasonsContainer}>
-              {negativeReasons.map((reason) => (
-                <button
-                  key={reason}
-                  className={`${styles.reasonButton} ${styles.negative} ${
-                    selectedNegativeReasons.includes(reason) ? styles.selected : ''
-                  }`}
-                  onClick={() => handleNegativeReasonClick(reason)}
-                >
-                  {reason}
-                </button>
-              ))}
+              {isLoading ? (
+                <div>로딩 중...</div>
+              ) : (
+                negativeOptions.map((option) => (
+                  <button
+                    key={option.code}
+                    className={`${styles.reasonButton} ${styles.negative} ${
+                      selectedNegativeReasons.includes(option.code) ? styles.selected : ''
+                    }`}
+                    onClick={() => handleNegativeReasonClick(option.code)}
+                  >
+                    {option.displayName}
+                  </button>
+                ))
+              )}
             </div>
           </div>
 
@@ -136,9 +216,9 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
           <button 
             className={styles.submitButton}
             onClick={handleSubmit}
-            disabled={selectedPositiveReasons.length === 0 && selectedNegativeReasons.length === 0}
+            disabled={selectedPositiveReasons.length === 0 || selectedNegativeReasons.length === 0 || isSubmitting}
           >
-            답변 제출하기
+            {isSubmitting ? '제출 중...' : '답변 제출하기'}
           </button>
         </div>
       </div>

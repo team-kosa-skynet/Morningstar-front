@@ -55,13 +55,16 @@ const AIChatDetail: React.FC = () => {
   const chatInputRef = useRef<HTMLDivElement>(null);
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean;
-    selectedModel: { name: string; icon: string };
-    unselectedModel: { name: string; icon: string };
+    selectedModel: { name: string; icon: string; value?: string };
+    unselectedModel: { name: string; icon: string; value?: string };
   }>({
     isOpen: false,
-    selectedModel: { name: '', icon: '' },
-    unselectedModel: { name: '', icon: '' }
+    selectedModel: { name: '', icon: '', value: '' },
+    unselectedModel: { name: '', icon: '', value: '' }
   });
+  
+  // 피드백 제출된 모델 추적 (메시지ID로 관리)
+  const [feedbackSubmittedMessages, setFeedbackSubmittedMessages] = useState<Set<number>>(new Set());
 
   const [selectedModels, setSelectedModels] = useState<Array<{id: string, name: string, icon: string, brand: string}>>([]);
   
@@ -161,17 +164,104 @@ const AIChatDetail: React.FC = () => {
 
   const modelDetails = useMemo(() => getModelDetails(), [modelInfoData, isImageMode]);
 
-  const handleLike = (selectedModelName: string) => {
-    // 선택한 모델과 선택하지 않은 모델 찾기
-    const selected = selectedModels.find(m => m.name === selectedModelName);
-    const unselected = selectedModels.find(m => m.name !== selectedModelName);
+  const handleLike = (selectedModelId: string, messageId: number) => {
+    // 이미 피드백을 제출한 메시지인지 확인
+    if (feedbackSubmittedMessages.has(messageId)) {
+      alert('이미 피드백을 제출하셨습니다.');
+      return;
+    }
     
-    if (selected && unselected) {
+    console.log('handleLike called with:', selectedModelId, messageId);
+    console.log('Current allMessages:', allMessages);
+    
+    // 클릭한 메시지 찾기
+    const clickedMessage = allMessages.find(m => m.messageId === messageId);
+    if (!clickedMessage) {
+      console.error('Clicked message not found');
+      return;
+    }
+    
+    console.log('Clicked message:', clickedMessage);
+    
+    // 같은 user 질문에 대한 모든 assistant 응답 찾기
+    // 방법: 클릭한 메시지의 messageOrder를 기준으로 가장 가까운 이전 user 메시지를 찾고,
+    // 그 다음 user 메시지가 나오기 전까지의 모든 assistant 메시지를 찾기
+    
+    const clickedOrder = clickedMessage.messageOrder;
+    
+    // 현재 메시지 이전의 가장 가까운 user 메시지 찾기
+    const previousUserMessage = allMessages
+      .filter(msg => msg.role === 'user' && msg.messageOrder < clickedOrder)
+      .sort((a, b) => b.messageOrder - a.messageOrder)[0];
+    
+    // 다음 user 메시지 찾기 (있다면)
+    const nextUserMessage = allMessages
+      .filter(msg => msg.role === 'user' && msg.messageOrder > clickedOrder)
+      .sort((a, b) => a.messageOrder - b.messageOrder)[0];
+    
+    console.log('Previous user message:', previousUserMessage);
+    console.log('Next user message:', nextUserMessage);
+    
+    // 같은 질문에 대한 모든 assistant 응답 찾기
+    const currentGroupMessages = allMessages.filter(msg => {
+      if (msg.role !== 'assistant') return false;
+      
+      const msgOrder = msg.messageOrder;
+      const afterPrevUser = !previousUserMessage || msgOrder > previousUserMessage.messageOrder;
+      const beforeNextUser = !nextUserMessage || msgOrder < nextUserMessage.messageOrder;
+      
+      return afterPrevUser && beforeNextUser;
+    });
+    
+    console.log('Current group messages:', currentGroupMessages);
+    console.log('Number of AI responses in this group:', currentGroupMessages.length);
+    
+    // 선택한 모델과 선택하지 않은 모델 찾기
+    const selectedMessage = currentGroupMessages.find(msg => msg.messageId === messageId);
+    const unselectedMessage = currentGroupMessages.find(msg => msg.messageId !== messageId);
+    
+    if (selectedMessage && unselectedMessage) {
+      // 모델 아이콘과 표시 이름 결정
+      const getModelInfo = (modelId: string) => {
+        let icon = openAILogo;
+        let displayName = modelId;
+        
+        if (modelId.toLowerCase().includes('claude')) {
+          icon = claudeLogo;
+          displayName = modelId.replace(/claude-/g, 'Claude ').replace(/\b\w/g, l => l.toUpperCase());
+        } else if (modelId.toLowerCase().includes('gemini')) {
+          icon = geminiLogo;
+          displayName = modelId.replace(/gemini-/g, 'Gemini ').replace(/\b\w/g, l => l.toUpperCase());
+        } else if (modelId.toLowerCase().includes('gpt') || modelId.toLowerCase().includes('o1')) {
+          icon = openAILogo;
+          displayName = modelId.toUpperCase();
+        }
+        
+        return { icon, displayName };
+      };
+      
+      const selectedInfo = getModelInfo(selectedMessage.aiModel || '');
+      const unselectedInfo = getModelInfo(unselectedMessage.aiModel || '');
+      
       setFeedbackModal({
         isOpen: true,
-        selectedModel: { name: selected.name, icon: selected.icon },
-        unselectedModel: { name: unselected.name, icon: unselected.icon }
+        selectedModel: { 
+          name: selectedInfo.displayName, 
+          icon: selectedInfo.icon,
+          value: selectedMessage.aiModel || '' // 실제 모델 ID
+        },
+        unselectedModel: { 
+          name: unselectedInfo.displayName, 
+          icon: unselectedInfo.icon,
+          value: unselectedMessage.aiModel || '' // 실제 모델 ID
+        }
       });
+      
+      // 현재 피드백 중인 메시지 ID 저장 (제출 성공 시 처리용)
+      sessionStorage.setItem('currentFeedbackMessageId', messageId.toString());
+    } else {
+      console.log('Could not find both selected and unselected models');
+      alert('비교할 다른 모델의 응답이 없습니다.');
     }
   };
 
@@ -180,6 +270,17 @@ const AIChatDetail: React.FC = () => {
       ...feedbackModal,
       isOpen: false
     });
+    // 피드백 모달 닫을 때 임시 저장한 메시지 ID 제거
+    sessionStorage.removeItem('currentFeedbackMessageId');
+  };
+  
+  const handleFeedbackSuccess = () => {
+    // 피드백 제출 성공 시 해당 메시지를 제출된 목록에 추가
+    const messageId = sessionStorage.getItem('currentFeedbackMessageId');
+    if (messageId) {
+      setFeedbackSubmittedMessages(prev => new Set(prev).add(parseInt(messageId)));
+      sessionStorage.removeItem('currentFeedbackMessageId');
+    }
   };
 
   const handleModelSelect = (modelId: string) => {
@@ -1051,7 +1152,7 @@ const AIChatDetail: React.FC = () => {
                               <div className={styles.modelHeader}>
                                 <img 
                                   src={message.aiModel?.toLowerCase().includes('claude') ? claudeLogo :
-                                       message.aiModel?.toLowerCase().includes('gemini') ? geminiLogo :
+                                       (message.aiModel?.toLowerCase().includes('gemini') || message.aiModel?.toLowerCase().includes('imagen')) ? geminiLogo :
                                        openAILogo} 
                                   alt={message.aiModel} 
                                   className={styles.modelIcon}
@@ -1060,8 +1161,8 @@ const AIChatDetail: React.FC = () => {
                                   {message.aiModel ? 
                                     (message.aiModel.toLowerCase().includes('claude') ? 
                                       message.aiModel.replace(/claude-/g, 'Claude ').replace(/\b\w/g, (l: string) => l.toUpperCase()) :
-                                     message.aiModel.toLowerCase().includes('gemini') ? 
-                                      message.aiModel.replace(/gemini-/g, 'Gemini ').replace(/\b\w/g, (l: string) => l.toUpperCase()) :
+                                     (message.aiModel.toLowerCase().includes('gemini') || message.aiModel.toLowerCase().includes('imagen')) ? 
+                                      message.aiModel.replace(/gemini-/g, 'Gemini ').replace(/imagen-/g, 'Imagen ').replace(/\b\w/g, (l: string) => l.toUpperCase()) :
                                      message.aiModel.toUpperCase()) : 
                                     'AI Assistant'}
                                 </span>
@@ -1082,11 +1183,11 @@ const AIChatDetail: React.FC = () => {
                               {/* 피드백 버튼 */}
                               <div className={styles.feedbackSection}>
                                 <button 
-                                  className={styles.likeButton}
-                                  onClick={() => handleLike(message.aiModel || 'AI Assistant')}
+                                  className={`${styles.likeButton} ${feedbackSubmittedMessages.has(message.messageId) ? styles.active : ''}`}
+                                  onClick={() => handleLike(message.aiModel || 'AI Assistant', message.messageId)}
                                 >
                                   <i className="bi bi-hand-thumbs-up"></i>
-                                  마음에 들어요
+                                  {feedbackSubmittedMessages.has(message.messageId) ? '피드백 완료' : '마음에 들어요'}
                                 </button>
                               </div>
                             </div>
@@ -1378,6 +1479,7 @@ const AIChatDetail: React.FC = () => {
           onClose={closeFeedbackModal}
           selectedModel={feedbackModal.selectedModel}
           unselectedModel={feedbackModal.unselectedModel}
+          onSubmitSuccess={handleFeedbackSuccess}
         />
       </div>
     </div>
