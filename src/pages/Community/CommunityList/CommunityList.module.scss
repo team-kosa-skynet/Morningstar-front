@@ -134,6 +134,8 @@
     font-size: 16px;
     font-weight: $font-weight-medium;
     color: #333333;
+    display: flex;
+    align-items: center;
 
     &.notice {
       font-weight: $font-weight-bold;
@@ -196,6 +198,18 @@
   font-size: 14px;
   font-weight: 600;
   color: #333333;
+}
+
+.questionBadge {
+  display: inline-block;
+  padding: 2px 6px;
+  margin-right: 6px;
+  background-color: #4A90E2;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  vertical-align: middle;
 }
 
 // 이미지 없을 때 빈 배경
