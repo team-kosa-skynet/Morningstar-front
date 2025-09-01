@@ -6,10 +6,12 @@ import { getBoardDetail, createComment, deleteBoard, updateComment, deleteCommen
 import { useAuthStore } from '../../../stores/authStore';
 import DropdownModal from '../../../components/Modal/DropdownModal.tsx';
 import { getLevelIcon } from '../../../utils/levelUtils';
+import AIBotImage from '../../../assets/images/AIBOT.png';
 
 interface BoardDetail {
   boardId: number;
   title: string;
+  category?: string;
   commentCount: number;
   imageUrl: string[];
   content: string;
@@ -393,7 +395,10 @@ const CommunityDetail = () => {
           <div className={styles.contentBox}>
             {/* 제목 영역 */}
             <div className={styles.titleSection}>
-              <h1 className={styles.postTitle}>{boardDetail.title}</h1>
+              <h1 className={styles.postTitle}>
+                {boardDetail.category === 'QUESTION' && <span className={styles.questionBadge}>질문</span>}
+                {boardDetail.title}
+              </h1>
               {token && (
                 <button 
                   className={styles.menuButton}
@@ -505,7 +510,11 @@ const CommunityDetail = () => {
                   <div key={comment.commentId} className={styles.commentItem}>
                     <div className={styles.commentHeader}>
                       <div className={styles.userInfo}>
-                        <img src={getLevelIcon(comment.writerLevel)} alt="프로필" className={styles.profileImage} />
+                        <img 
+                          src={comment.writer === 'AI어시스턴트' ? AIBotImage : getLevelIcon(comment.writerLevel)} 
+                          alt="프로필" 
+                          className={`${styles.profileImage} ${comment.writer === 'AI어시스턴트' ? styles.aiProfileImage : ''}`}
+                        />
                         <span className={styles.nickname}>{comment.writer}</span>
                       </div>
                       {token && (

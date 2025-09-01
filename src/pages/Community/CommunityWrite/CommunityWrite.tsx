@@ -14,6 +14,7 @@ const CommunityWrite: React.FC = () => {
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string>('');
+  const [isQuestion, setIsQuestion] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCancel = () => {
@@ -65,7 +66,7 @@ const CommunityWrite: React.FC = () => {
         {
           title: title.trim(),
           content: content.trim(),
-          category: '일반', // 기본 카테고리로 설정
+          category: isQuestion ? 'QUESTION' : 'GENERAL',
           imageUrl: imageUrls
         },
         token
@@ -200,17 +201,27 @@ const CommunityWrite: React.FC = () => {
               <button className={styles.imageBtn} onClick={handleImageClick} disabled={isSubmitting}>
                 <i className="bi bi-image"></i>
               </button>
-              <button 
-                className={styles.submitBtn} 
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  uploadProgress ? <span style={{fontSize: '10px'}}>{uploadProgress}</span> : <span>...</span>
-                ) : (
-                  <i className="bi bi-vector-pen"></i>
-                )}
-              </button>
+              <div className={styles.rightActions}>
+                <label className={styles.questionCheckbox}>
+                  <input
+                    type="checkbox"
+                    checked={isQuestion}
+                    onChange={(e) => setIsQuestion(e.target.checked)}
+                  />
+                  <span>질문</span>
+                </label>
+                <button 
+                  className={styles.submitBtn} 
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    uploadProgress ? <span style={{fontSize: '10px'}}>{uploadProgress}</span> : <span>...</span>
+                  ) : (
+                    <i className="bi bi-vector-pen"></i>
+                  )}
+                </button>
+              </div>
             </div>
 
             <input
