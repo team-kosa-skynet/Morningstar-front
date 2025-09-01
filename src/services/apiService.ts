@@ -127,6 +127,7 @@ interface BoardDetailResponse {
   data: {
     boardId: number;
     title: string;
+    category?: string;
     commentCount: number;
     imageUrl: string[];
     content: string;
