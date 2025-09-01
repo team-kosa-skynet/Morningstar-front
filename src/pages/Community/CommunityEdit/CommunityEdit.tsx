@@ -17,6 +17,7 @@ const CommunityEdit: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [isQuestion, setIsQuestion] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 기존 게시글 데이터 불러오기
@@ -35,6 +36,7 @@ const CommunityEdit: React.FC = () => {
         setTitle(boardData.title);
         setContent(boardData.content);
         setExistingImages(boardData.imageUrl || []);
+        setIsQuestion(boardData.category === 'QUESTION');
         
         if (boardData.imageUrl && boardData.imageUrl.length > 0) {
           setShowImagePreview(true);
@@ -103,7 +105,7 @@ const CommunityEdit: React.FC = () => {
         {
           title: title.trim(),
           content: content.trim(),
-          category: '일반', // 기본 카테고리로 설정
+          category: isQuestion ? 'QUESTION' : 'GENERAL',
           imageUrl: allImageUrls
         },
         token
@@ -269,7 +271,16 @@ const CommunityEdit: React.FC = () => {
               <button className={styles.imageBtn} onClick={handleImageClick} disabled={isSubmitting}>
                 <i className="bi bi-image"></i>
               </button>
-              <button 
+              <div className={styles.rightActions}>
+                <label className={styles.questionCheckbox}>
+                  <input
+                    type="checkbox"
+                    checked={isQuestion}
+                    onChange={(e) => setIsQuestion(e.target.checked)}
+                  />
+                  <span>질문</span>
+                </label>
+                <button 
                 className={styles.submitBtn} 
                 onClick={handleSubmit}
                 disabled={isSubmitting}
@@ -279,7 +290,8 @@ const CommunityEdit: React.FC = () => {
                 ) : (
                   <i className="bi bi-vector-pen"></i>
                 )}
-              </button>
+                </button>
+              </div>
             </div>
 
             <input
