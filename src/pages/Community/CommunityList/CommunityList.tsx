@@ -17,6 +17,7 @@ import AIBotImage from '../../../assets/images/AIBOT.png';
 interface PostItem {
   boardId: number;
   title: string;
+  category?: string;
   writer: string;
   writerLevel: number;
   imageUrl: string;
@@ -182,7 +183,10 @@ const CommunityList = () => {
                   </div>
                   <div className={styles.postContent}>
                     <div className={styles.postTitle}>
-                      <h3>{post.title}</h3>
+                      <h3>
+                        {post.category === 'QUESTION' && <span className={styles.questionBadge}>질문</span>}
+                        {post.title}
+                      </h3>
                       <span className={styles.commentCount}>{post.commentCount}</span>
                     </div>
                     <div className={styles.postMeta}>

@@ -66,7 +66,7 @@ const CommunityWrite: React.FC = () => {
         {
           title: title.trim(),
           content: content.trim(),
-          category: '일반', // 기본 카테고리로 설정
+          category: isQuestion ? 'QUESTION' : 'GENERAL',
           imageUrl: imageUrls
         },
         token
