@@ -561,14 +561,6 @@ const Interview: React.FC = () => {
                       >
                         <i className="bi bi-keyboard"></i>
                       </button>
-                      <button 
-                        className={styles.testSubmitButton} 
-                        onClick={handleTestSubmit}
-                        disabled={isLoading || isPlayingAudio}
-                      >
-                        <i className="bi bi-send"></i>
-                        <span>테스트 제출</span>
-                      </button>
                     </div>
                   ) : (
                     // 텍스트 입력 모드 - 입력창 + X 버튼 + 제출 버튼
@@ -578,11 +570,16 @@ const Interview: React.FC = () => {
                         value={textAnswer}
                         onChange={(e) => setTextAnswer(e.target.value)}
                         className={styles.textInput}
-                        placeholder="답변을 입력하세요..."
+                        placeholder="답변을 입력하세요... ('제출'을 입력하면 면접 종료)"
                         disabled={isLoading}
                         onKeyPress={(e) => {
                           if (e.key === 'Enter' && !isLoading && textAnswer.trim()) {
-                            handleTextSubmit();
+                            // '제출'이라고 입력했을 때 면접 종료
+                            if (textAnswer.trim() === '제출') {
+                              handleTestSubmit();
+                            } else {
+                              handleTextSubmit();
+                            }
                           }
                         }}
                       />
