@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './Interview.module.scss';
 import fileUploadIcon from '../../assets/images/file-upload.png';
 import geminiIcon from '../../assets/images/gemini-1336519698502187930_128px.png';
@@ -44,10 +44,13 @@ const Interview: React.FC = () => {
   const [reportData, setReportData] = useState<any>(null);
   const [isTextInputMode, setIsTextInputMode] = useState<boolean>(false);
   const [textAnswer, setTextAnswer] = useState<string>('');
+  const [questionBoxHeight, setQuestionBoxHeight] = useState<number>(200);
   
   // 로딩 모달 상태
   const [loadingModalOpen, setLoadingModalOpen] = useState<boolean>(false);
   const [loadingModalType, setLoadingModalType] = useState<'session' | 'report'>('session');
+  
+  const questionTextRef = useRef<HTMLParagraphElement>(null);
   
   const {
     transcript,
@@ -61,6 +64,30 @@ const Interview: React.FC = () => {
   useEffect(() => {
     checkMicrophonePermission();
   }, []);
+  
+  // 질문 텍스트 길이에 따라 박스 높이 동적 조절
+  useEffect(() => {
+    if (currentQuestion && questionTextRef.current) {
+      const textElement = questionTextRef.current;
+      const lineHeight = 21; // CSS에서 설정한 line-height
+      const textHeight = textElement.scrollHeight;
+      const numberOfLines = Math.ceil(textHeight / lineHeight);
+      
+      // 기본 높이(200px) + 줄 수에 따른 추가 높이 계산
+      let newHeight;
+      if (numberOfLines <= 2) {
+        newHeight = 200; // 기본 높이
+      } else if (numberOfLines === 3) {
+        newHeight = 220; // 3줄일 때
+      } else if (numberOfLines === 4) {
+        newHeight = 240; // 4줄일 때
+      } else {
+        newHeight = Math.max(240, 200 + (numberOfLines - 2) * 20); // 5줄 이상일 때
+      }
+      
+      setQuestionBoxHeight(newHeight);
+    }
+  }, [currentQuestion]);
 
   const checkMicrophonePermission = async () => {
     try {
@@ -236,7 +263,11 @@ const Interview: React.FC = () => {
       
       // 약간의 지연 후 제출 (transcript가 업데이트될 시간을 줌)
       setTimeout(async () => {
-        if (transcript && !isLoading && sessionId) {
+        const currentTranscript = transcript.trim();
+        console.log('녹음 중지 후 transcript:', currentTranscript);
+        console.log('세션ID:', sessionId, '로딩상태:', isLoading);
+        
+        if (!isLoading && sessionId) {
           setIsLoading(true);
           try {
             const token = localStorage.getItem('token');
@@ -248,7 +279,7 @@ const Interview: React.FC = () => {
             const turnData = {
               sessionId,
               questionIndex: currentQuestionIndex,
-              transcript: transcript.trim()
+              transcript: currentTranscript
             };
 
             const response = await submitInterviewTurn(turnData, token);
@@ -525,7 +556,7 @@ const Interview: React.FC = () => {
                 <div className={styles.waveAnimationOverlay}>
                   <WaveAnimation isActive={isPlayingAudio} />
                 </div>
-                <div className={styles.questionBox}>
+                <div className={styles.questionBox} style={{ height: `${questionBoxHeight}px` }}>
                   <div className={styles.questionHeader}>
                     <span className={styles.questionNumber}>Q{currentQuestionIndex + 1}.</span>
                     <div className={styles.questionProgress}>
@@ -533,7 +564,7 @@ const Interview: React.FC = () => {
                     </div>
                   </div>
                   <div className={styles.questionContent}>
-                    <p className={styles.questionText}>{currentQuestion}</p>
+                    <p ref={questionTextRef} className={styles.questionText}>{currentQuestion}</p>
                   </div>
                   {!isTextInputMode ? (
                     // 음성 입력 모드 - 마이크 + 키보드 + 테스트 제출 버튼
@@ -557,14 +588,6 @@ const Interview: React.FC = () => {
                       >
                         <i className="bi bi-keyboard"></i>
                       </button>
-                      <button 
-                        className={styles.testSubmitButton} 
-                        onClick={handleTestSubmit}
-                        disabled={isLoading || isPlayingAudio}
-                      >
-                        <i className="bi bi-send"></i>
-                        <span>테스트 제출</span>
-                      </button>
                     </div>
                   ) : (
                     // 텍스트 입력 모드 - 입력창 + X 버튼 + 제출 버튼
@@ -574,11 +597,16 @@ const Interview: React.FC = () => {
                         value={textAnswer}
                         onChange={(e) => setTextAnswer(e.target.value)}
                         className={styles.textInput}
-                        placeholder="답변을 입력하세요..."
+                        placeholder="답변을 입력하세요... ('제출'을 입력하면 면접 종료)"
                         disabled={isLoading}
                         onKeyPress={(e) => {
                           if (e.key === 'Enter' && !isLoading && textAnswer.trim()) {
-                            handleTextSubmit();
+                            // '제출'이라고 입력했을 때 면접 종료
+                            if (textAnswer.trim() === '제출') {
+                              handleTestSubmit();
+                            } else {
+                              handleTextSubmit();
+                            }
                           }
                         }}
                       />
