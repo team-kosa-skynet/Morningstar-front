@@ -236,7 +236,11 @@ const Interview: React.FC = () => {
       
       // 약간의 지연 후 제출 (transcript가 업데이트될 시간을 줌)
       setTimeout(async () => {
-        if (transcript && !isLoading && sessionId) {
+        const currentTranscript = transcript.trim();
+        console.log('녹음 중지 후 transcript:', currentTranscript);
+        console.log('세션ID:', sessionId, '로딩상태:', isLoading);
+        
+        if (!isLoading && sessionId) {
           setIsLoading(true);
           try {
             const token = localStorage.getItem('token');
@@ -248,7 +252,7 @@ const Interview: React.FC = () => {
             const turnData = {
               sessionId,
               questionIndex: currentQuestionIndex,
-              transcript: transcript.trim()
+              transcript: currentTranscript
             };
 
             const response = await submitInterviewTurn(turnData, token);
