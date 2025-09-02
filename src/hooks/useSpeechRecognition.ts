@@ -48,13 +48,24 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
 
     recognition.onresult = (event: any) => {
       let finalTranscript = '';
+      let interimTranscript = '';
+      
       for (let i = 0; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
           finalTranscript += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
         }
       }
+      
       if (finalTranscript) {
         setTranscript(prev => prev + finalTranscript + ' ');
+      } else if (interimTranscript) {
+        // 중간 결과도 실시간으로 업데이트
+        setTranscript(prev => {
+          const prevFinal = prev.replace(/\s*\[인식 중\].*$/, '');
+          return prevFinal + interimTranscript;
+        });
       }
     };
 
