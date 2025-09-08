@@ -115,3 +115,15 @@
 <img src="https://github.com/user-attachments/assets/0858adf2-558b-440a-8a1f-635f36b6d9c3" alt=""/>
 
 <br/>
+
+# 5. API 명세서
+<a href="https://documenter.getpostman.com/view/46916444/2sB34oBxMe" target="_blank">
+  <img src="https://github.com/user-attachments/assets/4b332e6d-cb12-44d5-bfbf-0cb17af6f242" alt="Postman" width="120"/>
+</a>
+
+[🔗 API 명세서 바로가기](https://documenter.getpostman.com/view/46916444/2sB34oBxMe)
+
+<br/>
+
+# 6. Figma
+[🔗 Figma 바로가기](https://www.figma.com/design/XO6o8kTarJg1vXccGHaFBo/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-%EC%83%9B%EB%B3%84--%EB%B3%B5%EC%82%AC-?node-id=96-202&t=ktGLZBDM75LRX5wS-1)
