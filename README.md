@@ -4,8 +4,8 @@
 
 
 # 1. Project Overview (프로젝트 개요)
-- 프로젝트 이름: 샛별 (서비스명 : 개발자의 방주)
-- 프로젝트 설명: 개발자의 방주 (줄여서 개방) 는 AI시대 흐름에 맞춘 개발자들을 위한 커뮤니티 입니다.
+- 프로젝트 이름: 개발자의 방주
+- 프로젝트 설명: 개발자의 방주는 AI 시대에 맞춰 개발자들의 정보 획득과 취업을 도와주는 커뮤니티 사이트 입니다.
 - 사이트 이동하기: www.gaebang.site
 
 ## 🛠️ 기술 스택
@@ -43,6 +43,18 @@
 | <img src="https://github.com/user-attachments/assets/c6cb2f22-b13b-4377-bee1-a8aa86509dca" alt="이동규" width="150"> | <img src="https://github.com/user-attachments/assets/2e1fcc35-54e8-4deb-8444-fac933a3dcdf" alt="이유상" width="150"> | <img src="https://github.com/user-attachments/assets/6e9fefda-a6e0-4b32-be73-72881aa55d4a" alt="유성호" width="150"> | <img src="https://github.com/user-attachments/assets/2426819f-237b-4428-b9cb-7fd1a10e54e7" alt="조민희" width="150"> |
 | PL | BE | BE | BE |
 | [GitHub](https://github.com/Gorani77) | [GitHub](https://github.com/liyusang1) | [GitHub](https://github.com/Dorosiya) | [GitHub](https://github.com/minimini1212) |
+
+<br/>
+
+# 3. 주요 기능
+
+<details>
+  <summary>AI 업데이트 소식</summary>
+  <br/>
+  <img src="https://github.com/user-attachments/assets/212acfd4-aeb2-4e59-b48f-5ab4bcd0e666" alt=""/>
+  <img src="https://github.com/user-attachments/assets/c144c8d5-fa11-4a4c-b184-93355618a9e7" alt=""/>
+  <img src="https://github.com/user-attachments/assets/4b8ed6dd-6fc3-47e1-8a1d-0a4ca035b46c" alt=""/>
+</details>
 
 <br/>
 
